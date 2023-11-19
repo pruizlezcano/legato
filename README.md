@@ -20,6 +20,20 @@
 
 </div>
 
+## TODO
+
+- [ ] Project key
+- [X] Input blur on enter key
+- [ ] Featuring
+- [ ] Status (done...)
+- [ ] Tier (S, A, B...)
+- [ ] Dark mode (from device settings)
+- [ ] Logger
+- [ ] Settings page
+  - [ ] Fast scan
+  - [ ] Full scan
+  - [ ] Projects path
+
 ## Install
 
 Clone the repo and install dependencies:

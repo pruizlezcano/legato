@@ -20,14 +20,22 @@ const Project = ({ project }) => {
     });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.target.blur();
+    }
+  };
+
   return (
     <tr>
       <td className="px-6 py-4">
         <input
           type="text"
           value={title}
+          className="outline outline-0 transition-all focus:border-b focus:border-pink-500 focus:outline-0 disabled:border-0"
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleProjectUpdate}
+          onKeyDown={handleKeyDown}
         />
       </td>
       <td className="px-6 py-4">
@@ -41,9 +49,10 @@ const Project = ({ project }) => {
         <input
           type="number"
           value={bpm}
+          className="w-20 text-center transition-all focus:border-b focus:border-pink-500 focus:outline-0 disabled:border-0"
           onChange={(e) => setBpm(parseInt(e.target.value))}
-          onBlur={handleProjectUpdate}
-          className="w-20 text-center"
+          onBlur={() => handleProjectUpdate()}
+          onKeyDown={handleKeyDown}
         />
       </td>
       <td className="px-6 py-4 text-center">Active</td>
