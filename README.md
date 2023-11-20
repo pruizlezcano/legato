@@ -33,13 +33,14 @@
 - [ ] Date added
 - [ ] Date modified
 - [ ] Notes
+- [ ] react-table
 - [ ] Search and filter
 - [ ] Add project file manually
 - [ ] Dark mode (from device settings)
 - [ ] Logger
 - [ ] Settings page
-  - [ ] Fast scan
-  - [ ] Full scan
+  - [X] Fast scan
+  - [X] Full scan
   - [ ] Projects path
   - [ ] Theme
 - [ ] Project Modal

@@ -14,7 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { glob, globSync, globStream, globStreamSync, Glob } from 'glob';
+import { glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
 import { XMLParser } from 'fast-xml-parser';
@@ -32,65 +32,89 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
+const processProject = async (project) => {
+  console.log(`Processing ${project.fullpath()}`);
 
-ipcMain.on('update-projects', async (event, arg) => {
-  const projectsPath = '/Volumes/Expansion/Music/Beats/';
-  let results = await glob(`${projectsPath}/!(Backup)/*.als`, {
+  const { name, size, mtimeMs } = project;
+
+  const projectFile = project.fullpath();
+  const zippedContent = fs.readFileSync(projectFile);
+  const content = zlib.gunzipSync(zippedContent).toString('utf-8');
+
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: '',
+  });
+  const jObj = parser.parse(content);
+  const bpm =
+    parseFloat(
+      jObj?.Ableton?.LiveSet?.MasterTrack?.DeviceChain?.Mixer?.Tempo?.Manual
+        ?.Value,
+    ) || null;
+
+  console.log('Creating DB entry');
+
+  const p = await prisma.project.create({
+    data: {
+      file: name,
+      path: projectFile,
+      bpm,
+    },
+  });
+  console.log("Created DB entry, let's go");
+
+  return p;
+};
+
+const scanPath = async (projectsPath: string) => {
+  console.log(`Scanning ${projectsPath}`);
+  const results = await glob(`${projectsPath}/!(Backup)/*.als`, {
     stat: true,
     withFileTypes: true,
   });
-  // const results = await glob(`${projectsPath}/*.als`, {
-  //   stat: true,
-  //   withFileTypes: true,
-  // });
-  results = results.splice(0, 100);
+  return results;
+};
+
+const fastScan = async (projectsPath: string) => {
+  const projects = await prisma.project.findMany();
+  const savedProjects = projects.map((i) => i.path);
+
+  const results = await scanPath(projectsPath);
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const result of results) {
+    const projectPath = result.fullpath();
+    if (!savedProjects.includes(projectPath)) {
+      // eslint-disable-next-line no-await-in-loop
+      await processProject(result);
+    }
+    console.log(`Skipped ${projectPath}`);
+  }
+};
+
+const fullScan = async (projectsPath: string) => {
   console.log('Deleting all projects');
   await prisma.project.deleteMany();
+  console.log('Deleted all projects');
 
-  console.log('Starting to read files');
+  const results = await scanPath(projectsPath);
+  console.log(`Found ${results.length} projects`);
 
-  const projects = results.map(async (result) => {
-    // Save the name, path, size, and modified time of each file
-    const { name, size, mtimeMs } = result;
+  // eslint-disable-next-line no-restricted-syntax
+  for (const result of results) {
+    // eslint-disable-next-line no-await-in-loop
+    await processProject(result);
+  }
+};
 
-    // Search bpm and key from the project file
-    const projectFile = result.fullpath();
-    const zippedContent = fs.readFileSync(projectFile);
-    const content = zlib.gunzipSync(zippedContent).toString('utf-8');
-
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-    });
-    const jObj = parser.parse(content);
-    const p = await prisma.project.create({
-      data: {
-        file: name,
-        path: projectFile,
-        bpm: parseFloat(
-          jObj.Ableton.LiveSet.MasterTrack.DeviceChain.Mixer.Tempo.Manual.Value,
-        ),
-      },
-    });
-
-    return {
-      name,
-      size,
-      mtimeMs,
-      bpm: parseFloat(
-        jObj.Ableton.LiveSet.MasterTrack.DeviceChain.Mixer.Tempo.Manual.Value,
-      ),
-    };
-  });
-  console.log('Finished reading files');
-
-  // console.log(projects);
-  event.reply('list-projects', projects);
+ipcMain.on('scan-projects', async (event, arg) => {
+  const projectsPath = '/Volumes/Expansion/Music/Beats/';
+  if (arg === 'fast') {
+    await fastScan(projectsPath);
+  } else if (arg === 'full') {
+    await fullScan(projectsPath);
+  }
+  event.reply('scan-projects', 'done');
 });
 
 ipcMain.on('list-projects', async (event, arg) => {
@@ -261,7 +285,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
-    app.on('activate', () => {
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();

@@ -46,6 +46,26 @@ const Settings = ({ onClose, onSave }) => {
             >
               Open dialog
             </button>
+            <hr />
+            <p className="my-4 text-blueGray-500 text-lg leading-relaxed">
+              Scan projects:
+            </p>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() =>
+                window.electron.ipcRenderer.sendMessage('scan-projects', 'fast')
+              }
+            >
+              Fast Scan
+            </button>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() =>
+                window.electron.ipcRenderer.sendMessage('scan-projects', 'full')
+              }
+            >
+              Full Scan
+            </button>
           </div>
           {/*footer*/}
           <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">

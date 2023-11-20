@@ -8,20 +8,24 @@ function Hello() {
   const [projects, setProjects] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
 
-  // call the ipc exposed from main process and listen for response
+  const handleList = () =>
+    window.electron.ipcRenderer.sendMessage('list-projects');
+
+  const handleUpdate = () =>
+    window.electron.ipcRenderer.sendMessage('update-projects');
+
   useEffect(() => {
-    window.electron.ipcRenderer.once('list-projects', (arg) => {
+    window.electron.ipcRenderer.on('list-projects', (arg) => {
       setProjects(arg);
     });
     window.electron.ipcRenderer.on('open-settings', (arg) => {
       setShowSettings(true);
     });
+    window.electron.ipcRenderer.on('scan-projects', (arg) => {
+      handleList();
+    });
+    handleList();
   }, []);
-
-  window.electron.ipcRenderer.sendMessage('list-projects');
-
-  const handleUpdate = () =>
-    window.electron.ipcRenderer.sendMessage('update-projects');
 
   return (
     <div className="overflow-x-auto w-full">
@@ -41,7 +45,9 @@ function Hello() {
       </div>
       {showSettings ? (
         <Settings
-          onClose={() => setShowSettings(false)}
+          onClose={() => {
+            setShowSettings(false);
+          }}
           onSave={() => setShowSettings(false)}
         />
       ) : null}
