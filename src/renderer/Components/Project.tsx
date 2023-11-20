@@ -3,7 +3,9 @@ import abletonIcon from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
 
 const Project = ({ project }) => {
-  const [title, setTitle] = useState(project.title ? project.title : '');
+  const [title, setTitle] = useState(
+    project.title ? project.title : project.file,
+  );
   const [bpm, setBpm] = useState(project.bpm);
 
   const handleOpenInAbleton = () =>
@@ -26,12 +28,17 @@ const Project = ({ project }) => {
     }
   };
 
+  const toTitleCase = (str) => {
+    let s = str.replace('.als', '');
+    return s.replace(/\.|-|_/g, ' ');
+  };
+
   return (
     <tr>
       <td className="px-6 py-4">
         <input
           type="text"
-          value={title}
+          value={toTitleCase(title)}
           className="outline outline-0 transition-all focus:border-b focus:border-pink-500 focus:outline-0 disabled:border-0"
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleProjectUpdate}
