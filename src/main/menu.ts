@@ -61,6 +61,14 @@ export default class MenuBuilder {
           selector: 'orderFrontStandardAboutPanel:',
         },
         { type: 'separator' },
+        {
+          label: 'Settings',
+          accelerator: 'Command+,',
+          click: () => {
+            app.emit('open-settings');
+          },
+        },
+        { type: 'separator' },
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {

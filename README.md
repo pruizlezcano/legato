@@ -23,16 +23,28 @@
 ## TODO
 
 - [ ] Project key
+- [ ] Duration
 - [X] Input blur on enter key
 - [ ] Featuring
 - [ ] Status (done...)
 - [ ] Tier (S, A, B...)
+- [ ] Tags
+- [ ] Genre
+- [ ] Date added
+- [ ] Date modified
+- [ ] Notes
+- [ ] Search and filter
+- [ ] Add project file manually
 - [ ] Dark mode (from device settings)
 - [ ] Logger
 - [ ] Settings page
   - [ ] Fast scan
   - [ ] Full scan
   - [ ] Projects path
+  - [ ] Theme
+- [ ] Project Modal
+  - [ ] Screenshot?
+  - [ ] Backups
 
 ## Install
 

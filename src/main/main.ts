@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -141,6 +141,26 @@ ipcMain.on('update-project', async (event, arg) => {
     return event.reply('update-project', project);
   } catch (error) {
     return event.reply('update-project', error);
+  }
+});
+
+ipcMain.on('open-settings', async (event, arg) => {
+  event.reply('open-settings', 'foo');
+});
+
+app.on('open-settings', () => {
+  if (mainWindow) {
+    mainWindow.webContents.send('open-settings');
+  }
+});
+
+ipcMain.on('open-path-dialog', async (event, arg) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+  console.log(result);
+  if (!result.canceled) {
+    return event.reply('open-path-dialog', result.filePaths[0]);
   }
 });
 
