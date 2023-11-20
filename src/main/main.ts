@@ -20,7 +20,18 @@ import zlib from 'zlib';
 import { XMLParser } from 'fast-xml-parser';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const dbPath =
+  process.env.NODE_ENV === 'development'
+    ? './dev.db'
+    : path.join(app.getPath('userData'), 'projects.db');
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: `file:${dbPath}`,
+    },
+  },
+});
 
 class AppUpdater {
   constructor() {
