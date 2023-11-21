@@ -1,8 +1,8 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
-import Project from './Components/Project';
 import Settings from './Views/Settings';
+import Table from './Components/Table';
 
 function Hello() {
   const [projects, setProjects] = useState([]);
@@ -51,35 +51,7 @@ function Hello() {
           onSave={() => setShowSettings(false)}
         />
       ) : null}
-      <table className="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden">
-        <thead>
-          <tr>
-            <th className="font-semibold text-sm uppercase px-6 py-4 text-left">
-              Title
-            </th>
-            <th className="font-semibold text-sm uppercase px-6 py-4 text-left">
-              File
-            </th>
-            <th className="font-semibold text-sm uppercase px-6 py-4 text-center">
-              BPM
-            </th>
-            <th className="font-semibold text-sm uppercase px-6 py-4 text-center">
-              Estado
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {projects.map((project) => (
-            <Project key={project.id} project={project} />
-          ))}
-        </tbody>
-      </table>
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={handleUpdate}
-      >
-        Update
-      </button>
+      <Table data={projects} />
     </div>
   );
 }
