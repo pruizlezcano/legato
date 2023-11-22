@@ -38,7 +38,7 @@
 - [X] react-table
 - [X] Search
 - [ ] Filter (bpm: multiple values, minmax, path)
-- [ ] Table pagination
+- [X] Table pagination
 - [ ] Add project file manually
 - [ ] Dark mode (from device settings)
 - [ ] Logger
