@@ -3,11 +3,24 @@ import Dialog from '../Components/Dialog';
 
 const Settings = ({ onClose, onSave }) => {
   const [path, setPath] = useState('');
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  };
+
   useEffect(() => {
     window.electron.ipcRenderer.on('open-path-dialog', (arg) => {
       setPath(arg);
     });
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
     <>
       <Dialog>
