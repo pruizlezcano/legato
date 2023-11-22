@@ -1,24 +1,24 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
+import { Project } from '@prisma/client';
 import Settings from './Views/Settings';
 import Table from './Components/Table';
 
 function Hello() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
 
   const handleList = () =>
     window.electron.ipcRenderer.sendMessage('list-projects');
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('list-projects', (arg) => {
+    window.electron.ipcRenderer.on('list-projects', (arg: Project[]) => {
       setProjects(arg);
     });
-    window.electron.ipcRenderer.on('open-settings', (arg) => {
+    window.electron.ipcRenderer.on('open-settings', () => {
       setShowSettings(true);
-    });
-    window.electron.ipcRenderer.on('scan-projects', (arg) => {
+
       handleList();
     });
     handleList();
@@ -32,6 +32,7 @@ function Hello() {
       </h2>
       <div className="flex justify-center">
         <button
+          type="button"
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={() =>
             window.electron.ipcRenderer.sendMessage('open-settings')
@@ -48,7 +49,7 @@ function Hello() {
           onSave={() => setShowSettings(false)}
         />
       ) : null}
-      <Table data={projects} />
+      <Table content={projects} />
     </div>
   );
 }

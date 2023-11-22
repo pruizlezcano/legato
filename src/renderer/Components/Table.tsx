@@ -1,3 +1,4 @@
+import { Project } from '@prisma/client';
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,12 +8,21 @@ import {
   createColumnHelper,
   flexRender,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import abletonIcon from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
+import EditableCell from './EditableCell';
 
-const Table = ({ data }) => {
+// eslint-disable-next-line react/function-component-definition
+const Table = ({ content }: { content: Project[] }) => {
+  const [data, setData] = useState<Project[]>([]);
+
+  useEffect(() => {
+    if (content) {
+      setData(content);
+    }
+  }, [content]);
   const [globalFilter, setGlobalFilter] = useState('');
 
   const handleOpenInAbleton = (projectId: number) =>
@@ -21,9 +31,16 @@ const Table = ({ data }) => {
   const handleOpenInFinder = (projectId: number) =>
     window.electron.ipcRenderer.sendMessage('open-project-folder', projectId);
 
+  const handleProjectUpdate = (project: Project) => {
+    window.electron.ipcRenderer.sendMessage('update-project', project);
+  };
+
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor('title', { header: 'Title' }),
+    columnHelper.accessor('title', {
+      header: 'Title',
+      cell: EditableCell,
+    }),
     columnHelper.accessor('file', {
       header: 'File',
       cell: ({ row }) => (
@@ -37,7 +54,10 @@ const Table = ({ data }) => {
         </Tooltip>
       ),
     }),
-    columnHelper.accessor('bpm', { header: 'BPM' }),
+    columnHelper.accessor('bpm', {
+      header: 'BPM',
+      cell: (props) => <EditableCell {...props} type="number" />,
+    }),
     columnHelper.accessor('open', {
       header: 'Open',
       cell: ({ row }) => (
@@ -54,6 +74,24 @@ const Table = ({ data }) => {
     }),
   ];
 
+  const useSkipper = () => {
+    const shouldSkipRef = useRef(true);
+    const shouldSkip = shouldSkipRef.current;
+
+    // Wrap a function with this to skip a pagination reset temporarily
+    const skip = useCallback(() => {
+      shouldSkipRef.current = false;
+    }, []);
+
+    useEffect(() => {
+      shouldSkipRef.current = true;
+    });
+
+    return [shouldSkip, skip] as const;
+  };
+
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
+
   const table = useReactTable({
     columns,
     data,
@@ -65,6 +103,26 @@ const Table = ({ data }) => {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    autoResetPageIndex,
+    meta: {
+      updateData: (rowIndex: number, columnId: any, value: any) => {
+        // Skip page index reset until after next rerender
+        skipAutoResetPageIndex();
+        setData((old) =>
+          old.map((row, index) => {
+            if (index === rowIndex) {
+              const updatedRow = {
+                ...old[rowIndex]!,
+                [columnId]: value,
+              };
+              handleProjectUpdate(updatedRow);
+              return updatedRow;
+            }
+            return row;
+          }),
+        );
+      },
+    },
     debugTable: true,
   });
 
@@ -72,7 +130,9 @@ const Table = ({ data }) => {
     <>
       <DebounceInput
         value={globalFilter}
-        onChange={(value) => table.getColumn('title').setFilterValue(value)}
+        onChange={(value: any) =>
+          table.getColumn('title')!.setFilterValue(value)
+        }
         placeholder="Search..."
       />
       <table>
@@ -122,6 +182,7 @@ const Table = ({ data }) => {
       </table>
       <div className="flex items-center gap-2">
         <button
+          type="button"
           className="border rounded p-1"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
@@ -129,6 +190,7 @@ const Table = ({ data }) => {
           {'<<'}
         </button>
         <button
+          type="button"
           className="border rounded p-1"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
@@ -136,6 +198,7 @@ const Table = ({ data }) => {
           {'<'}
         </button>
         <button
+          type="button"
           className="border rounded p-1"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
@@ -143,6 +206,7 @@ const Table = ({ data }) => {
           {'>'}
         </button>
         <button
+          type="button"
           className="border rounded p-1"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}

@@ -39,6 +39,7 @@
 - [X] Search
 - [ ] Filter (bpm: multiple values, minmax, path)
 - [X] Table pagination
+- [X] Editable title, bpm...
 - [ ] Add project file manually
 - [ ] Dark mode (from device settings)
 - [ ] Logger
