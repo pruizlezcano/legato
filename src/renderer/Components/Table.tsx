@@ -1,19 +1,23 @@
 import {
   useReactTable,
   getCoreRowModel,
-  getPaginationRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   createColumnHelper,
   flexRender,
 } from '@tanstack/react-table';
+import { useState } from 'react';
 import abletonIcon from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
+import DebounceInput from './DebounceInput';
 
 const Table = ({ data }) => {
-  const handleOpenInAbleton = (projectId) =>
+  const [globalFilter, setGlobalFilter] = useState('');
+
+  const handleOpenInAbleton = (projectId: number) =>
     window.electron.ipcRenderer.sendMessage('open-project', projectId);
 
-  const handleOpenInFinder = (projectId) =>
+  const handleOpenInFinder = (projectId: number) =>
     window.electron.ipcRenderer.sendMessage('open-project-folder', projectId);
 
   const columnHelper = createColumnHelper();
@@ -52,57 +56,70 @@ const Table = ({ data }) => {
   const table = useReactTable({
     columns,
     data,
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     // getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    debugTable: true,
   });
 
   return (
-    <table>
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        {table.getFooterGroups().map((footerGroup) => (
-          <tr key={footerGroup.id}>
-            {footerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.footer,
-                      header.getContext(),
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </tfoot>
-    </table>
+    <>
+      <DebounceInput
+        value={globalFilter}
+        onChange={(value) => table.setGlobalFilter(value)}
+        placeholder="Search..."
+      />
+      <table>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          {table.getFooterGroups().map((footerGroup) => (
+            <tr key={footerGroup.id}>
+              {footerGroup.headers.map((header) => (
+                <th key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.footer,
+                        header.getContext(),
+                      )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </tfoot>
+      </table>
+    </>
   );
 };
 export default Table;

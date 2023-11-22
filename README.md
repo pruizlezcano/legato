@@ -33,8 +33,9 @@
 - [ ] Date added
 - [ ] Date modified
 - [ ] Notes
-- [ ] react-table
+- [X] react-table
 - [ ] Search and filter
+- [ ] Table pagination
 - [ ] Add project file manually
 - [ ] Dark mode (from device settings)
 - [ ] Logger

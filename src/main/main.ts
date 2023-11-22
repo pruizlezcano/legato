@@ -67,6 +67,10 @@ const processProject = async (project) => {
 
   const p = await prisma.project.create({
     data: {
+      title: name
+        .replace('.als', '')
+        .replace(/\.|-|_/g, ' ')
+        .trim(),
       file: name,
       path: projectFile,
       bpm,

@@ -11,9 +11,6 @@ function Hello() {
   const handleList = () =>
     window.electron.ipcRenderer.sendMessage('list-projects');
 
-  const handleUpdate = () =>
-    window.electron.ipcRenderer.sendMessage('update-projects');
-
   useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       setProjects(arg);
