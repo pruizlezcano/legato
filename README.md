@@ -31,10 +31,13 @@
 - [ ] Tags
 - [ ] Genre
 - [ ] Date added
-- [ ] Date modified
+- [ ] Date created
+- [ ] Date launched
 - [ ] Notes
+- [ ] Audio file
 - [X] react-table
-- [ ] Search and filter
+- [X] Search
+- [ ] Filter (bpm: multiple values, minmax, path)
 - [ ] Table pagination
 - [ ] Add project file manually
 - [ ] Dark mode (from device settings)
@@ -42,8 +45,8 @@
 - [ ] Settings page
   - [X] Fast scan
   - [X] Full scan
-  - [ ] Projects path
-  - [ ] Theme
+  - [ ] Projects path (save to local storage)
+  - [ ] Theme (save to local storage)
 - [ ] Project Modal
   - [ ] Screenshot?
   - [ ] Backups

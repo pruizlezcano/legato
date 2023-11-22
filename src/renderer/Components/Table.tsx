@@ -71,7 +71,7 @@ const Table = ({ data }) => {
     <>
       <DebounceInput
         value={globalFilter}
-        onChange={(value) => table.setGlobalFilter(value)}
+        onChange={(value) => table.getColumn('title').setFilterValue(value)}
         placeholder="Search..."
       />
       <table>
