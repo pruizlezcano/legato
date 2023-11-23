@@ -7,6 +7,7 @@ const EditableCell = ({
   column: { id },
   table,
   type = 'text',
+  ...props
 }) => {
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
@@ -32,6 +33,8 @@ const EditableCell = ({
       onChange={(e) => setValue(e.target.value)}
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
+      {...props}
+      className={`w-full focus:outline-0 ${props.className}`}
     />
   );
 };

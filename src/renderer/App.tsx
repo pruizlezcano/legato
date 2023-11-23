@@ -25,21 +25,12 @@ function Hello() {
   }, []);
 
   return (
-    <div className="overflow-x-auto w-full">
-      <h1 className="text-4xl font-bold text-center">Ableton Projects</h1>
-      <h2 className="text-2xl font-bold text-center">
-        {projects.length} projects found
-      </h2>
-      <div className="flex justify-center">
-        <button
-          type="button"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() =>
-            window.electron.ipcRenderer.sendMessage('open-settings')
-          }
-        >
-          Settings
-        </button>
+    <div className="overflow-x-auto w-full flex flex-wrap">
+      <div className="flex justify-start items-center p-5 pr-10">
+        <h1 className="text-xl font-bold text-center">Ableton Projects</h1>
+        <span className="ml-4 font-medium py-1 px-2 bg-blue-100 rounded-full text-xs text-blue-800">
+          {projects.length} projects
+        </span>
       </div>
       {showSettings ? (
         <Settings

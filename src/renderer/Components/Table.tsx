@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { Project } from '@prisma/client';
 import {
   useReactTable,
@@ -13,6 +14,7 @@ import abletonIcon from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
+import Pagination from './Pagination';
 
 // eslint-disable-next-line react/function-component-definition
 const Table = ({ content }: { content: Project[] }) => {
@@ -39,7 +41,7 @@ const Table = ({ content }: { content: Project[] }) => {
   const columns = [
     columnHelper.accessor('title', {
       header: 'Title',
-      cell: EditableCell,
+      cell: (props) => <EditableCell {...props} className="text-slate-950" />,
     }),
     columnHelper.accessor('file', {
       header: 'File',
@@ -59,12 +61,12 @@ const Table = ({ content }: { content: Project[] }) => {
       cell: (props) => <EditableCell {...props} type="number" />,
     }),
     columnHelper.accessor('open', {
-      header: 'Open',
+      header: '',
       cell: ({ row }) => (
-        <Tooltip message={'Open in Ableton'}>
+        <Tooltip message="Open in Ableton">
           <img
             src={abletonIcon}
-            alt="Open ina Ableton"
+            alt="Open in Ableton"
             onClick={() => handleOpenInAbleton(row.original.id)}
             className="cursor-pointer"
             width={52}
@@ -106,7 +108,6 @@ const Table = ({ content }: { content: Project[] }) => {
     autoResetPageIndex,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
-        // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
         setData((old) =>
           old.map((row, index) => {
@@ -134,13 +135,17 @@ const Table = ({ content }: { content: Project[] }) => {
           table.getColumn('title')!.setFilterValue(value)
         }
         placeholder="Search..."
+        className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0"
       />
-      <table>
-        <thead>
+      <table className="w-full table-auto md:table-fixed">
+        <thead className="bg-gray-100 h-12 border border-gray-200 border-x-0 border-b-1">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th
+                  key={header.id}
+                  className="text-left text-base font-normal text-slate-700 first-of-type:pl-14"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -154,9 +159,15 @@ const Table = ({ content }: { content: Project[] }) => {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.id}
+              className="h-12 border border-slate-200 border-x-0 border-y-1"
+            >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  className="text-left text-base font-normal text-slate-700 first-of-type:pl-14"
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -180,71 +191,7 @@ const Table = ({ content }: { content: Project[] }) => {
           ))}
         </tfoot>
       </table>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className="border rounded p-1"
-          onClick={() => table.setPageIndex(0)}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {'<<'}
-        </button>
-        <button
-          type="button"
-          className="border rounded p-1"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {'<'}
-        </button>
-        <button
-          type="button"
-          className="border rounded p-1"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {'>'}
-        </button>
-        <button
-          type="button"
-          className="border rounded p-1"
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          disabled={!table.getCanNextPage()}
-        >
-          {'>>'}
-        </button>
-        <span className="flex items-center gap-1">
-          <div>Page</div>
-          <input
-            type="number"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-            className="border p-1 rounded w-16"
-            min={1}
-            max={table.getPageCount()}
-          />
-          <strong>of {table.getPageCount()}</strong>
-        </span>
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            if (e.target.value === 'All') {
-              table.setPageSize(data.length);
-              return;
-            }
-            table.setPageSize(Number(e.target.value));
-          }}
-        >
-          {[10, 25, 50, 100, 'All'].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Pagination table={table} size={data.length} />
     </>
   );
 };

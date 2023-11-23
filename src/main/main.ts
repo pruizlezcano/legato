@@ -12,13 +12,13 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
-import { glob } from 'glob';
+import { PrismaClient } from '@prisma/client';
+import { Path, glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
 import { XMLParser } from 'fast-xml-parser';
-import { PrismaClient } from '@prisma/client';
+import MenuBuilder from './menu';
+import { resolveHtmlPath } from './util';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -43,7 +43,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-const processProject = async (project) => {
+const processProject = async (project: Path) => {
   console.log(`Processing ${project.fullpath()}`);
 
   const { name, size, mtimeMs } = project;
@@ -132,7 +132,7 @@ ipcMain.on('scan-projects', async (event, arg) => {
   event.reply('scan-projects', 'done');
 });
 
-ipcMain.on('list-projects', async (event, arg) => {
+ipcMain.on('list-projects', async (event) => {
   const projects = await prisma.project.findMany();
   event.reply('list-projects', projects);
 });
@@ -145,7 +145,7 @@ ipcMain.on('open-project', async (event, arg: number) => {
       },
     });
 
-    shell.openPath(project.path);
+    shell.openPath(project!.path);
     return event.reply('open-project', project);
   } catch (error) {
     return event.reply('open-project', error);
@@ -160,7 +160,7 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
       },
     });
 
-    shell.showItemInFolder(project.path);
+    shell.showItemInFolder(project!.path);
     return event.reply('open-project-folder', project);
   } catch (error) {
     return event.reply('open-project-folder', error);
@@ -183,7 +183,7 @@ ipcMain.on('update-project', async (event, arg) => {
   }
 });
 
-ipcMain.on('open-settings', async (event, arg) => {
+ipcMain.on('open-settings', async (event) => {
   event.reply('open-settings', 'foo');
 });
 
@@ -193,7 +193,7 @@ app.on('open-settings', () => {
   }
 });
 
-ipcMain.on('open-path-dialog', async (event, arg) => {
+ipcMain.on('open-path-dialog', async (event) => {
   const result = await dialog.showOpenDialog({
     properties: ['openDirectory'],
   });
@@ -201,6 +201,7 @@ ipcMain.on('open-path-dialog', async (event, arg) => {
   if (!result.canceled) {
     return event.reply('open-path-dialog', result.filePaths[0]);
   }
+  return event.reply('open-path-dialog', null);
 });
 
 if (process.env.NODE_ENV === 'production') {
