@@ -30,9 +30,8 @@
 - [ ] Tier (S, A, B...)
 - [ ] Tags
 - [ ] Genre
-- [ ] Date added
-- [ ] Date created
-- [ ] Date launched
+- [X] Date added
+- [X] Date modified
 - [ ] Notes
 - [ ] Audio file
 - [X] react-table
@@ -40,13 +39,13 @@
 - [ ] Filter (bpm: multiple values, minmax, path)
 - [X] Table pagination
 - [X] Editable title, bpm...
-- [ ] Add project file manually
+- [ ] Add project file manually (drag and drop)
 - [ ] Dark mode (from device settings)
 - [ ] Logger
 - [ ] Settings page
   - [X] Fast scan
   - [X] Full scan
-  - [ ] Projects path (save to local storage)
+  - [X] Projects path (save to local storage)
   - [ ] Theme (save to local storage)
 - [ ] Project Modal
   - [ ] Screenshot?

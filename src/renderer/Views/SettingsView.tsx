@@ -24,8 +24,6 @@ function SettingsView({ onClose, onSave }) {
   };
 
   useEffect(() => {
-    console.log('SettingsView: useEffect');
-
     window.electron.ipcRenderer.once('load-settings', (arg: Settings) => {
       setSettings(arg);
     });

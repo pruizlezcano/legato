@@ -10,7 +10,9 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { useCallback, useRef, useState, useEffect } from 'react';
-import abletonIcon from '../../../assets/ableton-icon.svg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
@@ -43,36 +45,51 @@ const Table = ({ content }: { content: Project[] }) => {
       header: 'Title',
       cell: (props) => <EditableCell {...props} className="text-slate-950" />,
     }),
-    columnHelper.accessor('file', {
-      header: 'File',
-      cell: ({ row }) => (
-        <Tooltip message={row.original.path}>
-          <p
-            className="cursor-pointer"
-            onClick={() => handleOpenInFinder(row.original.id)}
-          >
-            {row.original.file}
-          </p>
-        </Tooltip>
-      ),
-    }),
     columnHelper.accessor('bpm', {
       header: 'BPM',
       cell: (props) => <EditableCell {...props} type="number" />,
+      enableGlobalFilter: false,
+    }),
+    columnHelper.accessor('modifiedAt', {
+      header: 'Modified',
+      cell: ({ row }) => (
+        <Tooltip message={row.original.modifiedAt.toString()}>
+          <p>{row.original.modifiedAt.toLocaleDateString()}</p>
+        </Tooltip>
+      ),
+    }),
+    columnHelper.accessor('modifiedAt', {
+      header: 'Added',
+      cell: ({ row }) => (
+        <Tooltip message={row.original.createdAt.toString()}>
+          <p>{row.original.createdAt.toLocaleDateString()}</p>
+        </Tooltip>
+      ),
+    }),
+    columnHelper.accessor('path', {
+      header: 'Path',
+      cell: ({ row }) => <p>{row.original.path}</p>,
     }),
     columnHelper.accessor('open', {
       header: '',
       cell: ({ row }) => (
-        <Tooltip message="Open in Ableton">
-          <img
-            src={abletonIcon}
-            alt="Open in Ableton"
-            onClick={() => handleOpenInAbleton(row.original.id)}
-            className="cursor-pointer"
-            width={52}
-          />
-        </Tooltip>
+        <div className="flex flex-row gap-2">
+          <Tooltip message="Open in Ableton">
+            <button onClick={() => handleOpenInAbleton(row.original.id)}>
+              <AbletonLogo className="fill-slate-700 w-7" />
+            </button>
+          </Tooltip>
+          <Tooltip message="Open in Finder">
+            <button
+              type="button"
+              onClick={() => handleOpenInFinder(row.original.id)}
+            >
+              <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
+            </button>
+          </Tooltip>
+        </div>
       ),
+      enableGlobalFilter: false,
     }),
   ];
 
@@ -127,13 +144,21 @@ const Table = ({ content }: { content: Project[] }) => {
     debugTable: true,
   });
 
+  // Hide the path column
+  const hasToggledVisibility = useRef(false);
+
+  useEffect(() => {
+    if (!hasToggledVisibility.current) {
+      table.getColumn('path')!.toggleVisibility(false);
+      hasToggledVisibility.current = true;
+    }
+  }, [table]);
+
   return (
     <>
       <DebounceInput
         value={globalFilter}
-        onChange={(value: any) =>
-          table.getColumn('title')!.setFilterValue(value)
-        }
+        onChange={(value: any) => setGlobalFilter(value)}
         placeholder="Search..."
         className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0"
       />
