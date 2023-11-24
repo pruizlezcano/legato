@@ -108,7 +108,7 @@ devDependencies:
     version: 10.4.16(postcss@8.4.31)
   browserslist-config-erb:
     specifier: ^0.0.3
-    version: 0.0.3(electron@26.2.4)
+    version: 0.0.3(electron@27.1.2)
   chalk:
     specifier: ^4.1.2
     version: 4.1.2
@@ -131,8 +131,8 @@ devDependencies:
     specifier: ^1.5.1
     version: 1.5.1
   electron:
-    specifier: ^26.2.4
-    version: 26.2.4
+    specifier: ^27.1.2
+    version: 27.1.2
   electron-builder:
     specifier: ^24.6.4
     version: 24.6.4
@@ -3991,12 +3991,12 @@ packages:
       fill-range: 7.0.1
     dev: true
 
-  /browserslist-config-erb@0.0.3(electron@26.2.4):
+  /browserslist-config-erb@0.0.3(electron@27.1.2):
     resolution: {integrity: sha512-y47DryCY92lxkKyRVMlaZvXAolIY7U33q9e4CS0MdWeJkoAht7OzsrkfdZFCBOP3H5q1EVUxS0L7VVsKM6gZCQ==}
     peerDependencies:
       electron: '>=12.0.0'
     dependencies:
-      electron: 26.2.4
+      electron: 27.1.2
     dev: true
 
   /browserslist@4.22.1:
@@ -5305,8 +5305,8 @@ packages:
       - supports-color
     dev: false
 
-  /electron@26.2.4:
-    resolution: {integrity: sha512-weMUSMyDho5E0DPQ3breba3D96IxwNvtYHjMd/4/wNN3BdI5s3+0orNnPVGJFcLhSvKoxuKUqdVonUocBPwlQA==}
+  /electron@27.1.2:
+    resolution: {integrity: sha512-Dy6BUuGLiIJv+zfsXwr78TV2TNppi24rXF4PIIS+OjDblEKdkI9r1iM8JUd3/x3sbGUy5mdLMSPhvmu//IhkgA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
