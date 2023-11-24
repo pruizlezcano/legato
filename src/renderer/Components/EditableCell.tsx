@@ -33,7 +33,6 @@ const EditableCell = ({
       onChange={(e) => setValue(e.target.value)}
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
-      {...props}
       className={`w-full focus:outline-0 ${props.className}`}
     />
   );

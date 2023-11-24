@@ -9,7 +9,10 @@ export type Channels =
   | 'scan-projects'
   | 'open-project'
   | 'open-project-folder'
-  | 'update-project';
+  | 'update-project'
+  | 'open-path-dialog'
+  | 'save-settings'
+  | 'load-settings';
 
 const electronHandler = {
   ipcRenderer: {

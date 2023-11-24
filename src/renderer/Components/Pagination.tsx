@@ -37,6 +37,7 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
       <span className="flex pl-5 py-2">
         <button
           type="button"
+          key="prev"
           className="uppercase px-1 rounded-lg hover:bg-gray-200"
           onClick={onPrev}
           disabled={!table.getCanPreviousPage()}
@@ -46,11 +47,12 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
         <span className="flex items-center gap-1">
           {paginationRange.map((pageNumber) => {
             if (pageNumber === -1) {
-              return <p>&#8230;</p>;
+              return <p key="...">&#8230;</p>;
             }
             return (
               <button
                 type="button"
+                key={pageNumber}
                 className={`px-1 rounded-lg hover:bg-gray-200 ${
                   pageNumber === currentPage ? 'bg-gray-300' : ''
                 }`}
@@ -63,6 +65,7 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
         </span>
         <button
           type="button"
+          key="next"
           className="uppercase px-1 rounded-lg hover:bg-gray-200"
           onClick={onNext}
           disabled={!table.getCanNextPage()}

@@ -12,7 +12,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Setting } from '@prisma/client';
 import { Path, glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
@@ -32,6 +32,18 @@ const prisma = new PrismaClient({
     },
   },
 });
+
+const seedDb = async () => {
+  const settings = await prisma.setting.findMany();
+  if (!settings.length) {
+    await prisma.setting.create({
+      data: {
+        key: 'projectsPath',
+        value: null,
+      },
+    });
+  }
+};
 
 class AppUpdater {
   constructor() {
@@ -123,11 +135,22 @@ const fullScan = async (projectsPath: string) => {
 };
 
 ipcMain.on('scan-projects', async (event, arg) => {
-  const projectsPath = '/Volumes/Expansion/Music/Beats/';
+  const projectsPath = await prisma.setting.findUnique({
+    where: {
+      key: 'projectsPath',
+    },
+  });
   if (arg === 'fast') {
-    await fastScan(projectsPath);
+    await fastScan(projectsPath!.value);
   } else if (arg === 'full') {
-    await fullScan(projectsPath);
+    const { response } = await dialog.showMessageBox({
+      type: 'warning',
+      buttons: ['Cancel', 'OK'],
+      defaultId: 1,
+      title: 'Full Scan',
+      message: 'This will delete all projects in the database',
+    });
+    if (response) await fullScan(projectsPath!.value);
   }
   event.reply('scan-projects', 'done');
 });
@@ -185,6 +208,40 @@ ipcMain.on('update-project', async (event, arg) => {
 
 ipcMain.on('open-settings', async (event) => {
   event.reply('open-settings', 'foo');
+});
+
+ipcMain.on('load-settings', async (event) => {
+  try {
+    const settings = await prisma.setting.findMany();
+    const settingsObj: { [key: string]: any } = {}; // Add type annotation for settingsObj
+
+    settings.forEach((setting: Setting) => {
+      settingsObj[setting.key] = setting.value;
+    });
+    event.reply('load-settings', settingsObj);
+  } catch (error) {
+    console.log('get', error);
+
+    event.reply('load-settings', error);
+  }
+});
+
+ipcMain.on('save-settings', async (event, arg) => {
+  try {
+    Object.entries(arg).forEach(async ([key, value], index) => {
+      await prisma.setting.update({
+        where: {
+          key,
+        },
+        data: {
+          value,
+        },
+      });
+    });
+    event.reply('save-settings', 'done');
+  } catch (error) {
+    event.reply('save-settings', error);
+  }
 });
 
 app.on('open-settings', () => {
@@ -304,6 +361,7 @@ app
     app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
+      await seedDb();
       if (mainWindow === null) createWindow();
     });
   })
