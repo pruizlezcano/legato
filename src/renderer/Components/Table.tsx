@@ -8,10 +8,15 @@ import {
   getPaginationRowModel,
   createColumnHelper,
   flexRender,
+  SortingState,
 } from '@tanstack/react-table';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUpRightFromSquare,
+  faArrowDown,
+  faArrowUp,
+} from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
 import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
@@ -53,6 +58,7 @@ const Table = ({ content }: { content: Project[] }) => {
     columnHelper.accessor('genre', {
       header: 'Genre',
       cell: (props) => <EditableCell {...props} />,
+      enableSorting: false,
     }),
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
@@ -114,14 +120,17 @@ const Table = ({ content }: { content: Project[] }) => {
   };
 
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     columns,
     data,
     state: {
       globalFilter,
+      sorting,
     },
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -175,12 +184,32 @@ const Table = ({ content }: { content: Project[] }) => {
                   key={header.id}
                   className="text-left text-base font-normal text-slate-700 first-of-type:pl-14"
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <div
+                      className={
+                        header.column.getCanSort()
+                          ? 'cursor-pointer select-none'
+                          : ''
+                      }
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
+                      {{
+                        asc: (
+                          <FontAwesomeIcon icon={faArrowUp} className="ml-2" />
+                        ),
+                        desc: (
+                          <FontAwesomeIcon
+                            icon={faArrowDown}
+                            className="ml-2"
+                          />
+                        ),
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </div>
+                  )}
                 </th>
               ))}
             </tr>
