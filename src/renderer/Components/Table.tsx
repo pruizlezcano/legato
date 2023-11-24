@@ -50,6 +50,10 @@ const Table = ({ content }: { content: Project[] }) => {
       cell: (props) => <EditableCell {...props} type="number" />,
       enableGlobalFilter: false,
     }),
+    columnHelper.accessor('genre', {
+      header: 'Genre',
+      cell: (props) => <EditableCell {...props} />,
+    }),
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
       cell: ({ row }) => (
@@ -58,7 +62,7 @@ const Table = ({ content }: { content: Project[] }) => {
         </Tooltip>
       ),
     }),
-    columnHelper.accessor('modifiedAt', {
+    columnHelper.accessor('createdAt', {
       header: 'Added',
       cell: ({ row }) => (
         <Tooltip message={row.original.createdAt.toString()}>

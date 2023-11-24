@@ -20,10 +20,19 @@ model Project {
   modifiedAt DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  genre      String?
+  tags       Tag[]
 }
 
 model Setting {
   id    Int     @id @default(autoincrement())
   key   String  @unique
   value String?
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  projects  Project[]
 }

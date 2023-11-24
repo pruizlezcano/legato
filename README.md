@@ -29,7 +29,7 @@
 - [ ] Status (done...)
 - [ ] Tier (S, A, B...)
 - [ ] Tags
-- [ ] Genre
+- [X] Genre
 - [X] Date added
 - [X] Date modified
 - [ ] Notes

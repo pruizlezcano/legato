@@ -29,7 +29,7 @@ const EditableCell = ({
   return (
     <input
       type={type}
-      value={value as string}
+      value={value || ''}
       onChange={(e) => setValue(e.target.value)}
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
