@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -55,7 +56,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-const processProject = async (project: Path) => {
+const processProject = async (project: Path, update = false) => {
   console.log(`Processing ${project.fullpath()}`);
 
   const { name, size, mtimeMs } = project;
@@ -75,9 +76,38 @@ const processProject = async (project: Path) => {
         ?.Value,
     ) || null;
 
+  let p = null;
+
+  if (update) {
+    console.log('Updating DB entry');
+    p = await prisma.project.findUnique({
+      where: {
+        path: projectFile,
+      },
+    });
+    if (p) {
+      p = await prisma.project.update({
+        where: {
+          path: projectFile,
+        },
+        data: {
+          title: name
+            .replace('.als', '')
+            .replace(/\.|-|_/g, ' ')
+            .trim(),
+          file: name,
+          path: projectFile,
+          bpm,
+          modifiedAt: new Date(mtimeMs),
+        },
+      });
+    }
+    console.log("Updated DB entry, let's go");
+    return p;
+  }
   console.log('Creating DB entry');
 
-  const p = await prisma.project.create({
+  p = await prisma.project.create({
     data: {
       title: name
         .replace('.als', '')
@@ -86,6 +116,7 @@ const processProject = async (project: Path) => {
       file: name,
       path: projectFile,
       bpm,
+      modifiedAt: new Date(mtimeMs),
     },
   });
   console.log("Created DB entry, let's go");
@@ -112,7 +143,6 @@ const fastScan = async (projectsPath: string) => {
   for (const result of results) {
     const projectPath = result.fullpath();
     if (!savedProjects.includes(projectPath)) {
-      // eslint-disable-next-line no-await-in-loop
       await processProject(result);
     }
     console.log(`Skipped ${projectPath}`);
@@ -120,17 +150,32 @@ const fastScan = async (projectsPath: string) => {
 };
 
 const fullScan = async (projectsPath: string) => {
-  console.log('Deleting all projects');
-  await prisma.project.deleteMany();
-  console.log('Deleted all projects');
-
   const results = await scanPath(projectsPath);
+  const savedProjects = await prisma.project.findMany();
   console.log(`Found ${results.length} projects`);
 
   // eslint-disable-next-line no-restricted-syntax
   for (const result of results) {
-    // eslint-disable-next-line no-await-in-loop
-    await processProject(result);
+    const projectPath = result.fullpath();
+    const savedProject = savedProjects.find((i) => i.path === projectPath);
+    if (savedProject) {
+      await processProject(result, true);
+    } else {
+      await processProject(result);
+    }
+  }
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const savedProject of savedProjects) {
+    const projectPath = savedProject.path;
+    const result = results.find((i) => i.fullpath() === projectPath);
+    if (!result) {
+      await prisma.project.delete({
+        where: {
+          path: projectPath,
+        },
+      });
+    }
   }
 };
 
@@ -148,7 +193,7 @@ ipcMain.on('scan-projects', async (event, arg) => {
       buttons: ['Cancel', 'OK'],
       defaultId: 1,
       title: 'Full Scan',
-      message: 'This will delete all projects in the database',
+      message: 'This will take a while, are you sure?',
     });
     if (response) await fullScan(projectsPath!.value);
   }
