@@ -96,7 +96,7 @@ devDependencies:
     version: 10.4.16(postcss@8.4.31)
   browserslist-config-erb:
     specifier: ^0.0.3
-    version: 0.0.3(electron@26.6.0)
+    version: 0.0.3(electron@26.2.4)
   chalk:
     specifier: ^4.1.2
     version: 4.1.2
@@ -119,8 +119,8 @@ devDependencies:
     specifier: ^1.5.1
     version: 1.5.1
   electron:
-    specifier: ^26.2.1
-    version: 26.6.0
+    specifier: ^26.2.4
+    version: 26.2.4
   electron-builder:
     specifier: ^24.6.4
     version: 24.6.4
@@ -3208,6 +3208,7 @@ packages:
   /@xmldom/xmldom@0.8.10:
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
     engines: {node: '>=10.0.0'}
+    requiresBuild: true
     dev: true
 
   /@xtuc/ieee754@1.2.0:
@@ -3775,6 +3776,7 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    requiresBuild: true
     dev: true
 
   /batch@0.6.1:
@@ -3887,12 +3889,12 @@ packages:
       fill-range: 7.0.1
     dev: true
 
-  /browserslist-config-erb@0.0.3(electron@26.6.0):
+  /browserslist-config-erb@0.0.3(electron@26.2.4):
     resolution: {integrity: sha512-y47DryCY92lxkKyRVMlaZvXAolIY7U33q9e4CS0MdWeJkoAht7OzsrkfdZFCBOP3H5q1EVUxS0L7VVsKM6gZCQ==}
     peerDependencies:
       electron: '>=12.0.0'
     dependencies:
-      electron: 26.6.0
+      electron: 26.2.4
     dev: true
 
   /browserslist@4.22.1:
@@ -5201,8 +5203,8 @@ packages:
       - supports-color
     dev: false
 
-  /electron@26.6.0:
-    resolution: {integrity: sha512-jqJSM9/+3nghA9vbTMdB0AW5dbMEnRJ9w6oBFNgiwN5V001DYbzZQMsr8xAbI/NXM3eh34qZYf8EIvPrnvT+Bw==}
+  /electron@26.2.4:
+    resolution: {integrity: sha512-weMUSMyDho5E0DPQ3breba3D96IxwNvtYHjMd/4/wNN3BdI5s3+0orNnPVGJFcLhSvKoxuKUqdVonUocBPwlQA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -6827,6 +6829,7 @@ packages:
 
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    requiresBuild: true
     dev: true
 
   /ignore@5.3.0:
@@ -11516,6 +11519,7 @@ packages:
   /xmlbuilder@15.1.1:
     resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
     engines: {node: '>=8.0'}
+    requiresBuild: true
     dev: true
 
   /xmlchars@2.2.0:
