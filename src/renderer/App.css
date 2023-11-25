@@ -14,3 +14,7 @@
 @supports (font-variation-settings: normal) {
   :root { font-family: InterVariable, sans-serif; }
 }
+
+.dark {
+  background-color: rgb(33,29,38);
+}

@@ -48,16 +48,23 @@ const Table = ({ content }: { content: Project[] }) => {
   const columns = [
     columnHelper.accessor('title', {
       header: 'Title',
-      cell: (props) => <EditableCell {...props} className="text-slate-950" />,
+      cell: (props) => (
+        <EditableCell
+          {...props}
+          className="text-slate-950 dark:text-white dark:bg-dark"
+        />
+      ),
     }),
     columnHelper.accessor('bpm', {
       header: 'BPM',
-      cell: (props) => <EditableCell {...props} type="number" />,
+      cell: (props) => (
+        <EditableCell {...props} type="number" className="dark:bg-dark" />
+      ),
       enableGlobalFilter: false,
     }),
     columnHelper.accessor('genre', {
       header: 'Genre',
-      cell: (props) => <EditableCell {...props} />,
+      cell: (props) => <EditableCell {...props} className="dark:bg-dark" />,
       enableSorting: false,
     }),
     columnHelper.accessor('modifiedAt', {
@@ -86,7 +93,7 @@ const Table = ({ content }: { content: Project[] }) => {
         <div className="flex flex-row gap-2">
           <Tooltip message="Open in Ableton">
             <button onClick={() => handleOpenInAbleton(row.original.id)}>
-              <AbletonLogo className="fill-slate-700 w-7" />
+              <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
             </button>
           </Tooltip>
           <Tooltip message="Open in Finder">
@@ -173,16 +180,16 @@ const Table = ({ content }: { content: Project[] }) => {
         value={globalFilter}
         onChange={(value: any) => setGlobalFilter(value)}
         placeholder="Search..."
-        className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0"
+        className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"
       />
       <table className="w-full table-auto md:table-fixed">
-        <thead className="bg-gray-100 h-12 border border-gray-200 border-x-0 border-b-1">
+        <thead className="bg-gray-100 dark:bg-dark-900 h-12 border border-gray-200 dark:border-black border-x-0 border-b-1">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="text-left text-base font-normal text-slate-700 first-of-type:pl-14"
+                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14"
                 >
                   {header.isPlaceholder ? null : (
                     <div
@@ -219,12 +226,12 @@ const Table = ({ content }: { content: Project[] }) => {
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="h-12 border border-slate-200 border-x-0 border-y-1"
+              className="h-12 border border-slate-200 dark:border-dark-800 border-x-0 border-y-1"
             >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className="text-left text-base font-normal text-slate-700 first-of-type:pl-14"
+                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

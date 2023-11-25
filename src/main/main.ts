@@ -36,13 +36,23 @@ const prisma = new PrismaClient({
 
 const seedDb = async () => {
   const settings = await prisma.setting.findMany();
-  if (!settings.length) {
-    await prisma.setting.create({
-      data: {
-        key: 'projectsPath',
-        value: null,
-      },
-    });
+  const defaults = [
+    {
+      key: 'projectsPath',
+      value: null,
+    },
+    {
+      key: 'theme',
+      value: 'system',
+    },
+  ];
+  for (let i = 0; i < defaults.length; i += 1) {
+    const setting = defaults[i];
+    if (!settings.find((s) => s.key === setting.key)) {
+      await prisma.setting.create({
+        data: setting,
+      });
+    }
   }
 };
 
@@ -401,12 +411,13 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
+    await seedDb();
     createWindow();
-    app.on('activate', async () => {
+    app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      await seedDb();
+
       if (mainWindow === null) createWindow();
     });
   })

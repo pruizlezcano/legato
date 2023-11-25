@@ -1,14 +1,21 @@
-import { useState, useEffect, KeyboardEvent } from 'react';
+import { useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Settings } from '@prisma/client';
 
 import Dialog from '../Components/Dialog';
 import Tooltip from '../Components/Tooltip';
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
-function SettingsView({ onClose, onSave }) {
-  const [settings, setSettings] = useState({ projectsPath: '' });
+function SettingsView({
+  onClose,
+  onSave,
+  settings: initialSettings,
+}: {
+  onClose: () => void;
+  onSave: () => void;
+  settings: any;
+}) {
+  const [settings, setSettings] = useState(initialSettings);
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -18,17 +25,24 @@ function SettingsView({ onClose, onSave }) {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'full');
   };
 
-  const handleSave = () => {
-    onSave();
-    window.electron.ipcRenderer.sendMessage('save-settings', settings);
+  const handleThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newTheme = e.target.value;
+    if (
+      newTheme === 'dark' ||
+      (newTheme === 'system' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    setSettings((old) => ({ ...old, theme: newTheme }));
   };
 
-  useEffect(() => {
-    window.electron.ipcRenderer.once('load-settings', (arg: Settings) => {
-      setSettings(arg);
-    });
-    window.electron.ipcRenderer.sendMessage('load-settings');
-  }, []);
+  const handleSave = () => {
+    window.electron.ipcRenderer.sendMessage('save-settings', settings);
+    onSave();
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -49,18 +63,18 @@ function SettingsView({ onClose, onSave }) {
 
   return (
     <Dialog>
-      <div className="relative flex flex-col w-screen bg-white outline-none focus:outline-none mx-auto my-4 max-w-3xl">
+      <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-3xl">
         {/* header */}
         <div className="flex items-start justify-between pl-5 border-b pb-4">
           <h1 className="text-xl font-bold">Settings</h1>
         </div>
         {/* body */}
         <div className="flex flex-col relative p-6">
-          <div className="flex flox-row border-b pb-6 align-middle">
+          <div className="flex flox-row pb-6 align-middle">
             <p className="w-fit pr-2">Projects folder:</p>
             <input
               type="text"
-              className="flex-grow bg-transparent border-b outline-none text-slate-700"
+              className="flex-grow bg-transparent border-b outline-none text-slate-700 dark:text-text-dark"
               placeholder="Search"
               value={settings.projectsPath}
               onChange={(e) =>
@@ -71,22 +85,39 @@ function SettingsView({ onClose, onSave }) {
             <Tooltip message="Open folder">
               <button
                 type="button"
-                className="text-gray-500"
                 onClick={() =>
                   window.electron.ipcRenderer.sendMessage('open-path-dialog')
                 }
               >
-                <FontAwesomeIcon icon={faFolderOpen} />
+                <FontAwesomeIcon
+                  icon={faFolderOpen}
+                  className="text-gray-500 dark:text-text-dark"
+                />
               </button>
             </Tooltip>
             <hr />
           </div>
+          <div className="flex flex-row">
+            {/* // Theme selector */}
+            <p>Theme</p>
+            <select
+              className="p-1 rounded bg-inherit capitalize hover:bg-gray-200 dark:hover:bg-dark-700 focus:outline-none"
+              value={settings.theme}
+              onChange={handleThemeChange}
+            >
+              {['system', 'light', 'dark'].map((theme) => (
+                <option key={theme} value={theme}>
+                  {theme}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex flex-col">
             <p className="mt-4 mb-2">Scan projects:</p>
-            <p className="text-slate-700">
+            <p className="text-slate-700 dark:text-text-dark">
               <button
                 type="button"
-                className="font-medium py-1 px-2 bg-blue-100 rounded-full text-xs text-blue-800 mr-2 focus:outline-none"
+                className="font-medium py-1 px-2 bg-blue-100 dark:bg-blue-200 rounded-full text-xs text-blue-800 dark:text-blue-900 mr-2 focus:outline-none"
                 onClick={handleFastScan}
               >
                 <FontAwesomeIcon icon={faArrowRight} className="pr-1" />
@@ -94,10 +125,10 @@ function SettingsView({ onClose, onSave }) {
               </button>
               Search for new projects.
             </p>
-            <p className="text-slate-700">
+            <p className="text-slate-700 dark:text-text-dark">
               <button
                 type="button"
-                className="cursor-pointer font-medium py-1 px-2 bg-red-100 rounded-full text-xs text-red-800 mr-2 focus:outline-none"
+                className="cursor-pointer font-medium py-1 px-2 bg-red-100 dark:bg-red-200 rounded-full text-xs text-red-800 dark:text-red-900 mr-2 focus:outline-none"
                 onClick={handleFullScan}
               >
                 <FontAwesomeIcon icon={faArrowRight} className="pr-1" />

@@ -22,6 +22,7 @@ const DebounceInput = ({
   return (
     <input
       type="text"
+      className={props.className}
       {...props}
       value={inputValue}
       onChange={handleInputChange}

@@ -8,6 +8,7 @@ import Table from './Components/Table';
 function Hello() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState({});
 
   const handleList = () =>
     window.electron.ipcRenderer.sendMessage('list-projects');
@@ -27,19 +28,37 @@ function Hello() {
       handleList();
     });
 
+    window.electron.ipcRenderer.on('load-settings', (arg) => {
+      setSettings(arg);
+    });
+
+    window.electron.ipcRenderer.sendMessage('load-settings');
     handleList();
   }, []);
 
+  useEffect(() => {
+    if (
+      settings.theme === 'dark' ||
+      (settings.theme === 'system' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [settings]);
+
   return (
-    <div className="overflow-x-auto w-full flex flex-wrap">
+    <div className="overflow-x-auto w-full flex flex-wrap dark:text-white">
       <div className="flex justify-start items-center p-5 pr-10">
         <h1 className="text-xl font-bold">Ableton Projects</h1>
-        <span className="ml-4 font-medium py-1 px-2 bg-blue-100 rounded-full text-xs text-blue-800">
+        <span className="ml-4 font-medium py-1 px-2 bg-blue-200 rounded-full text-xs text-blue-900">
           {projects.length} projects
         </span>
       </div>
       {showSettings ? (
         <Settings
+          settings={settings}
           onClose={() => {
             setShowSettings(false);
           }}

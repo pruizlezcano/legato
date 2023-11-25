@@ -33,12 +33,12 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
   };
 
   return (
-    <div className="flex justify-center gap-2 ml-auto mr-auto rounded text-sm bg-gray-100 mt-5 mb-8">
+    <div className="flex justify-center gap-2 ml-auto mr-auto rounded text-sm bg-gray-100 dark:bg-dark-900 mt-5 mb-8">
       <span className="flex pl-5 py-2">
         <button
           type="button"
           key="prev"
-          className="uppercase px-1 rounded-lg hover:bg-gray-200"
+          className="uppercase px-1 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700"
           onClick={onPrev}
           disabled={!table.getCanPreviousPage()}
         >
@@ -53,8 +53,10 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
               <button
                 type="button"
                 key={pageNumber}
-                className={`px-1 rounded-lg hover:bg-gray-200 ${
-                  pageNumber === currentPage ? 'bg-gray-300' : ''
+                className={`px-1 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 ${
+                  pageNumber === currentPage
+                    ? 'bg-gray-300 dark:bg-dark-600'
+                    : ''
                 }`}
                 onClick={() => onPageChange(pageNumber)}
               >
@@ -66,7 +68,7 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
         <button
           type="button"
           key="next"
-          className="uppercase px-1 rounded-lg hover:bg-gray-200"
+          className="uppercase px-1 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700"
           onClick={onNext}
           disabled={!table.getCanNextPage()}
         >
@@ -74,7 +76,7 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
         </button>
       </span>
       <select
-        className="p-1 rounded bg-inherit uppercase text-xs hover:bg-gray-200 focus:outline-none"
+        className="p-1 rounded bg-inherit uppercase text-xs hover:bg-gray-200 dark:hover:bg-dark-700 focus:outline-none"
         value={table.getState().pagination.pageSize}
         onChange={(e) => {
           if (e.target.value === 'All') {
