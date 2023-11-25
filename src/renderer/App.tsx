@@ -1,7 +1,6 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
-import { Project } from '@prisma/client';
 import Settings from './Views/SettingsView';
 import Table from './Components/Table';
 
@@ -17,7 +16,7 @@ function Hello() {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('list-projects', (arg: Project[]) => {
+    window.electron.ipcRenderer.on('list-projects', (arg) => {
       setProjects(arg);
     });
     window.electron.ipcRenderer.on('scan-projects', () => {

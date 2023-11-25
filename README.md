@@ -40,7 +40,7 @@
 - [X] Table pagination
 - [X] Editable title, bpm...
 - [ ] Add project file manually (drag and drop)
-- [ ] Dark mode (from device settings)
+- [X] Dark mode (from device settings)
 - [ ] Logger
 - [ ] Settings page
   - [X] Fast scan

@@ -13,48 +13,24 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { PrismaClient, Setting } from '@prisma/client';
 import { Path, glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
 import { XMLParser } from 'fast-xml-parser';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import initDb from '../db/data-source';
+import { Project } from '../entity/Project';
+import { Setting } from '../entity/Setting';
+import { Repository } from 'typeorm';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
-    ? './dev.db'
+    ? './src/db/dev.db'
     : path.join(app.getPath('userData'), 'projects.db');
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: `file:${dbPath}`,
-    },
-  },
-});
-
-const seedDb = async () => {
-  const settings = await prisma.setting.findMany();
-  const defaults = [
-    {
-      key: 'projectsPath',
-      value: null,
-    },
-    {
-      key: 'theme',
-      value: 'system',
-    },
-  ];
-  for (let i = 0; i < defaults.length; i += 1) {
-    const setting = defaults[i];
-    if (!settings.find((s) => s.key === setting.key)) {
-      await prisma.setting.create({
-        data: setting,
-      });
-    }
-  }
-};
+let ProjectRepository: Repository<Project>;
+let SettingRepository: Repository<Setting>;
 
 class AppUpdater {
   constructor() {
@@ -90,45 +66,37 @@ const processProject = async (project: Path, update = false) => {
 
   if (update) {
     console.log('Updating DB entry');
-    p = await prisma.project.findUnique({
-      where: {
-        path: projectFile,
-      },
+    p = await ProjectRepository.findOneBy({
+      path: projectFile,
     });
+
     if (p) {
-      p = await prisma.project.update({
-        where: {
-          path: projectFile,
-        },
-        data: {
-          title: name
-            .replace('.als', '')
-            .replace(/\.|-|_/g, ' ')
-            .trim(),
-          file: name,
-          path: projectFile,
-          bpm,
-          modifiedAt: new Date(mtimeMs),
-        },
-      });
+      p.title = name
+        .replace('.als', '')
+        .replace(/\.|-|_/g, ' ')
+        .trim();
+      p.file = name;
+      p.path = projectFile;
+      p.bpm = bpm !== null ? bpm : 0;
+      p.modifiedAt = new Date(mtimeMs || 0);
+      await ProjectRepository.save(p);
     }
     console.log("Updated DB entry, let's go");
     return p;
   }
   console.log('Creating DB entry');
 
-  p = await prisma.project.create({
-    data: {
-      title: name
-        .replace('.als', '')
-        .replace(/\.|-|_/g, ' ')
-        .trim(),
-      file: name,
-      path: projectFile,
-      bpm,
-      modifiedAt: new Date(mtimeMs),
-    },
-  });
+  p = new Project();
+  p.title = name
+    .replace('.als', '')
+    .replace(/\.|-|_/g, ' ')
+    .trim();
+  p.file = name;
+  p.path = projectFile;
+  p.bpm = bpm !== null ? bpm : 0;
+  p.modifiedAt = new Date(mtimeMs || 0);
+  await ProjectRepository.save(p);
+
   console.log("Created DB entry, let's go");
 
   return p;
@@ -144,7 +112,7 @@ const scanPath = async (projectsPath: string) => {
 };
 
 const fastScan = async (projectsPath: string) => {
-  const projects = await prisma.project.findMany();
+  const projects = await ProjectRepository.find();
   const savedProjects = projects.map((i) => i.path);
 
   const results = await scanPath(projectsPath);
@@ -161,7 +129,7 @@ const fastScan = async (projectsPath: string) => {
 
 const fullScan = async (projectsPath: string) => {
   const results = await scanPath(projectsPath);
-  const savedProjects = await prisma.project.findMany();
+  const savedProjects = await ProjectRepository.find();
   console.log(`Found ${results.length} projects`);
 
   // eslint-disable-next-line no-restricted-syntax
@@ -169,31 +137,31 @@ const fullScan = async (projectsPath: string) => {
     const projectPath = result.fullpath();
     const savedProject = savedProjects.find((i) => i.path === projectPath);
     if (savedProject) {
+      // Update project
       await processProject(result, true);
     } else {
+      // Create project
       await processProject(result);
     }
   }
 
+  // Remove projects that are not in the folder anymore
   // eslint-disable-next-line no-restricted-syntax
   for (const savedProject of savedProjects) {
     const projectPath = savedProject.path;
     const result = results.find((i) => i.fullpath() === projectPath);
     if (!result) {
-      await prisma.project.delete({
-        where: {
-          path: projectPath,
-        },
+      const p = await ProjectRepository.findOneBy({
+        id: savedProject.id,
       });
+      await ProjectRepository.remove(p!);
     }
   }
 };
 
 ipcMain.on('scan-projects', async (event, arg) => {
-  const projectsPath = await prisma.setting.findUnique({
-    where: {
-      key: 'projectsPath',
-    },
+  const projectsPath = await SettingRepository.findOneBy({
+    key: 'projectsPath',
   });
   if (arg === 'fast') {
     await fastScan(projectsPath!.value);
@@ -203,7 +171,7 @@ ipcMain.on('scan-projects', async (event, arg) => {
       buttons: ['Cancel', 'OK'],
       defaultId: 1,
       title: 'Full Scan',
-      message: 'This will take a while, are you sure?',
+      message: 'This may take a while, are you sure?',
     });
     if (response) await fullScan(projectsPath!.value);
   }
@@ -211,16 +179,14 @@ ipcMain.on('scan-projects', async (event, arg) => {
 });
 
 ipcMain.on('list-projects', async (event) => {
-  const projects = await prisma.project.findMany();
+  const projects = await ProjectRepository.find();
   event.reply('list-projects', projects);
 });
 
 ipcMain.on('open-project', async (event, arg: number) => {
   try {
-    const project = await prisma.project.findUnique({
-      where: {
-        id: arg,
-      },
+    const project = await ProjectRepository.findOneBy({
+      id: arg,
     });
 
     shell.openPath(project!.path);
@@ -232,10 +198,8 @@ ipcMain.on('open-project', async (event, arg: number) => {
 
 ipcMain.on('open-project-folder', async (event, arg: number) => {
   try {
-    const project = await prisma.project.findUnique({
-      where: {
-        id: arg,
-      },
+    const project = await ProjectRepository.findOneBy({
+      id: arg,
     });
 
     shell.showItemInFolder(project!.path);
@@ -247,14 +211,15 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
 
 ipcMain.on('update-project', async (event, arg) => {
   try {
-    const project = await prisma.project.update({
-      where: {
-        id: arg.id,
-      },
-      data: {
-        ...arg,
-      },
+    const project = await ProjectRepository.findOneBy({
+      id: arg.id,
     });
+    if (project) {
+      project.title = arg.title;
+      project.genre = arg.genre;
+      project.bpm = arg.bpm;
+      await ProjectRepository.save(project);
+    }
     return event.reply('update-project', project);
   } catch (error) {
     return event.reply('update-project', error);
@@ -267,7 +232,7 @@ ipcMain.on('open-settings', async (event) => {
 
 ipcMain.on('load-settings', async (event) => {
   try {
-    const settings = await prisma.setting.findMany();
+    const settings = await SettingRepository.find();
     const settingsObj: { [key: string]: any } = {}; // Add type annotation for settingsObj
 
     settings.forEach((setting: Setting) => {
@@ -284,14 +249,13 @@ ipcMain.on('load-settings', async (event) => {
 ipcMain.on('save-settings', async (event, arg) => {
   try {
     Object.entries(arg).forEach(async ([key, value], index) => {
-      await prisma.setting.update({
-        where: {
-          key,
-        },
-        data: {
-          value,
-        },
+      const setting = await SettingRepository.findOneBy({
+        key,
       });
+      if (setting) {
+        setting.value = value as string | undefined;
+        await SettingRepository.save(setting);
+      }
     });
     event.reply('save-settings', 'done');
   } catch (error) {
@@ -412,7 +376,10 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(async () => {
-    await seedDb();
+    let { Projects, Settings } = await initDb(dbPath);
+    ProjectRepository = Projects;
+    SettingRepository = Settings;
+
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

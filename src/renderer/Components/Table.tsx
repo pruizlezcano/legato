@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unstable-nested-components */
-import { Project } from '@prisma/client';
 import {
   useReactTable,
   getCoreRowModel,
@@ -24,8 +23,8 @@ import EditableCell from './EditableCell';
 import Pagination from './Pagination';
 
 // eslint-disable-next-line react/function-component-definition
-const Table = ({ content }: { content: Project[] }) => {
-  const [data, setData] = useState<Project[]>([]);
+const Table = ({ content }: { content }) => {
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     if (content) {
@@ -40,7 +39,7 @@ const Table = ({ content }: { content: Project[] }) => {
   const handleOpenInFinder = (projectId: number) =>
     window.electron.ipcRenderer.sendMessage('open-project-folder', projectId);
 
-  const handleProjectUpdate = (project: Project) => {
+  const handleProjectUpdate = (project) => {
     window.electron.ipcRenderer.sendMessage('update-project', project);
   };
 

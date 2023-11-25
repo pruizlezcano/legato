@@ -2,6 +2,8 @@
   "compilerOptions": {
     "incremental": true,
     "target": "es2022",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "module": "commonjs",
     "lib": ["dom", "es2022"],
     "jsx": "react-jsx",
@@ -14,5 +16,7 @@
     "allowJs": true,
     "outDir": ".erb/dll"
   },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
+  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"],
+  "experimentalDecorators": true,
+  "emitDecoratorMetadata": true,
 }
