@@ -15,7 +15,6 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "sqlite3": "^5.1.6",
-    "typeorm": "0.3.17"
+    "sqlite3": "^5.1.6"
   }
 }

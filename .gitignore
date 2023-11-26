@@ -29,4 +29,4 @@ npm-debug.log.*
 *.scss.d.ts
 
 # Dev
-prisma/dev.db
+src/db/dev.db

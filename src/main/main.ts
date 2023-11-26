@@ -20,8 +20,8 @@ import { XMLParser } from 'fast-xml-parser';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
-import { Project } from '../entity/Project';
-import { Setting } from '../entity/Setting';
+import { Project } from '../db/entity/Project';
+import { Setting } from '../db/entity/Setting';
 import { Repository } from 'typeorm';
 
 const dbPath =
