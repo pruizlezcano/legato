@@ -1,12 +1,11 @@
 {
-  "name": "electron-react-boilerplate",
+  "name": "legato",
   "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "description": "A manager for your music projects",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "Pablo Ruiz",
+    "url": "https://github.com/pruizlezcano"
   },
   "main": "./dist/main/main.js",
   "scripts": {
