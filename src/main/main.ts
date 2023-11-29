@@ -162,22 +162,28 @@ const fullScan = async (projectsPath: string) => {
 };
 
 ipcMain.on('scan-projects', async (event, arg) => {
+  if (mainWindow) mainWindow.webContents.send('scan-started');
   const projectsPath = await SettingRepository.findOneBy({
     key: 'projectsPath',
   });
-  if (arg === 'fast') {
-    await fastScan(projectsPath!.value);
-  } else if (arg === 'full') {
-    const { response } = await dialog.showMessageBox({
-      type: 'warning',
-      buttons: ['Cancel', 'OK'],
-      defaultId: 1,
-      title: 'Full Scan',
-      message: 'This may take a while, are you sure?',
-    });
-    if (response) await fullScan(projectsPath!.value);
+  try {
+    if (arg === 'fast') {
+      await fastScan(projectsPath!.value);
+    } else if (arg === 'full') {
+      const { response } = await dialog.showMessageBox({
+        type: 'warning',
+        buttons: ['Cancel', 'OK'],
+        defaultId: 1,
+        title: 'Full Scan',
+        message: 'This may take a while, are you sure?',
+      });
+      if (response) await fullScan(projectsPath!.value);
+    }
+    event.reply('scan-projects', 'OK');
+  } catch (error) {
+    logger.error(`Error scanning projects: ${error}`);
+    event.reply('scan-projects', error);
   }
-  event.reply('scan-projects', 'done');
 });
 
 ipcMain.on('list-projects', async (event) => {

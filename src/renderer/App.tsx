@@ -1,6 +1,7 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import Settings from './Views/SettingsView';
 import Table from './Components/Table';
 import { Project } from '../db/entity/Project';
@@ -14,18 +15,41 @@ function Hello() {
   const handleList = () =>
     window.electron.ipcRenderer.sendMessage('list-projects');
 
-  const handleFastScan = () =>
+  const showScanToast = () => {
+    return toast.promise(
+      new Promise((resolve, reject) => {
+        window.electron.ipcRenderer.once('scan-projects', (arg) => {
+          if (arg !== 'OK') {
+            toast.error('Error scanning projects');
+            reject(arg);
+          }
+          logger.info('projects received');
+          handleList();
+          resolve(arg);
+        });
+      }),
+      {
+        loading: 'Scanning projects...',
+        success: <b>Scanning completed successfully</b>,
+        error: <b>Error while scanning projects</b>,
+      },
+    );
+  };
+
+  const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
+  };
 
   useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
       setProjects(arg);
     });
-    window.electron.ipcRenderer.on('scan-projects', () => {
-      logger.info('projects received');
-      handleList();
+
+    window.electron.ipcRenderer.on('scan-started', () => {
+      showScanToast();
     });
+
     window.electron.ipcRenderer.on('open-settings', () => {
       setShowSettings(true);
       handleList();
@@ -95,6 +119,12 @@ function Hello() {
       ) : (
         <Table content={projects} />
       )}
+      <Toaster
+        toastOptions={{
+          className:
+            'bg-white dark:bg-dark-900 text-slate-700 dark:text-text-dark',
+        }}
+      />
     </div>
   );
 }

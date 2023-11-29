@@ -7,6 +7,7 @@ export type Channels =
   | 'list-projects'
   | 'open-settings'
   | 'scan-projects'
+  | 'scan-started'
   | 'open-project'
   | 'open-project-folder'
   | 'update-project'
