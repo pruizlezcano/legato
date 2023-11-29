@@ -16,8 +16,8 @@ import {
   faArrowDown,
   faArrowUp,
 } from '@fortawesome/free-solid-svg-icons';
+import { Tooltip } from 'react-tooltip';
 import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
-import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
@@ -69,17 +69,35 @@ const Table = ({ content }: { content }) => {
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
       cell: ({ row }) => (
-        <Tooltip message={row.original.modifiedAt.toString()}>
-          <p>{row.original.modifiedAt.toLocaleDateString()}</p>
-        </Tooltip>
+        <>
+          <p data-tooltip-id="modifiedAt">
+            {row.original.modifiedAt.toLocaleDateString()}
+          </p>
+          <Tooltip
+            content={row.original.modifiedAt.toString()}
+            id="modifiedAt"
+            place="bottom"
+            disableStyleInjection
+            noArrow
+          />
+        </>
       ),
     }),
     columnHelper.accessor('createdAt', {
       header: 'Added',
       cell: ({ row }) => (
-        <Tooltip message={row.original.createdAt.toString()}>
-          <p>{row.original.createdAt.toLocaleDateString()}</p>
-        </Tooltip>
+        <>
+          <p data-tooltip-id="createdAt">
+            {row.original.createdAt.toLocaleDateString()}
+          </p>
+          <Tooltip
+            content={row.original.createdAt.toString()}
+            id="createdAt"
+            place="bottom"
+            disableStyleInjection
+            noArrow
+          />
+        </>
       ),
     }),
     columnHelper.accessor('path', {
@@ -90,19 +108,32 @@ const Table = ({ content }: { content }) => {
       header: '',
       cell: ({ row }) => (
         <div className="flex flex-row gap-2">
-          <Tooltip message="Open in Ableton">
-            <button onClick={() => handleOpenInAbleton(row.original.id)}>
-              <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
-            </button>
-          </Tooltip>
-          <Tooltip message="Open in Finder">
-            <button
-              type="button"
-              onClick={() => handleOpenInFinder(row.original.id)}
-            >
-              <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
-            </button>
-          </Tooltip>
+          <button
+            onClick={() => handleOpenInAbleton(row.original.id)}
+            data-tooltip-id="ableton-logo"
+          >
+            <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOpenInFinder(row.original.id)}
+            data-tooltip-id="open-project-folder"
+          >
+            <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
+          </button>
+          <Tooltip
+            id="ableton-logo"
+            content="Open in Ableton"
+            place="bottom"
+            disableStyleInjection
+            noArrow
+          />
+          <Tooltip
+            id="open-project-folder"
+            content="Open location"
+            place="bottom"
+            noArrow
+          />
         </div>
       ),
       enableGlobalFilter: false,
@@ -113,7 +144,6 @@ const Table = ({ content }: { content }) => {
     const shouldSkipRef = useRef(true);
     const shouldSkip = shouldSkipRef.current;
 
-    // Wrap a function with this to skip a pagination reset temporarily
     const skip = useCallback(() => {
       shouldSkipRef.current = false;
     }, []);
@@ -191,6 +221,7 @@ const Table = ({ content }: { content }) => {
                   className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14"
                 >
                   {header.isPlaceholder ? null : (
+                    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                     <div
                       className={
                         header.column.getCanSort()

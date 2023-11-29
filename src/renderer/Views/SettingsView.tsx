@@ -1,10 +1,10 @@
 import { useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import Dialog from '../Components/Dialog';
-import Tooltip from '../Components/Tooltip';
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { Tooltip } from 'react-tooltip';
+import Dialog from '../Components/Dialog';
 
 function SettingsView({
   onClose,
@@ -82,19 +82,19 @@ function SettingsView({
               }
               style={{ transition: 'all .15s ease' }}
             />
-            <Tooltip message="Open folder">
-              <button
-                type="button"
-                onClick={() =>
-                  window.electron.ipcRenderer.sendMessage('open-path-dialog')
-                }
-              >
-                <FontAwesomeIcon
-                  icon={faFolderOpen}
-                  className="text-gray-500 dark:text-text-dark"
-                />
-              </button>
-            </Tooltip>
+            <button
+              type="button"
+              onClick={() =>
+                window.electron.ipcRenderer.sendMessage('open-path-dialog')
+              }
+              data-tooltip-id="select-folder"
+            >
+              <FontAwesomeIcon
+                icon={faFolderOpen}
+                className="text-gray-500 dark:text-text-dark"
+              />
+            </button>
+            <Tooltip id="select-folder" content="Open folder" place="bottom" />
             <hr />
           </div>
           <div className="flex flex-row">

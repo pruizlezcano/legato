@@ -31,5 +31,8 @@
     "project",
     "settings",
     "deps-dev"
-  ]
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  }
 }
