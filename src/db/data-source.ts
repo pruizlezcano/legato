@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import sqlite3 from 'sqlite3';
 import { DataSource, Repository } from 'typeorm';
 import { Project } from './entity/Project';
@@ -5,6 +6,7 @@ import { Setting } from './entity/Setting';
 
 const seedSettings = async (SettingRepository: Repository<Setting>) => {
   const settings = await SettingRepository.find();
+
   const defaults = [
     {
       key: 'projectsPath',
@@ -19,11 +21,7 @@ const seedSettings = async (SettingRepository: Repository<Setting>) => {
   for (let i = 0; i < defaults.length; i += 1) {
     const setting = defaults[i];
 
-    if (
-      !settings.find(
-        (s: Setting) => s.key === setting.key && s.value === setting.value,
-      )
-    ) {
+    if (!settings.find((s: Setting) => s.key === setting.key)) {
       const newSetting = new Setting();
       newSetting.key = setting.key;
       newSetting.value = setting.value !== null ? setting.value : undefined;
@@ -46,7 +44,8 @@ const initDb = async (
     database: dbPath,
     driver: sqlite3,
     synchronize: true,
-    logging: true,
+    // logging: true,
+    logger: 'advanced-console',
     entities: [Project, Setting],
     migrations: [],
     subscribers: [],
