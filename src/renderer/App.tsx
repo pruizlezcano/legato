@@ -3,6 +3,8 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import Settings from './Views/SettingsView';
 import Table from './Components/Table';
+import { Project } from '../db/entity/Project';
+import logger from './hooks/useLogger';
 
 function Hello() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -17,9 +19,11 @@ function Hello() {
 
   useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
+      logger.info('updating projects list');
       setProjects(arg);
     });
     window.electron.ipcRenderer.on('scan-projects', () => {
+      logger.info('projects received');
       handleList();
     });
     window.electron.ipcRenderer.on('open-settings', () => {
@@ -28,6 +32,7 @@ function Hello() {
     });
 
     window.electron.ipcRenderer.on('load-settings', (arg) => {
+      logger.info('loading settings');
       setSettings(arg);
     });
 
@@ -50,8 +55,8 @@ function Hello() {
   return (
     <div className="overflow-x-auto w-full flex flex-wrap dark:text-white">
       <div className="flex justify-start items-center p-5 pr-10">
-        <h1 className="text-xl font-bold">Ableton Projects</h1>
-        <span className="ml-4 font-medium py-1 px-2 bg-blue-200 rounded-full text-xs text-blue-900">
+        <h1 className="text-2xl font-bold">Legato</h1>
+        <span className="ml-4 font-medium py-1 px-2 bg-gray-300 dark:bg-gray-200 rounded-full text-xs dark:text-dark">
           {projects.length} projects
         </span>
       </div>
@@ -67,7 +72,7 @@ function Hello() {
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full pt-60">
           <p className="text-2xl font-bold">No projects found</p>
-          <p className="text-slate-700">
+          <p className="text-slate-700 dark:text-text-dark">
             Check your projects folder in the settings and scan again
           </p>
           <div className="flex flex-row">

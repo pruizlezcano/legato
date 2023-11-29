@@ -104,7 +104,8 @@
     "react-router-dom": "^6.16.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "0.3.17",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.10.14",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@electron/notarize": "^2.1.0",

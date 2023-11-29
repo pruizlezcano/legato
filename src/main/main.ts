@@ -17,25 +17,25 @@ import { Path, glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
 import { XMLParser } from 'fast-xml-parser';
+import { Repository } from 'typeorm';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
 import { Project } from '../db/entity/Project';
 import { Setting } from '../db/entity/Setting';
-import { Repository } from 'typeorm';
+import logger from './logger';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
     ? './src/db/dev.db'
-    : path.join(app.getPath('userData'), 'projects.db');
+    : path.join(app.getPath('userData'), 'legato.db');
 
 let ProjectRepository: Repository<Project>;
 let SettingRepository: Repository<Setting>;
 
 class AppUpdater {
   constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
+    autoUpdater.logger = logger;
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
@@ -43,7 +43,7 @@ class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 const processProject = async (project: Path, update = false) => {
-  console.log(`Processing ${project.fullpath()}`);
+  logger.info(`Processing ${project.fullpath()}`);
 
   const { name, size, mtimeMs } = project;
 
@@ -65,7 +65,6 @@ const processProject = async (project: Path, update = false) => {
   let p = null;
 
   if (update) {
-    console.log('Updating DB entry');
     p = await ProjectRepository.findOneBy({
       path: projectFile,
     });
@@ -81,10 +80,9 @@ const processProject = async (project: Path, update = false) => {
       p.modifiedAt = new Date(mtimeMs || 0);
       await ProjectRepository.save(p);
     }
-    console.log("Updated DB entry, let's go");
+    logger.info(`Updating DB entry for ${name}`);
     return p;
   }
-  console.log('Creating DB entry');
 
   p = new Project();
   p.title = name
@@ -97,18 +95,28 @@ const processProject = async (project: Path, update = false) => {
   p.modifiedAt = new Date(mtimeMs || 0);
   await ProjectRepository.save(p);
 
-  console.log("Created DB entry, let's go");
+  logger.info(`Created DB entry for ${projectFile}`);
 
   return p;
 };
 
 const scanPath = async (projectsPath: string) => {
-  console.log(`Scanning ${projectsPath}`);
-  const results = await glob(`${projectsPath}/!(Backup)/*.als`, {
-    stat: true,
-    withFileTypes: true,
-  });
-  return results;
+  logger.info(`Scanning ${projectsPath}`);
+  try {
+    const results = await glob(`${projectsPath}/**/!(Backup)/*.als`, {
+      stat: true,
+      withFileTypes: true,
+    });
+    if (Array.isArray(results) && results.length > 0) {
+      logger.info(`Found ${results.length} projects`);
+      return results;
+    }
+    logger.warn(`No projects found in ${projectsPath}`);
+    return [];
+  } catch (error) {
+    logger.error(`Error scanning path: ${error}`);
+    return [];
+  }
 };
 
 const fastScan = async (projectsPath: string) => {
@@ -122,15 +130,15 @@ const fastScan = async (projectsPath: string) => {
     const projectPath = result.fullpath();
     if (!savedProjects.includes(projectPath)) {
       await processProject(result);
+    } else {
+      logger.info(`Skipped ${projectPath}`);
     }
-    console.log(`Skipped ${projectPath}`);
   }
 };
 
 const fullScan = async (projectsPath: string) => {
   const results = await scanPath(projectsPath);
   const savedProjects = await ProjectRepository.find();
-  console.log(`Found ${results.length} projects`);
 
   // eslint-disable-next-line no-restricted-syntax
   for (const result of results) {
@@ -184,6 +192,7 @@ ipcMain.on('list-projects', async (event) => {
 });
 
 ipcMain.on('open-project', async (event, arg: number) => {
+  logger.info(`Launching project ${arg}`);
   try {
     const project = await ProjectRepository.findOneBy({
       id: arg,
@@ -192,11 +201,13 @@ ipcMain.on('open-project', async (event, arg: number) => {
     shell.openPath(project!.path);
     return event.reply('open-project', project);
   } catch (error) {
+    logger.error(`Error launching project: ${error}`);
     return event.reply('open-project', error);
   }
 });
 
 ipcMain.on('open-project-folder', async (event, arg: number) => {
+  logger.info(`Opening project folder ${arg}`);
   try {
     const project = await ProjectRepository.findOneBy({
       id: arg,
@@ -205,11 +216,13 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
     shell.showItemInFolder(project!.path);
     return event.reply('open-project-folder', project);
   } catch (error) {
+    logger.error(`Error opening project folder: ${error}`);
     return event.reply('open-project-folder', error);
   }
 });
 
 ipcMain.on('update-project', async (event, arg) => {
+  logger.info(`Updating project ${arg.id}`);
   try {
     const project = await ProjectRepository.findOneBy({
       id: arg.id,
@@ -219,9 +232,13 @@ ipcMain.on('update-project', async (event, arg) => {
       project.genre = arg.genre;
       project.bpm = arg.bpm;
       await ProjectRepository.save(project);
+      logger.info(`Project ${arg.id} updated`);
+    } else {
+      logger.warn(`Project ${arg.id} not found`);
     }
     return event.reply('update-project', project);
   } catch (error) {
+    logger.error(`Error updating project: ${error}`);
     return event.reply('update-project', error);
   }
 });
@@ -231,6 +248,7 @@ ipcMain.on('open-settings', async (event) => {
 });
 
 ipcMain.on('load-settings', async (event) => {
+  logger.info('Loading settings');
   try {
     const settings = await SettingRepository.find();
     const settingsObj: { [key: string]: any } = {}; // Add type annotation for settingsObj
@@ -240,13 +258,13 @@ ipcMain.on('load-settings', async (event) => {
     });
     event.reply('load-settings', settingsObj);
   } catch (error) {
-    console.log('get', error);
-
+    logger.error(`Error loading settings: ${error}`);
     event.reply('load-settings', error);
   }
 });
 
 ipcMain.on('save-settings', async (event, arg) => {
+  logger.info(`Saving settings ${arg}`);
   try {
     Object.entries(arg).forEach(async ([key, value], index) => {
       const setting = await SettingRepository.findOneBy({
@@ -259,6 +277,7 @@ ipcMain.on('save-settings', async (event, arg) => {
     });
     event.reply('save-settings', 'done');
   } catch (error) {
+    logger.error(`Error saving settings: ${error}`);
     event.reply('save-settings', error);
   }
 });
@@ -273,11 +292,23 @@ ipcMain.on('open-path-dialog', async (event) => {
   const result = await dialog.showOpenDialog({
     properties: ['openDirectory'],
   });
-  console.log(result);
   if (!result.canceled) {
     return event.reply('open-path-dialog', result.filePaths[0]);
   }
+  logger.warn('No path selected');
   return event.reply('open-path-dialog', null);
+});
+
+ipcMain.on('log-info', (_event, arg) => {
+  logger.log('infoRender', `${arg}`);
+});
+
+ipcMain.on('log-warn', (_event, arg) => {
+  logger.log('warnRender', `${arg}`);
+});
+
+ipcMain.on('log-error', (_event, arg) => {
+  logger.log('errorRender', `${arg}`);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -302,7 +333,7 @@ const installExtensions = async () => {
       extensions.map((name) => installer[name]),
       forceDownload,
     )
-    .catch(console.log);
+    .catch(logger.error);
 };
 
 const createWindow = async () => {
@@ -359,6 +390,9 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+  const { Projects, Settings } = await initDb(dbPath);
+  ProjectRepository = Projects;
+  SettingRepository = Settings;
 };
 
 /**
@@ -376,10 +410,6 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(async () => {
-    let { Projects, Settings } = await initDb(dbPath);
-    ProjectRepository = Projects;
-    SettingRepository = Settings;
-
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
@@ -388,4 +418,4 @@ app
       if (mainWindow === null) createWindow();
     });
   })
-  .catch(console.log);
+  .catch(logger.error);
