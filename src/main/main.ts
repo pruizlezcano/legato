@@ -12,7 +12,6 @@
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
 import { Path, glob } from 'glob';
 import fs from 'fs';
 import zlib from 'zlib';
@@ -47,6 +46,10 @@ const processProject = async (project: Path, update = false) => {
 
   const { name, size, mtimeMs } = project;
 
+  const title = name
+    .replace('.als', '')
+    .replace(/\.|-|_/g, ' ')
+    .trim();
   const projectFile = project.fullpath();
   const zippedContent = fs.readFileSync(projectFile);
   const content = zlib.gunzipSync(zippedContent).toString('utf-8');
@@ -70,12 +73,6 @@ const processProject = async (project: Path, update = false) => {
     });
 
     if (p) {
-      p.title = name
-        .replace('.als', '')
-        .replace(/\.|-|_/g, ' ')
-        .trim();
-      p.file = name;
-      p.path = projectFile;
       p.bpm = bpm !== null ? bpm : 0;
       p.modifiedAt = new Date(mtimeMs || 0);
       await ProjectRepository.save(p);
@@ -85,10 +82,7 @@ const processProject = async (project: Path, update = false) => {
   }
 
   p = new Project();
-  p.title = name
-    .replace('.als', '')
-    .replace(/\.|-|_/g, ' ')
-    .trim();
+  p.title = title;
   p.file = name;
   p.path = projectFile;
   p.bpm = bpm !== null ? bpm : 0;
