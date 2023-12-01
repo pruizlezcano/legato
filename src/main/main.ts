@@ -264,7 +264,7 @@ ipcMain.on('load-settings', async (event) => {
 });
 
 ipcMain.on('save-settings', async (event, arg) => {
-  logger.info(`Saving settings ${arg}`);
+  logger.info('Saving settings');
   try {
     Object.entries(arg).forEach(async ([key, value], index) => {
       const setting = await SettingRepository.findOneBy({

@@ -2,15 +2,18 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import Settings from './Views/SettingsView';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import SettingsView from './Views/SettingsView';
 import Table from './Components/Table';
 import { Project } from '../db/entity/Project';
 import logger from './hooks/useLogger';
+import { Settings } from '../interfaces/Settings';
 
 function Hello() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState({});
+  const [settings, setSettings] = useState({} as Settings);
 
   const handleList = () =>
     window.electron.ipcRenderer.sendMessage('list-projects');
@@ -83,14 +86,21 @@ function Hello() {
         <span className="ml-4 font-medium py-1 px-2 bg-gray-300 dark:bg-gray-200 rounded-full text-xs dark:text-dark">
           {projects.length} projects
         </span>
+        <button
+          className="ml-4 font-medium py-1 px-3 bg-gray-300 dark:bg-gray-200 rounded-full text-xs dark:text-dark"
+          onClick={() => setShowSettings(true)}
+        >
+          <FontAwesomeIcon icon={faGear} className="pr-1" />
+          Settings
+        </button>
       </div>
       {showSettings ? (
-        <Settings
+        <SettingsView
           settings={settings}
           onClose={() => {
+            window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
             setShowSettings(false);
           }}
-          onSave={() => setShowSettings(false)}
         />
       ) : null}
       {projects.length === 0 ? (

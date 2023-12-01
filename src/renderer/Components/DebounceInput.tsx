@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 
-const DebounceInput = ({
+function DebounceInput({
   value: initialValue,
   onChange,
   debounce = 500,
   ...props
-}) => {
+}) {
   const [inputValue, setInputValue] = useState(initialValue);
 
   const handleInputChange = (e) => {
@@ -22,12 +22,12 @@ const DebounceInput = ({
   return (
     <input
       type="text"
-      className={props.className}
       {...props}
+      className={props.className}
       value={inputValue}
       onChange={handleInputChange}
     />
   );
-};
+}
 
 export default DebounceInput;
