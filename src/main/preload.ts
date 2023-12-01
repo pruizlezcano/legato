@@ -3,7 +3,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
 export type Channels =
-  | 'ipc-example'
   | 'list-projects'
   | 'open-settings'
   | 'scan-projects'
