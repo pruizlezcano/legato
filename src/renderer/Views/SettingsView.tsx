@@ -67,7 +67,7 @@ function SettingsView({
     <Dialog onClose={onClose}>
       <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-3xl">
         {/* header */}
-        <div className="flex pl-5 border-b pb-4">
+        <div className="flex pl-5 pb-4">
           <h1 className="text-xl font-bold">Settings</h1>
         </div>
         {/* body */}

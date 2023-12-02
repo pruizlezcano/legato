@@ -16,7 +16,7 @@ const Dialog = ({
     <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none bg-black bg-opacity-30 focus:outline-none">
       <div
         ref={ref}
-        className="relative w-auto mx-auto max-w-3xl bg-white dark:bg-dark rounded-xl"
+        className="relative mx-auto bg-white dark:bg-dark border border-slate-200 dark:border-dark-800 rounded-xl"
       >
         {children}
       </div>

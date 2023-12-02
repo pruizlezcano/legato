@@ -9,22 +9,33 @@ import {
   flexRender,
   SortingState,
 } from '@tanstack/react-table';
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUpRightFromSquare,
-  faArrowDown,
-  faArrowUp,
+  faSortUp,
+  faSortDown,
+  faCircleInfo,
+  faSort,
 } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from 'react-tooltip';
 import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
+import { Project } from '../../db/entity/Project';
+import ProjectView from '../Views/ProjectView';
+import {
+  handleOpenInAbleton,
+  handleOpenInFinder,
+  handleProjectUpdate,
+} from '../hooks/handlers';
 
 // eslint-disable-next-line react/function-component-definition
-const Table = ({ content }: { content }) => {
+const Table = ({ content }: { content: Project[] }) => {
   const [data, setData] = useState([]);
+  const [showProject, setshowProject] = useState(false);
+  const [project, setProject] = useState({} as Project);
 
   useEffect(() => {
     if (content) {
@@ -32,16 +43,6 @@ const Table = ({ content }: { content }) => {
     }
   }, [content]);
   const [globalFilter, setGlobalFilter] = useState('');
-
-  const handleOpenInAbleton = (projectId: number) =>
-    window.electron.ipcRenderer.sendMessage('open-project', projectId);
-
-  const handleOpenInFinder = (projectId: number) =>
-    window.electron.ipcRenderer.sendMessage('open-project-folder', projectId);
-
-  const handleProjectUpdate = (project) => {
-    window.electron.ipcRenderer.sendMessage('update-project', project);
-  };
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -60,6 +61,7 @@ const Table = ({ content }: { content }) => {
         <EditableCell {...props} type="number" className="dark:bg-dark" />
       ),
       enableGlobalFilter: false,
+      size: 30,
     }),
     columnHelper.accessor('genre', {
       header: 'Genre',
@@ -68,37 +70,13 @@ const Table = ({ content }: { content }) => {
     }),
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
-      cell: ({ row }) => (
-        <>
-          <p data-tooltip-id="modifiedAt">
-            {row.original.modifiedAt.toLocaleDateString()}
-          </p>
-          <Tooltip
-            content={row.original.modifiedAt.toString()}
-            id="modifiedAt"
-            place="bottom"
-            disableStyleInjection
-            noArrow
-          />
-        </>
-      ),
+      cell: ({ row }) => <p>{row.original.modifiedAt.toLocaleDateString()}</p>,
+      size: 50,
     }),
     columnHelper.accessor('createdAt', {
       header: 'Added',
-      cell: ({ row }) => (
-        <>
-          <p data-tooltip-id="createdAt">
-            {row.original.createdAt.toLocaleDateString()}
-          </p>
-          <Tooltip
-            content={row.original.createdAt.toString()}
-            id="createdAt"
-            place="bottom"
-            disableStyleInjection
-            noArrow
-          />
-        </>
-      ),
+      cell: ({ row }) => <p>{row.original.createdAt.toLocaleDateString()}</p>,
+      size: 50,
     }),
     columnHelper.accessor('path', {
       header: 'Path',
@@ -109,11 +87,21 @@ const Table = ({ content }: { content }) => {
       cell: ({ row }) => (
         <div className="flex flex-row gap-2">
           <button
-            onClick={() => handleOpenInAbleton(row.original.id)}
-            data-tooltip-id="ableton-logo"
+            type="button"
+            onClick={() => {
+              setProject(row.original);
+              setshowProject(true);
+            }}
+            data-tooltip-id="project-info"
           >
-            <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
+            <FontAwesomeIcon icon={faCircleInfo} size="1x" />
           </button>
+          <Tooltip
+            id="project-info"
+            content="Project details"
+            place="bottom"
+            noArrow
+          />
           <button
             type="button"
             onClick={() => handleOpenInFinder(row.original.id)}
@@ -122,21 +110,28 @@ const Table = ({ content }: { content }) => {
             <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
           </button>
           <Tooltip
+            id="open-project-folder"
+            content="Open folder"
+            place="bottom"
+            noArrow
+          />
+          <button
+            onClick={() => handleOpenInAbleton(row.original.id)}
+            data-tooltip-id="ableton-logo"
+          >
+            <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
+          </button>
+          <Tooltip
             id="ableton-logo"
             content="Open in Ableton"
             place="bottom"
             disableStyleInjection
             noArrow
           />
-          <Tooltip
-            id="open-project-folder"
-            content="Open location"
-            place="bottom"
-            noArrow
-          />
         </div>
       ),
       enableGlobalFilter: false,
+      size: 40,
     }),
   ];
 
@@ -190,7 +185,7 @@ const Table = ({ content }: { content }) => {
         );
       },
     },
-    debugTable: true,
+    // debugTable: true,
   });
 
   // Hide the path column
@@ -218,7 +213,8 @@ const Table = ({ content }: { content }) => {
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14"
+                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14 last-of-type:pr-12"
+                  style={{ width: header.column.columnDef.size }}
                 >
                   {header.isPlaceholder ? null : (
                     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -236,13 +232,10 @@ const Table = ({ content }: { content }) => {
                       )}
                       {{
                         asc: (
-                          <FontAwesomeIcon icon={faArrowUp} className="ml-2" />
+                          <FontAwesomeIcon icon={faSortUp} className="ml-2" />
                         ),
                         desc: (
-                          <FontAwesomeIcon
-                            icon={faArrowDown}
-                            className="ml-2"
-                          />
+                          <FontAwesomeIcon icon={faSortDown} className="ml-2" />
                         ),
                       }[header.column.getIsSorted() as string] ?? null}
                     </div>
@@ -287,6 +280,9 @@ const Table = ({ content }: { content }) => {
         </tfoot>
       </table>
       <Pagination table={table} size={data.length} />
+      {showProject ? (
+        <ProjectView project={project} onClose={() => setshowProject(false)} />
+      ) : null}
     </>
   );
 };

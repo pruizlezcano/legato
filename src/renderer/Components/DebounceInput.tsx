@@ -5,6 +5,10 @@ function DebounceInput({
   onChange,
   debounce = 500,
   ...props
+}: {
+  value: string;
+  onChange: (arg: string) => void;
+  debounce: number | undefined;
 }) {
   const [inputValue, setInputValue] = useState(initialValue);
 

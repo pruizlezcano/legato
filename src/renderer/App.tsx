@@ -94,15 +94,6 @@ function Hello() {
           Settings
         </button>
       </div>
-      {showSettings ? (
-        <SettingsView
-          settings={settings}
-          onClose={() => {
-            window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
-            setShowSettings(false);
-          }}
-        />
-      ) : null}
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full pt-60">
           <p className="text-2xl font-bold">No projects found</p>
@@ -129,6 +120,15 @@ function Hello() {
       ) : (
         <Table content={projects} />
       )}
+      {showSettings ? (
+        <SettingsView
+          settings={settings}
+          onClose={() => {
+            window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
+            setShowSettings(false);
+          }}
+        />
+      ) : null}
       <Toaster
         toastOptions={{
           className:
