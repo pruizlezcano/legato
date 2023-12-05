@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Tag } from './Tag';
 
 @Entity()
 export class Project {
@@ -19,6 +26,12 @@ export class Project {
 
   @Column({ nullable: true })
   genre?: string;
+
+  @ManyToMany(() => Tag)
+  @JoinTable()
+  tags?: Tag[];
+
+  tagNames?: string[];
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;

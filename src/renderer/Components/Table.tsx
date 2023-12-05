@@ -26,22 +26,25 @@ import Pagination from './Pagination';
 import { Project } from '../../db/entity/Project';
 import ProjectView from '../Views/ProjectView';
 import {
+  handleList,
   handleOpenInAbleton,
   handleOpenInFinder,
   handleProjectUpdate,
 } from '../hooks/handlers';
+import EditableTagCell from './EditableTagCell';
 
 // eslint-disable-next-line react/function-component-definition
 const Table = ({ content }: { content: Project[] }) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Project[]>([]);
   const [showProject, setshowProject] = useState(false);
-  const [project, setProject] = useState({} as Project);
+  const [selectedProject, setSelectedProject] = useState({} as Project);
 
   useEffect(() => {
     if (content) {
       setData(content);
     }
   }, [content]);
+
   const [globalFilter, setGlobalFilter] = useState('');
 
   const columnHelper = createColumnHelper();
@@ -65,8 +68,21 @@ const Table = ({ content }: { content: Project[] }) => {
     }),
     columnHelper.accessor('genre', {
       header: 'Genre',
-      cell: (props) => <EditableCell {...props} className="dark:bg-dark" />,
+      cell: (props) => (
+        <EditableCell
+          {...props}
+          className="dark:bg-dark"
+          placeholder="Enter a genre..."
+        />
+      ),
       enableSorting: false,
+      size: 100,
+    }),
+    columnHelper.accessor('tagNames', {
+      header: 'Tags',
+      cell: (props) => <EditableTagCell {...props} className="dark:bg-dark" />,
+      enableSorting: true,
+      size: 100,
     }),
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
@@ -89,7 +105,7 @@ const Table = ({ content }: { content: Project[] }) => {
           <button
             type="button"
             onClick={() => {
-              setProject(row.original);
+              setSelectedProject(row.original);
               setshowProject(true);
             }}
             data-tooltip-id="project-info"
@@ -281,7 +297,13 @@ const Table = ({ content }: { content: Project[] }) => {
       </table>
       <Pagination table={table} size={data.length} />
       {showProject ? (
-        <ProjectView project={project} onClose={() => setshowProject(false)} />
+        <ProjectView
+          project={selectedProject}
+          onClose={() => {
+            setshowProject(false);
+            handleList();
+          }}
+        />
       ) : null}
     </>
   );

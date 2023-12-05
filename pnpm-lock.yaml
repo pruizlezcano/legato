@@ -20,6 +20,9 @@ dependencies:
   '@tanstack/react-table':
     specifier: ^8.10.7
     version: 8.10.7(react-dom@18.2.0)(react@18.2.0)
+  '@yaireo/tagify':
+    specifier: ^4.17.9
+    version: 4.17.9(prop-types@15.8.1)
   electron-debug:
     specifier: ^3.2.0
     version: 3.2.0
@@ -3285,6 +3288,15 @@ packages:
   /@xtuc/long@4.2.2:
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
     dev: true
+
+  /@yaireo/tagify@4.17.9(prop-types@15.8.1):
+    resolution: {integrity: sha512-x9aZy22hzte7BNmMrFcYNrZH71ombgH5PnzcOVXqPevRV/m/ItSnWIvY5fOHYzpC9Uxy0+h/1P5v62fIvwq2MA==}
+    engines: {node: '>=14.20.0', npm: '>=8.0.0'}
+    peerDependencies:
+      prop-types: ^15.7.2
+    dependencies:
+      prop-types: 15.8.1
+    dev: false
 
   /abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}

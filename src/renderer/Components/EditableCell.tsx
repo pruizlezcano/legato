@@ -34,6 +34,7 @@ const EditableCell = ({
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
       className={`w-full focus:outline-0 ${props.className}`}
+      placeholder={props.placeholder}
     />
   );
 };

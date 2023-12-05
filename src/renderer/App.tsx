@@ -9,14 +9,12 @@ import Table from './Components/Table';
 import { Project } from '../db/entity/Project';
 import logger from './hooks/useLogger';
 import { Settings } from '../interfaces/Settings';
+import { handleList } from './hooks/handlers';
 
 function Hello() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({} as Settings);
-
-  const handleList = () =>
-    window.electron.ipcRenderer.sendMessage('list-projects');
 
   const showScanToast = () => {
     return toast.promise(
@@ -46,6 +44,8 @@ function Hello() {
   useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
+      console.log(arg);
+
       setProjects(arg);
     });
 
@@ -83,11 +83,11 @@ function Hello() {
     <div className="overflow-x-auto w-full flex flex-wrap dark:text-white">
       <div className="flex justify-start items-center p-5 pr-10">
         <h1 className="text-2xl font-bold">Legato</h1>
-        <span className="ml-4 font-medium py-1 px-2 bg-gray-300 dark:bg-gray-200 rounded-full text-xs dark:text-dark">
+        <span className="ml-4 font-medium py-1 px-2 bg-gray-200 rounded-full text-xs dark:text-dark">
           {projects.length} projects
         </span>
         <button
-          className="ml-4 font-medium py-1 px-3 bg-gray-300 dark:bg-gray-200 rounded-full text-xs dark:text-dark"
+          className="ml-4 font-medium py-1 px-3 bg-gray-200 rounded-full text-xs dark:text-dark"
           onClick={() => setShowSettings(true)}
         >
           <FontAwesomeIcon icon={faGear} className="pr-1" />

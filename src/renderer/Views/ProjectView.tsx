@@ -2,7 +2,12 @@ import { useEffect, useState, KeyboardEvent } from 'react';
 import { Project } from '../../db/entity/Project';
 import DebounceInput from '../Components/DebounceInput';
 import Dialog from '../Components/Dialog';
-import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
+import {
+  handleOpenInAbleton,
+  handleOpenInFinder,
+  handleProjectUpdate,
+} from '../hooks/handlers';
+import TagInput from '../Components/TagInput';
 
 function ProjectView({
   project: initialProject,
@@ -12,6 +17,10 @@ function ProjectView({
   onClose: () => void;
 }) {
   const [project, setProject] = useState(initialProject);
+
+  useEffect(() => {
+    handleProjectUpdate(project);
+  }, [project]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -41,7 +50,17 @@ function ProjectView({
           <tbody>
             <tr>
               <td className="px-4 py-2 text-gray-400 font-bold">BPM</td>
-              <td className="px-4 py-2">{project.bpm}</td>
+              <td className="px-4 py-2">
+                <DebounceInput
+                  type="number"
+                  value={project.bpm ?? ''}
+                  onChange={(value: string) =>
+                    setProject((old) => ({ ...old, bpm: value }))
+                  }
+                  placeholder="BPM..."
+                  className="w-16 bg-inherit focus:outline-none"
+                />
+              </td>
             </tr>
             <tr>
               <td className="px-4 py-2 text-gray-400 font-bold">Genre</td>
@@ -52,7 +71,19 @@ function ProjectView({
                     setProject((old) => ({ ...old, genre: value }))
                   }
                   placeholder="Genre..."
-                  className="w-full focus:outline-none"
+                  className="w-full bg-inherit focus:outline-none"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 text-gray-400 font-bold">Tags</td>
+              <td className="px-4 py-2">
+                <TagInput
+                  value={project.tags}
+                  onChange={(value: string) =>
+                    setProject((old) => ({ ...old, tags: value }))
+                  }
+                  className="w-full bg-inherit focus:outline-none"
                 />
               </td>
             </tr>

@@ -12,6 +12,11 @@ function DebounceInput({
 }) {
   const [inputValue, setInputValue] = useState(initialValue);
 
+  // If the initialValue is changed external, sync it up with our state
+  useEffect(() => {
+    setInputValue(initialValue);
+  }, [initialValue]);
+
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };

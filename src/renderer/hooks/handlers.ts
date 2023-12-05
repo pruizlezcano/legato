@@ -9,3 +9,6 @@ export const handleOpenInFinder = (projectId: number) =>
 export const handleProjectUpdate = (project: Project) => {
   window.electron.ipcRenderer.sendMessage('update-project', project);
 };
+
+export const handleList = () =>
+  window.electron.ipcRenderer.sendMessage('list-projects');

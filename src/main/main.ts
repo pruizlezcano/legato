@@ -22,15 +22,12 @@ import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
 import { Project } from '../db/entity/Project';
 import { Setting } from '../db/entity/Setting';
+import { Tag } from '../db/entity/Tag';
 import logger from './logger';
-
-const dbPath =
-  process.env.NODE_ENV === 'development'
-    ? './src/db/dev.db'
-    : path.join(app.getPath('userData'), 'legato.db');
 
 let ProjectRepository: Repository<Project>;
 let SettingRepository: Repository<Setting>;
+let TagRepository: Repository<Tag>;
 
 class AppUpdater {
   constructor() {
@@ -187,7 +184,18 @@ ipcMain.on('scan-projects', async (event, arg) => {
 });
 
 ipcMain.on('list-projects', async (event) => {
-  const projects = await ProjectRepository.find();
+  logger.info('Listing projects');
+  const projects = await ProjectRepository.find({
+    relations: ['tags'],
+  });
+  // convert tags to string array
+  projects.forEach((project) => {
+    if (project.tags) {
+      project.tagNames = project.tags.map((tag) => tag.name);
+    }
+  });
+  console.log(projects);
+
   event.reply('list-projects', projects);
 });
 
@@ -221,8 +229,9 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
   }
 });
 
-ipcMain.on('update-project', async (event, arg) => {
+ipcMain.on('update-project', async (event, arg: Project) => {
   logger.info(`Updating project ${arg.id}`);
+
   try {
     const project = await ProjectRepository.findOneBy({
       id: arg.id,
@@ -231,11 +240,28 @@ ipcMain.on('update-project', async (event, arg) => {
       project.title = arg.title;
       project.genre = arg.genre;
       project.bpm = arg.bpm;
+      project.tags = [];
+      for (let i = 0; i < arg.tagNames!.length; i += 1) {
+        let tag = await TagRepository.findOneBy({
+          name: arg.tagNames![i],
+        });
+        console.log('tag', tag);
+        if (!tag) {
+          tag = new Tag();
+          tag.name = arg.tagNames![i];
+          await TagRepository.save(tag);
+        }
+        project.tags!.push(tag!);
+      }
       await ProjectRepository.save(project);
       logger.info(`Project ${arg.id} updated`);
+      console.log(project);
+
+      project.tagNames = project.tags.map((tag) => tag.name);
     } else {
       logger.warn(`Project ${arg.id} not found`);
     }
+
     return event.reply('update-project', project);
   } catch (error) {
     logger.error(`Error updating project: ${error}`);
@@ -390,9 +416,10 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
-  const { Projects, Settings } = await initDb(dbPath);
+  const { Projects, Settings, Tags } = await initDb();
   ProjectRepository = Projects;
   SettingRepository = Settings;
+  TagRepository = Tags;
 };
 
 /**
