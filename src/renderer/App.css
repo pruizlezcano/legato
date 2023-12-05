@@ -18,3 +18,8 @@
 .dark {
   background-color: rgb(33,29,38);
 }
+
+.tagify__input {
+  padding: 0 !important;
+  margin-left: 0 !important;
+}

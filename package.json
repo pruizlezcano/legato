@@ -94,18 +94,20 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tanstack/react-table": "^8.10.7",
+    "@yaireo/tagify": "^4.17.9",
     "electron-debug": "^3.2.0",
-    "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
     "fast-xml-parser": "^4.3.2",
-    "glob": "^10.3.10",
     "node-stream-zip": "^1.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.16.0",
+    "react-tooltip": "^5.24.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "0.3.17",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.10.14",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@electron/notarize": "^2.1.0",

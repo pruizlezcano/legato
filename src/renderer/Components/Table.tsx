@@ -9,39 +9,43 @@ import {
   flexRender,
   SortingState,
 } from '@tanstack/react-table';
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUpRightFromSquare,
-  faArrowDown,
-  faArrowUp,
+  faSortUp,
+  faSortDown,
+  faCircleInfo,
+  faSort,
 } from '@fortawesome/free-solid-svg-icons';
+import { Tooltip } from 'react-tooltip';
 import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
-import Tooltip from './Tooltip';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
+import { Project } from '../../db/entity/Project';
+import ProjectView from '../Views/ProjectView';
+import {
+  handleList,
+  handleOpenInAbleton,
+  handleOpenInFinder,
+  handleProjectUpdate,
+} from '../hooks/handlers';
+import EditableTagCell from './EditableTagCell';
 
 // eslint-disable-next-line react/function-component-definition
-const Table = ({ content }: { content }) => {
-  const [data, setData] = useState([]);
+const Table = ({ content }: { content: Project[] }) => {
+  const [data, setData] = useState<Project[]>([]);
+  const [showProject, setshowProject] = useState(false);
+  const [selectedProject, setSelectedProject] = useState({} as Project);
 
   useEffect(() => {
     if (content) {
       setData(content);
     }
   }, [content]);
+
   const [globalFilter, setGlobalFilter] = useState('');
-
-  const handleOpenInAbleton = (projectId: number) =>
-    window.electron.ipcRenderer.sendMessage('open-project', projectId);
-
-  const handleOpenInFinder = (projectId: number) =>
-    window.electron.ipcRenderer.sendMessage('open-project-folder', projectId);
-
-  const handleProjectUpdate = (project) => {
-    window.electron.ipcRenderer.sendMessage('update-project', project);
-  };
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -60,27 +64,35 @@ const Table = ({ content }: { content }) => {
         <EditableCell {...props} type="number" className="dark:bg-dark" />
       ),
       enableGlobalFilter: false,
+      size: 30,
     }),
     columnHelper.accessor('genre', {
       header: 'Genre',
-      cell: (props) => <EditableCell {...props} className="dark:bg-dark" />,
+      cell: (props) => (
+        <EditableCell
+          {...props}
+          className="dark:bg-dark"
+          placeholder="Enter a genre..."
+        />
+      ),
       enableSorting: false,
+      size: 100,
+    }),
+    columnHelper.accessor('tagNames', {
+      header: 'Tags',
+      cell: (props) => <EditableTagCell {...props} className="dark:bg-dark" />,
+      enableSorting: true,
+      size: 100,
     }),
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
-      cell: ({ row }) => (
-        <Tooltip message={row.original.modifiedAt.toString()}>
-          <p>{row.original.modifiedAt.toLocaleDateString()}</p>
-        </Tooltip>
-      ),
+      cell: ({ row }) => <p>{row.original.modifiedAt.toLocaleDateString()}</p>,
+      size: 50,
     }),
     columnHelper.accessor('createdAt', {
       header: 'Added',
-      cell: ({ row }) => (
-        <Tooltip message={row.original.createdAt.toString()}>
-          <p>{row.original.createdAt.toLocaleDateString()}</p>
-        </Tooltip>
-      ),
+      cell: ({ row }) => <p>{row.original.createdAt.toLocaleDateString()}</p>,
+      size: 50,
     }),
     columnHelper.accessor('path', {
       header: 'Path',
@@ -90,22 +102,52 @@ const Table = ({ content }: { content }) => {
       header: '',
       cell: ({ row }) => (
         <div className="flex flex-row gap-2">
-          <Tooltip message="Open in Ableton">
-            <button onClick={() => handleOpenInAbleton(row.original.id)}>
-              <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
-            </button>
-          </Tooltip>
-          <Tooltip message="Open in Finder">
-            <button
-              type="button"
-              onClick={() => handleOpenInFinder(row.original.id)}
-            >
-              <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedProject(row.original);
+              setshowProject(true);
+            }}
+            data-tooltip-id="project-info"
+          >
+            <FontAwesomeIcon icon={faCircleInfo} size="1x" />
+          </button>
+          <Tooltip
+            id="project-info"
+            content="Project details"
+            place="bottom"
+            noArrow
+          />
+          <button
+            type="button"
+            onClick={() => handleOpenInFinder(row.original.id)}
+            data-tooltip-id="open-project-folder"
+          >
+            <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
+          </button>
+          <Tooltip
+            id="open-project-folder"
+            content="Open folder"
+            place="bottom"
+            noArrow
+          />
+          <button
+            onClick={() => handleOpenInAbleton(row.original.id)}
+            data-tooltip-id="ableton-logo"
+          >
+            <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
+          </button>
+          <Tooltip
+            id="ableton-logo"
+            content="Open in Ableton"
+            place="bottom"
+            disableStyleInjection
+            noArrow
+          />
         </div>
       ),
       enableGlobalFilter: false,
+      size: 40,
     }),
   ];
 
@@ -113,7 +155,6 @@ const Table = ({ content }: { content }) => {
     const shouldSkipRef = useRef(true);
     const shouldSkip = shouldSkipRef.current;
 
-    // Wrap a function with this to skip a pagination reset temporarily
     const skip = useCallback(() => {
       shouldSkipRef.current = false;
     }, []);
@@ -160,7 +201,7 @@ const Table = ({ content }: { content }) => {
         );
       },
     },
-    debugTable: true,
+    // debugTable: true,
   });
 
   // Hide the path column
@@ -188,9 +229,11 @@ const Table = ({ content }: { content }) => {
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14"
+                  className="text-left text-base font-normal text-slate-700 dark:text-text-dark first-of-type:pl-14 last-of-type:pr-12"
+                  style={{ width: header.column.columnDef.size }}
                 >
                   {header.isPlaceholder ? null : (
+                    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                     <div
                       className={
                         header.column.getCanSort()
@@ -205,13 +248,10 @@ const Table = ({ content }: { content }) => {
                       )}
                       {{
                         asc: (
-                          <FontAwesomeIcon icon={faArrowUp} className="ml-2" />
+                          <FontAwesomeIcon icon={faSortUp} className="ml-2" />
                         ),
                         desc: (
-                          <FontAwesomeIcon
-                            icon={faArrowDown}
-                            className="ml-2"
-                          />
+                          <FontAwesomeIcon icon={faSortDown} className="ml-2" />
                         ),
                       }[header.column.getIsSorted() as string] ?? null}
                     </div>
@@ -256,6 +296,15 @@ const Table = ({ content }: { content }) => {
         </tfoot>
       </table>
       <Pagination table={table} size={data.length} />
+      {showProject ? (
+        <ProjectView
+          project={selectedProject}
+          onClose={() => {
+            setshowProject(false);
+            handleList();
+          }}
+        />
+      ) : null}
     </>
   );
 };
