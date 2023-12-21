@@ -1,19 +1,24 @@
-import { useEffect, useState, KeyboardEvent, createRef, useRef } from 'react';
+/* eslint-disable react/require-default-props */
+/* eslint-disable react/no-this-in-sfc */
+import { useState, useRef } from 'react';
 import Tags from '@yaireo/tagify/dist/react.tagify'; // React-wrapper file
 import '@yaireo/tagify/dist/tagify.css'; // Tagify CSS
+import Tagify from '@yaireo/tagify';
 
 function TagInput({
   value,
   onChange,
+  className = '',
 }: {
   value: string[];
   onChange: (e: any) => void;
+  className?: string;
 }) {
   const valueRef = useRef<string[]>(value);
   const [valueState, setValue] = useState<string[]>(value);
   const settings = {
     templates: {
-      tag(tagData, tagify) {
+      tag(this: Tagify, tagData: any): string {
         return `
           <tag title="${tagData.title || tagData.value}"
             contenteditable='false'
@@ -57,7 +62,7 @@ function TagInput({
       settings={settings}
       value={valueState}
       onChange={handleOnChange}
-      className="bg-inherit border-0 w-full"
+      className={`bg-inherit border-0 w-full ${className}`}
     />
   );
 }

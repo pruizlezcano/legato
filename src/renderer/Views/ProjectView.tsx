@@ -1,5 +1,6 @@
-import { useEffect, useState, KeyboardEvent } from 'react';
-import { Project } from '../../db/entity/Project';
+/* eslint-disable jsx-a11y/control-has-associated-label */
+import { useEffect, useState } from 'react';
+import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import Dialog from '../Components/Dialog';
 import {
@@ -23,7 +24,7 @@ function ProjectView({
   }, [project]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: { key: string }) => {
       if (e.key === 'Escape') {
         onClose();
       }
@@ -55,7 +56,7 @@ function ProjectView({
                   type="number"
                   value={project.bpm ?? ''}
                   onChange={(value: string) =>
-                    setProject((old) => ({ ...old, bpm: value }))
+                    setProject((old) => ({ ...old, bpm: parseInt(value, 10) }))
                   }
                   placeholder="BPM..."
                   className="w-16 bg-inherit focus:outline-none"
@@ -79,9 +80,12 @@ function ProjectView({
               <td className="px-4 py-2 text-gray-400 font-bold">Tags</td>
               <td className="px-4 py-2">
                 <TagInput
-                  value={project.tags}
-                  onChange={(value: string) =>
-                    setProject((old) => ({ ...old, tags: value }))
+                  value={project.tagNames ?? []}
+                  onChange={(value: string[]) =>
+                    setProject(
+                      (old: Project) =>
+                        ({ ...old, tagNames: value }) as Project,
+                    )
                   }
                   className="w-full bg-inherit focus:outline-none"
                 />

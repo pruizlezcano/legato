@@ -20,9 +20,7 @@ import { Repository } from 'typeorm';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
-import { Project } from '../db/entity/Project';
-import { Setting } from '../db/entity/Setting';
-import { Tag } from '../db/entity/Tag';
+import { Project, Setting, Tag } from '../db/entity';
 import logger from './logger';
 
 let ProjectRepository: Repository<Project>;
@@ -41,7 +39,7 @@ let mainWindow: BrowserWindow | null = null;
 const processProject = async (project: Path, update = false) => {
   logger.info(`Processing ${project.fullpath()}`);
 
-  const { name, size, mtimeMs } = project;
+  const { name, mtimeMs } = project;
 
   const title = name
     .replace('.als', '')
@@ -292,7 +290,7 @@ ipcMain.on('load-settings', async (event) => {
 ipcMain.on('save-settings', async (event, arg) => {
   logger.info('Saving settings');
   try {
-    Object.entries(arg).forEach(async ([key, value], index) => {
+    Object.entries(arg).forEach(async ([key, value]) => {
       const setting = await SettingRepository.findOneBy({
         key,
       });

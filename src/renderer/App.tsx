@@ -6,7 +6,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SettingsView from './Views/SettingsView';
 import Table from './Components/Table';
-import { Project } from '../db/entity/Project';
+import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
 import { Settings } from '../interfaces/Settings';
 import { handleList } from './hooks/handlers';
@@ -44,9 +44,7 @@ function Hello() {
   useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
-      console.log(arg);
-
-      setProjects(arg);
+      setProjects(arg as Project[]);
     });
 
     window.electron.ipcRenderer.on('scan-started', () => {
@@ -60,7 +58,7 @@ function Hello() {
 
     window.electron.ipcRenderer.on('load-settings', (arg) => {
       logger.info('loading settings');
-      setSettings(arg);
+      setSettings(arg as Settings);
     });
 
     window.electron.ipcRenderer.sendMessage('load-settings');
@@ -87,6 +85,7 @@ function Hello() {
           {projects.length} projects
         </span>
         <button
+          type="button"
           className="ml-4 font-medium py-1 px-3 bg-gray-200 rounded-full text-xs dark:text-dark"
           onClick={() => setShowSettings(true)}
         >

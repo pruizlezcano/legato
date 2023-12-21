@@ -1,4 +1,4 @@
 export interface Settings {
-  path: string;
+  projectsPath: string;
   theme: string;
 }

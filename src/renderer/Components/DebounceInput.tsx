@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable react/require-default-props */
+import { useState, useEffect, SetStateAction } from 'react';
 
 function DebounceInput({
   value: initialValue,
   onChange,
+  type = 'text',
+  className = '',
+  placeholder = '',
   debounce = 500,
-  ...props
 }: {
-  value: string;
+  value: any;
   onChange: (arg: string) => void;
-  debounce: number | undefined;
+  type?: string;
+  className?: string;
+  placeholder?: string;
+  debounce?: number;
 }) {
   const [inputValue, setInputValue] = useState(initialValue);
 
@@ -17,24 +23,26 @@ function DebounceInput({
     setInputValue(initialValue);
   }, [initialValue]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: {
+    target: { value: SetStateAction<string> };
+  }) => {
     setInputValue(e.target.value);
   };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       onChange(inputValue);
-    }, 500);
+    }, debounce);
     return () => clearTimeout(timeoutId);
-  }, [inputValue, 500]);
+  }, [inputValue, debounce, onChange]);
 
   return (
     <input
-      type="text"
-      {...props}
-      className={props.className}
+      type={type}
+      className={className}
       value={inputValue}
       onChange={handleInputChange}
+      placeholder={placeholder}
     />
   );
 }

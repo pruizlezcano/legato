@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { useEffect, useState, KeyboardEvent } from 'react';
 
 // eslint-disable-next-line react/function-component-definition
@@ -7,7 +8,16 @@ const EditableCell = ({
   column: { id },
   table,
   type = 'text',
-  ...props
+  className = '',
+  placeholder = '',
+}: {
+  getValue: () => string;
+  row: { index: number };
+  column: { id: string };
+  table: any;
+  type?: string;
+  className?: string;
+  placeholder?: string;
 }) => {
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
@@ -33,8 +43,8 @@ const EditableCell = ({
       onChange={(e) => setValue(e.target.value)}
       onBlur={onBlur}
       onKeyDown={handleKeyDown}
-      className={`w-full focus:outline-0 ${props.className}`}
-      placeholder={props.placeholder}
+      className={`w-full focus:outline-0 ${className}`}
+      placeholder={placeholder}
     />
   );
 };

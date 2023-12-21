@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/no-unstable-nested-components */
 import {
   useReactTable,
@@ -8,22 +10,22 @@ import {
   createColumnHelper,
   flexRender,
   SortingState,
+  ColumnDef,
 } from '@tanstack/react-table';
-import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUpRightFromSquare,
   faSortUp,
   faSortDown,
   faCircleInfo,
-  faSort,
 } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from 'react-tooltip';
 import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
-import { Project } from '../../db/entity/Project';
+import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
 import {
   handleList,
@@ -48,7 +50,7 @@ const Table = ({ content }: { content: Project[] }) => {
   const [globalFilter, setGlobalFilter] = useState('');
 
   const columnHelper = createColumnHelper();
-  const columns = [
+  const columns: ColumnDef<unknown, any>[] = [
     columnHelper.accessor('title', {
       header: 'Title',
       cell: (props) => (
@@ -57,7 +59,7 @@ const Table = ({ content }: { content: Project[] }) => {
           className="text-slate-950 dark:text-white dark:bg-dark"
         />
       ),
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('bpm', {
       header: 'BPM',
       cell: (props) => (
@@ -65,7 +67,7 @@ const Table = ({ content }: { content: Project[] }) => {
       ),
       enableGlobalFilter: false,
       size: 30,
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('genre', {
       header: 'Genre',
       cell: (props) => (
@@ -77,78 +79,101 @@ const Table = ({ content }: { content: Project[] }) => {
       ),
       enableSorting: false,
       size: 100,
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('tagNames', {
       header: 'Tags',
-      cell: (props) => <EditableTagCell {...props} className="dark:bg-dark" />,
+      cell: ({ row, column, table }) => {
+        const project = row.original as Project;
+        return (
+          <EditableTagCell
+            getValue={() => project.tagNames ?? []}
+            row={{ index: row.index }}
+            column={{ id: column.id }}
+            table={table}
+          />
+        );
+      },
       enableSorting: true,
       size: 100,
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
-      cell: ({ row }) => <p>{row.original.modifiedAt.toLocaleDateString()}</p>,
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.modifiedAt.toLocaleDateString()}</p>;
+      },
       size: 50,
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('createdAt', {
       header: 'Added',
-      cell: ({ row }) => <p>{row.original.createdAt.toLocaleDateString()}</p>,
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.createdAt.toLocaleDateString()}</p>;
+      },
       size: 50,
-    }),
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('path', {
       header: 'Path',
-      cell: ({ row }) => <p>{row.original.path}</p>,
-    }),
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.path}</p>;
+      },
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('open', {
       header: '',
-      cell: ({ row }) => (
-        <div className="flex flex-row gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedProject(row.original);
-              setshowProject(true);
-            }}
-            data-tooltip-id="project-info"
-          >
-            <FontAwesomeIcon icon={faCircleInfo} size="1x" />
-          </button>
-          <Tooltip
-            id="project-info"
-            content="Project details"
-            place="bottom"
-            noArrow
-          />
-          <button
-            type="button"
-            onClick={() => handleOpenInFinder(row.original.id)}
-            data-tooltip-id="open-project-folder"
-          >
-            <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
-          </button>
-          <Tooltip
-            id="open-project-folder"
-            content="Open folder"
-            place="bottom"
-            noArrow
-          />
-          <button
-            onClick={() => handleOpenInAbleton(row.original.id)}
-            data-tooltip-id="ableton-logo"
-          >
-            <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
-          </button>
-          <Tooltip
-            id="ableton-logo"
-            content="Open in Ableton"
-            place="bottom"
-            disableStyleInjection
-            noArrow
-          />
-        </div>
-      ),
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return (
+          <div className="flex flex-row gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedProject(project);
+                setshowProject(true);
+              }}
+              data-tooltip-id="project-info"
+            >
+              <FontAwesomeIcon icon={faCircleInfo} size="1x" />
+            </button>
+            <Tooltip
+              id="project-info"
+              content="Project details"
+              place="bottom"
+              noArrow
+            />
+            <button
+              type="button"
+              onClick={() => handleOpenInFinder(project.id)}
+              data-tooltip-id="open-project-folder"
+            >
+              <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
+            </button>
+            <Tooltip
+              id="open-project-folder"
+              content="Open folder"
+              place="bottom"
+              noArrow
+            />
+            <button
+              type="button"
+              onClick={() => handleOpenInAbleton(project.id)}
+              data-tooltip-id="ableton-logo"
+            >
+              <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
+            </button>
+            <Tooltip
+              id="ableton-logo"
+              content="Open in Ableton"
+              place="bottom"
+              disableStyleInjection
+              noArrow
+            />
+          </div>
+        );
+      },
       enableGlobalFilter: false,
       size: 40,
-    }),
+    }) as ColumnDef<unknown, any>,
   ];
 
   const useSkipper = () => {

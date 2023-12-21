@@ -1,4 +1,4 @@
-import { Project } from '../../db/entity/Project';
+import { Project } from '../../db/entity';
 
 export const handleOpenInAbleton = (projectId: number) =>
   window.electron.ipcRenderer.sendMessage('open-project', projectId);

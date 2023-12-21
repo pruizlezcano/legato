@@ -1,5 +1,4 @@
-import { useEffect, useState, KeyboardEvent, createRef, useRef } from 'react';
-import Tags from '@yaireo/tagify/dist/react.tagify'; // React-wrapper file
+import { useEffect, useState } from 'react';
 import '@yaireo/tagify/dist/tagify.css'; // Tagify CSS
 import TagInput from './TagInput';
 // import TagInput from './TagInput';
@@ -10,7 +9,11 @@ const EditableTagCell = ({
   row: { index },
   column: { id },
   table,
-  ...props
+}: {
+  getValue: () => string[];
+  row: { index: number };
+  column: { id: string };
+  table: any;
 }) => {
   const initialValue = getValue();
   const [value, setValue] = useState<string[]>(initialValue);

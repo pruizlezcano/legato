@@ -1,4 +1,6 @@
-import { useState, useEffect, KeyboardEvent, ChangeEvent } from 'react';
+/* eslint-disable jsx-a11y/control-has-associated-label */
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import { useState, useEffect, ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
@@ -47,14 +49,16 @@ function SettingsView({
   };
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: { key: string }) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
 
     window.electron.ipcRenderer.on('open-path-dialog', (arg) => {
-      setSettings((old) => ({ ...old, projectsPath: arg }));
+      setSettings(
+        (old: Settings) => ({ ...old, projectsPath: arg }) as Settings,
+      );
     });
     window.addEventListener('keydown', handleKeyDown);
 

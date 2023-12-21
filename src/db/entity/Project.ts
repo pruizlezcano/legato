@@ -5,10 +5,10 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Tag } from './Tag';
+import Tag from './Tag';
 
 @Entity()
-export class Project {
+export default class Project {
   @PrimaryGeneratedColumn()
   id!: number;
 

@@ -3,9 +3,7 @@ import sqlite3 from 'sqlite3';
 import { DataSource, Repository } from 'typeorm';
 import path from 'path';
 import { app } from 'electron';
-import { Project } from './entity/Project';
-import { Setting } from './entity/Setting';
-import { Tag } from './entity/Tag';
+import { Project, Setting, Tag } from './entity';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
