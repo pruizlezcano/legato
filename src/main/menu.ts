@@ -57,7 +57,7 @@ export default class MenuBuilder {
       label: 'Electron',
       submenu: [
         {
-          label: 'About ElectronReact',
+          label: 'About Legato',
           selector: 'orderFrontStandardAboutPanel:',
         },
         { type: 'separator' },
@@ -72,7 +72,7 @@ export default class MenuBuilder {
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {
-          label: 'Hide ElectronReact',
+          label: 'Hide Legato',
           accelerator: 'Command+H',
           selector: 'hide:',
         },
