@@ -161,6 +161,10 @@ ipcMain.on('scan-projects', async (event, arg) => {
   const projectsPath = await SettingRepository.findOneBy({
     key: 'projectsPath',
   });
+  if (!projectsPath!.value) {
+    logger.warning('Projects path not set');
+    return event.reply('scan-projects', 'Projects path not set');
+  }
   try {
     if (arg === 'fast') {
       await fastScan(projectsPath!.value);
@@ -174,10 +178,10 @@ ipcMain.on('scan-projects', async (event, arg) => {
       });
       if (response) await fullScan(projectsPath!.value);
     }
-    event.reply('scan-projects', 'OK');
+    return event.reply('scan-projects', 'OK');
   } catch (error) {
     logger.error(`Error scanning projects: ${error}`);
-    event.reply('scan-projects', error);
+    return event.reply('scan-projects', error);
   }
 });
 
@@ -306,7 +310,7 @@ ipcMain.on('save-settings', async (event, arg) => {
   }
 });
 
-app.on('open-settings', () => {
+ipcMain.on('open-settings', () => {
   if (mainWindow) {
     mainWindow.webContents.send('open-settings');
   }

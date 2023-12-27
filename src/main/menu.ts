@@ -65,7 +65,8 @@ export default class MenuBuilder {
           label: 'Settings',
           accelerator: 'Command+,',
           click: () => {
-            app.emit('open-settings');
+            // app.emit('open-settings');
+            this.mainWindow.webContents.send('open-settings');
           },
         },
         { type: 'separator' },
