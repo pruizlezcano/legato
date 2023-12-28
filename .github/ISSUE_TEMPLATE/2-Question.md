@@ -9,7 +9,7 @@ labels: 'question'
 <!-- What do you need help with? -->
 
 <!---
-❗️❗️ Also, please consider donating (https://opencollective.com/electron-react-boilerplate-594) ❗️❗️
+❗️❗️ Also, please consider donating ❗️❗️
 
 Donations will ensure the following:
 

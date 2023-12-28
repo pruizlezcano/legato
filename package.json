@@ -1,15 +1,15 @@
 {
-  "description": "A manager for your music projects",
+  "description": "A manager for your Ableton projects",
   "keywords": [
     "electron",
-    "boilerplate",
     "react",
     "typescript",
     "ts",
     "sass",
     "webpack",
-    "hot",
-    "reload"
+    "ableton",
+    "music",
+    "manager"
   ],
   "homepage": "https://github.com/pruizlezcano/legato#readme",
   "bugs": {

@@ -10,11 +10,7 @@ labels: 'bug'
 
 <!-- If the following boxes are not ALL checked, your issue is likely to be closed -->
 
-- [ ] Using npm
-- [ ] Using an up-to-date [`main` branch](https://github.com/electron-react-boilerplate/electron-react-boilerplate/tree/main)
-- [ ] Using latest version of devtools. [Check the docs for how to update](https://electron-react-boilerplate.js.org/docs/dev-tools/)
-- [ ] Tried solutions mentioned in [#400](https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues/400)
-- [ ] For issue in production release, add devtools output of `DEBUG_PROD=true npm run build && npm start`
+- [ ] Using the latest version of [Legato](https://github.com/pruizlezcano/legato/releases/latest)
 
 ## Expected Behavior
 
@@ -26,8 +22,7 @@ labels: 'bug'
 
 ## Steps to Reproduce
 
-<!-- Add relevant code and/or a live example -->
-<!-- Add stack traces -->
+<!--- Provide a detailed step-by-step guide on how to reproduce the issue. -->
 
 1.
 
@@ -51,13 +46,11 @@ labels: 'bug'
 
 <!--- Include as many relevant details about the environment you experienced the bug in -->
 
-- Node version :
-- electron-react-boilerplate version or branch :
-- Operating System and version :
-- Link to your project :
+- Operating System and version:
+- Ableton version:
 
 <!---
-❗️❗️ Also, please consider donating (https://opencollective.com/electron-react-boilerplate-594) ❗️❗️
+❗️❗️ Also, please consider donating ❗️❗️
 
 Donations will ensure the following:
 
