@@ -19,9 +19,8 @@ import {
   faSortUp,
   faSortDown,
   faCircleInfo,
+  faRocket,
 } from '@fortawesome/free-solid-svg-icons';
-import { Tooltip } from 'react-tooltip';
-import { ReactComponent as AbletonLogo } from '../../../assets/ableton-icon.svg';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
@@ -34,6 +33,7 @@ import {
   handleProjectUpdate,
 } from '../hooks/handlers';
 import EditableTagCell from './EditableTagCell';
+import { Dropdown, DropdownOption, DropdownSeparator } from './Dropdown';
 
 // eslint-disable-next-line react/function-component-definition
 const Table = ({ content }: { content: Project[] }) => {
@@ -124,55 +124,42 @@ const Table = ({ content }: { content: Project[] }) => {
       cell: ({ row }) => {
         const project = row.original as Project;
         return (
-          <div className="flex flex-row gap-2">
-            <button
-              type="button"
+          <Dropdown>
+            <DropdownOption
               onClick={() => {
                 setSelectedProject(project);
                 setshowProject(true);
               }}
-              data-tooltip-id="project-info"
+              className="flex flex-row items-center gap-x-2"
             >
               <FontAwesomeIcon icon={faCircleInfo} size="1x" />
-            </button>
-            <Tooltip
-              id="project-info"
-              content="Project details"
-              place="bottom"
-              noArrow
-            />
-            <button
-              type="button"
-              onClick={() => handleOpenInFinder(project.id)}
-              data-tooltip-id="open-project-folder"
+              Project details
+            </DropdownOption>
+            <DropdownSeparator />
+            <DropdownOption
+              onClick={() => {
+                handleOpenInFinder(project.id);
+              }}
+              className="flex flex-row items-center gap-x-2"
             >
               <FontAwesomeIcon icon={faUpRightFromSquare} size="1x" />
-            </button>
-            <Tooltip
-              id="open-project-folder"
-              content="Open folder"
-              place="bottom"
-              noArrow
-            />
-            <button
-              type="button"
-              onClick={() => handleOpenInAbleton(project.id)}
-              data-tooltip-id="ableton-logo"
+              Open in Finder
+            </DropdownOption>
+            <DropdownOption
+              onClick={() => {
+                handleOpenInAbleton(project.id);
+              }}
+              className="flex flex-row items-center gap-x-2"
             >
-              <AbletonLogo className="w-7 fill-slate-700 dark:fill-text-dark" />
-            </button>
-            <Tooltip
-              id="ableton-logo"
-              content="Open in Ableton"
-              place="bottom"
-              disableStyleInjection
-              noArrow
-            />
-          </div>
+              <FontAwesomeIcon icon={faRocket} size="1x" />
+              Open in Ableton
+            </DropdownOption>
+            <DropdownSeparator />
+          </Dropdown>
         );
       },
       enableGlobalFilter: false,
-      size: 40,
+      size: 0,
     }) as ColumnDef<unknown, any>,
   ];
 
