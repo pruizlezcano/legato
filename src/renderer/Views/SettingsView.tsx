@@ -17,6 +17,7 @@ function SettingsView({
   settings: Settings;
 }) {
   const [settings, setSettings] = useState(initialSettings);
+  const [oldSettings, setOldSettings] = useState(initialSettings);
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -31,8 +32,11 @@ function SettingsView({
   };
 
   useEffect(() => {
-    saveSettings(settings);
-  }, [settings]);
+    if (JSON.stringify(settings) !== JSON.stringify(oldSettings)) {
+      saveSettings(settings);
+      setOldSettings(settings);
+    }
+  }, [settings, oldSettings]);
 
   const handleThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newTheme = e.target.value;
