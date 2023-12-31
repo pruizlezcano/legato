@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/no-unstable-nested-components */
@@ -11,6 +12,7 @@ import {
   flexRender,
   SortingState,
   ColumnDef,
+  FilterFn,
 } from '@tanstack/react-table';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,6 +37,13 @@ import {
 import EditableTagCell from './EditableTagCell';
 import { Dropdown, DropdownOption, DropdownSeparator } from './Dropdown';
 
+declare module '@tanstack/table-core' {
+  interface FilterFns {
+    numberFilter: FilterFn<unknown>;
+    arrayFilter: FilterFn<unknown>;
+  }
+}
+
 // eslint-disable-next-line react/function-component-definition
 const Table = ({ content }: { content: Project[] }) => {
   const [data, setData] = useState<Project[]>([]);
@@ -47,9 +56,11 @@ const Table = ({ content }: { content: Project[] }) => {
     }
   }, [content]);
 
+  const [filterQuery, setFilterQuery] = useState('');
   const [globalFilter, setGlobalFilter] = useState('');
 
   const columnHelper = createColumnHelper();
+
   const columns: ColumnDef<unknown, any>[] = [
     columnHelper.accessor('title', {
       header: 'Title',
@@ -67,6 +78,7 @@ const Table = ({ content }: { content: Project[] }) => {
       ),
       enableGlobalFilter: false,
       size: 30,
+      filterFn: 'numberFilter',
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('genre', {
       header: 'Genre',
@@ -79,6 +91,7 @@ const Table = ({ content }: { content: Project[] }) => {
       ),
       enableSorting: false,
       size: 100,
+      enableGlobalFilter: false,
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('tagNames', {
       header: 'Tags',
@@ -95,6 +108,8 @@ const Table = ({ content }: { content: Project[] }) => {
       },
       enableSorting: true,
       size: 100,
+      enableGlobalFilter: false,
+      filterFn: 'arrayFilter',
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('modifiedAt', {
       header: 'Modified',
@@ -103,6 +118,7 @@ const Table = ({ content }: { content: Project[] }) => {
         return <p>{project.modifiedAt.toLocaleDateString()}</p>;
       },
       size: 50,
+      enableGlobalFilter: false,
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('createdAt', {
       header: 'Added',
@@ -111,6 +127,7 @@ const Table = ({ content }: { content: Project[] }) => {
         return <p>{project.createdAt.toLocaleDateString()}</p>;
       },
       size: 50,
+      enableGlobalFilter: false,
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('path', {
       header: 'Path',
@@ -118,6 +135,7 @@ const Table = ({ content }: { content: Project[] }) => {
         const project = row.original as Project;
         return <p>{project.path}</p>;
       },
+      enableGlobalFilter: false,
     }) as ColumnDef<unknown, any>,
     columnHelper.accessor('open', {
       header: '',
@@ -213,6 +231,36 @@ const Table = ({ content }: { content: Project[] }) => {
         );
       },
     },
+    filterFns: {
+      numberFilter: (row, columnId, filterValue) => {
+        const value: number = row.getValue(columnId);
+        if (value === undefined) return true;
+        if (/\d+-\d+/.test(filterValue)) {
+          // Number interval: number:120-150
+          const [min, max] = filterValue.split('-');
+          return value >= Number(min) && value <= Number(max);
+        }
+        if (/>\d+/.test(filterValue)) {
+          // Greater than: number:>120
+          const threshold = Number(filterValue.slice(1)); // Remove '>'
+          return value > threshold;
+        }
+        if (/<\d+/.test(filterValue)) {
+          // Less than: number:<120
+          const threshold = Number(filterValue.slice(1)); // Remove '<'
+          return value < threshold;
+        }
+        // Exact number: number:123
+        return value === Number(filterValue);
+      },
+      arrayFilter: (row, columnId, filterValue) => {
+        const value: string[] = row.getValue(columnId);
+        if (value === undefined) return true;
+        const tags = value.map((tag) => tag.toLowerCase()).join(' ');
+        const filter = filterValue.toLowerCase();
+        return tags.includes(filter);
+      },
+    },
     // debugTable: true,
   });
 
@@ -226,11 +274,42 @@ const Table = ({ content }: { content: Project[] }) => {
     }
   }, [table]);
 
+  const setFilter = (query: string) => {
+    if (query === filterQuery) return;
+
+    setFilterQuery(query);
+    // Parse the general search term
+    const generalSearch = query.replace(/(\w+):([^" ]+|"[^"]*")/g, '').trim();
+
+    // Parse additional filters
+    const regex = /(\w+):([^" ]+|"[^"]*")/g;
+    let match;
+    const filters: { [key: string]: string } = {};
+
+    // Reset all filters
+    for (const column of table.getAllColumns()) {
+      column.setFilterValue('');
+    }
+
+    // Set new filters
+    // eslint-disable-next-line no-cond-assign
+    while ((match = regex.exec(query)) !== null) {
+      // eslint-disable-next-line prefer-const
+      let [, field, value] = match;
+      if (field === 'tags') field = 'tagNames';
+      filters[field] = value;
+      const column = table.getColumn(field);
+      if (column) column.setFilterValue(filters[field]);
+    }
+
+    table.setGlobalFilter(generalSearch);
+  };
+
   return (
     <>
       <DebounceInput
-        value={globalFilter}
-        onChange={(value: any) => setGlobalFilter(value)}
+        value={filterQuery}
+        onChange={(value: any) => setFilter(value)}
         placeholder="Search..."
         className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"
       />
