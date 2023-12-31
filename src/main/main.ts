@@ -196,7 +196,6 @@ ipcMain.on('list-projects', async (event) => {
       project.tagNames = project.tags.map((tag) => tag.name);
     }
   });
-  console.log(projects);
 
   event.reply('list-projects', projects);
 });
@@ -247,7 +246,6 @@ ipcMain.on('update-project', async (event, arg: Project) => {
         let tag = await TagRepository.findOneBy({
           name: arg.tagNames![i],
         });
-        console.log('tag', tag);
         if (!tag) {
           tag = new Tag();
           tag.name = arg.tagNames![i];
@@ -257,7 +255,6 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       }
       await ProjectRepository.save(project);
       logger.info(`Project ${arg.id} updated`);
-      console.log(project);
 
       project.tagNames = project.tags.map((tag) => tag.name);
     } else {
