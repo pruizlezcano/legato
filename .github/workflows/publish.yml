@@ -33,8 +33,9 @@ jobs:
 
       - name: Publish releases
         env:
-          # Disable code signing
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # macOS notarization
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           # This is used for uploading release assets to github
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
