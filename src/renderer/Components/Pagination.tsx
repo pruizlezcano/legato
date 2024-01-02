@@ -33,7 +33,7 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
   };
 
   return (
-    <div className="flex justify-center gap-2 ml-auto mr-auto rounded text-sm bg-gray-100 dark:bg-dark-900 mt-5 mb-8">
+    <div className="flex justify-center gap-2 w-fit ml-auto mr-auto rounded text-sm bg-gray-100 dark:bg-dark-900 mt-5 mb-8">
       <span className="flex pl-5 py-2">
         <button
           type="button"

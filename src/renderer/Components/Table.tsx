@@ -172,7 +172,6 @@ const Table = ({ content }: { content: Project[] }) => {
               <FontAwesomeIcon icon={faRocket} size="1x" />
               Open in Ableton
             </DropdownOption>
-            <DropdownSeparator />
           </Dropdown>
         );
       },
@@ -386,16 +385,18 @@ const Table = ({ content }: { content: Project[] }) => {
           ))}
         </tfoot>
       </table>
-      <Pagination table={table} size={data.length} />
-      {showProject ? (
-        <ProjectView
-          project={selectedProject}
-          onClose={() => {
-            setshowProject(false);
-            handleList();
-          }}
-        />
-      ) : null}
+      <div className="relative w-full">
+        <Pagination table={table} size={data.length} />
+        {showProject ? (
+          <ProjectView
+            project={selectedProject}
+            onClose={() => {
+              setshowProject(false);
+              handleList();
+            }}
+          />
+        ) : null}
+      </div>
     </>
   );
 };
