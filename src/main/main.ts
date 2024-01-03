@@ -214,6 +214,8 @@ ipcMain.on('open-project', async (event, arg: number) => {
     });
     checkFile(project!.path);
     shell.openPath(project!.path);
+    project!.modifiedAt = new Date();
+    await ProjectRepository.save(project!);
     return event.reply('open-project', 'OK');
   } catch (error: any) {
     logger.error(`Error launching project: ${error}`);
