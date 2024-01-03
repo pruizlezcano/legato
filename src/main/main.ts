@@ -30,7 +30,7 @@ let TagRepository: Repository<Tag>;
 class AppUpdater {
   constructor() {
     autoUpdater.logger = logger;
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdates();
   }
 }
 
@@ -334,6 +334,27 @@ ipcMain.on('log-warn', (_event, arg) => {
 
 ipcMain.on('log-error', (_event, arg) => {
   logger.log('errorRender', `${arg}`);
+});
+
+autoUpdater.on('update-available', async (event) => {
+  const { response } = await dialog.showMessageBox({
+    type: 'info',
+    buttons: ['Discard', 'Go to download page'],
+    title: 'Application Update',
+    message: (process.platform === 'win32'
+      ? event.releaseNotes
+      : event.releaseName) as string,
+    detail: 'There is a new version available, do you want to download it now?',
+  });
+  if (response === 1)
+    shell.openExternal(
+      'https://github.com/pruizlezcano/legato/releases/latest',
+    );
+});
+
+autoUpdater.on('error', (message) => {
+  logger.error('There was a problem updating the application');
+  logger.error(message);
 });
 
 if (process.env.NODE_ENV === 'production') {
