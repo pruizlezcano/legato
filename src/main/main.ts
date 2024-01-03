@@ -156,6 +156,12 @@ const fullScan = async (projectsPath: string) => {
   }
 };
 
+const checkFile = (filePath: string) => {
+  if (!fs.existsSync(filePath)) {
+    throw new Error('File not found');
+  }
+};
+
 ipcMain.on('scan-projects', async (event, arg) => {
   if (mainWindow) mainWindow.webContents.send('scan-started');
   const projectsPath = await SettingRepository.findOneBy({
@@ -206,12 +212,12 @@ ipcMain.on('open-project', async (event, arg: number) => {
     const project = await ProjectRepository.findOneBy({
       id: arg,
     });
-
+    checkFile(project!.path);
     shell.openPath(project!.path);
-    return event.reply('open-project', project);
-  } catch (error) {
+    return event.reply('open-project', 'OK');
+  } catch (error: any) {
     logger.error(`Error launching project: ${error}`);
-    return event.reply('open-project', error);
+    return event.reply('error', error.message);
   }
 });
 
@@ -221,12 +227,12 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
     const project = await ProjectRepository.findOneBy({
       id: arg,
     });
-
+    checkFile(project!.path);
     shell.showItemInFolder(project!.path);
-    return event.reply('open-project-folder', project);
-  } catch (error) {
+    return event.reply('open-project-folder', 'OK');
+  } catch (error: any) {
     logger.error(`Error opening project folder: ${error}`);
-    return event.reply('open-project-folder', error);
+    return event.reply('error', error.message);
   }
 });
 
@@ -264,7 +270,7 @@ ipcMain.on('update-project', async (event, arg: Project) => {
     return event.reply('update-project', project);
   } catch (error) {
     logger.error(`Error updating project: ${error}`);
-    return event.reply('update-project', error);
+    return event.reply('error', error);
   }
 });
 
@@ -284,7 +290,7 @@ ipcMain.on('load-settings', async (event) => {
     event.reply('load-settings', settingsObj);
   } catch (error) {
     logger.error(`Error loading settings: ${error}`);
-    event.reply('load-settings', error);
+    event.reply('error', error);
   }
 });
 
@@ -303,7 +309,7 @@ ipcMain.on('save-settings', async (event, arg) => {
     event.reply('save-settings', 'done');
   } catch (error) {
     logger.error(`Error saving settings: ${error}`);
-    event.reply('save-settings', error);
+    event.reply('error', error);
   }
 });
 

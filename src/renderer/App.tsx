@@ -61,6 +61,10 @@ function Hello() {
       setSettings(arg as Settings);
     });
 
+    window.electron.ipcRenderer.on('error', (arg) => {
+      toast.error(arg as string);
+    });
+
     window.electron.ipcRenderer.sendMessage('load-settings');
     handleList();
   }, []);
