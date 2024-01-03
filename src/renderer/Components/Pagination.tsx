@@ -45,14 +45,14 @@ function Pagination({ table, size }: { table: Table<unknown>; size: number }) {
           Prev
         </button>
         <span className="flex items-center gap-1">
-          {paginationRange.map((pageNumber) => {
+          {paginationRange.map((pageNumber, i) => {
             if (pageNumber === -1) {
-              return <p key="...">&#8230;</p>;
+              return <span key={Number(i)}>&#8230;</span>;
             }
             return (
               <button
                 type="button"
-                key={pageNumber}
+                key={Number(i)}
                 className={`px-1 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 ${
                   pageNumber === currentPage
                     ? 'bg-gray-300 dark:bg-dark-600'
