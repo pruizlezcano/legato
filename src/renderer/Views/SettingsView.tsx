@@ -3,7 +3,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from 'react-tooltip';
 import Dialog from '../Components/Dialog';
 import DebounceInput from '../Components/DebounceInput';
@@ -12,9 +11,11 @@ import { Settings } from '../../interfaces/Settings';
 function SettingsView({
   onClose,
   settings: initialSettings,
+  appVersion,
 }: {
   onClose: () => void;
   settings: Settings;
+  appVersion: string;
 }) {
   const [settings, setSettings] = useState(initialSettings);
   const [oldSettings, setOldSettings] = useState(initialSettings);
@@ -64,6 +65,7 @@ function SettingsView({
         (old: Settings) => ({ ...old, projectsPath: arg }) as Settings,
       );
     });
+
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -71,89 +73,98 @@ function SettingsView({
     };
   }, [onClose]);
 
+  useEffect(() => {
+    window.electron.ipcRenderer.sendMessage('get-version');
+  });
+
   return (
     <Dialog onClose={onClose}>
-      <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-3xl">
+      <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-xl">
         {/* header */}
-        <div className="flex pl-5 pb-4">
-          <h1 className="text-xl font-bold">Settings</h1>
-        </div>
+        <h1 className="w-11/12 ml-6 my-1 flex-grow text-xl font-bold">
+          Settings
+        </h1>
         {/* body */}
-        <div className="flex flex-col relative px-6 py-4 space-y-6">
-          <div className="flex flex-col align-middle">
-            {/* Path selector */}
-            <label htmlFor="projectsPath" className="">
-              Projects Path:
-            </label>
-            <div className="flex flow-row space-x-4">
-              <button
-                type="button"
-                onClick={() =>
-                  window.electron.ipcRenderer.sendMessage('open-path-dialog')
-                }
-                data-tooltip-id="select-folder"
-              >
-                <FontAwesomeIcon
-                  icon={faFolderOpen}
-                  className="text-gray-500 dark:text-text-dark"
+        <table className="table-auto mx-2 mb-4">
+          <tbody>
+            <tr>
+              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
+                Projects path
+              </td>
+              <td className="px-4 py-2 flex flex-row space-x-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.electron.ipcRenderer.sendMessage('open-path-dialog')
+                  }
+                  data-tooltip-id="select-folder"
+                >
+                  <FontAwesomeIcon
+                    icon={faFolderOpen}
+                    className="text-gray-500 dark:text-text-dark"
+                  />
+                </button>
+                <Tooltip
+                  id="select-folder"
+                  content="Open folder"
+                  place="bottom"
                 />
-              </button>
-              <Tooltip
-                id="select-folder"
-                content="Open folder"
-                place="bottom"
-              />
-              <DebounceInput
-                value={settings.projectsPath}
-                onChange={(value) =>
-                  setSettings((old) => ({ ...old, projectsPath: value }))
-                }
-                placeholder="..."
-                className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"
-              />
-            </div>
-          </div>
-          <div>
-            {/* // Theme selector */}
-            <p>Theme</p>
-            <select
-              className="p-1 rounded bg-inherit capitalize hover:bg-gray-200 dark:hover:bg-dark-700 focus:outline-none"
-              value={settings.theme}
-              onChange={handleThemeChange}
-            >
-              {['system', 'light', 'dark'].map((theme) => (
-                <option key={theme} value={theme}>
-                  {theme}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col">
-            {/* Scan section */}
-            <p className="mb-2">Scan projects:</p>
-            <p className="text-slate-700 dark:text-text-dark">
-              <button
-                type="button"
-                className="font-medium py-1 px-2 bg-blue-100 dark:bg-blue-200 rounded-full text-xs text-blue-800 dark:text-blue-900 mr-2 focus:outline-none"
-                onClick={handleFastScan}
-              >
-                <FontAwesomeIcon icon={faArrowRight} className="pr-1" />
-                Fast Scan
-              </button>
-              Search for new projects.
-            </p>
-            <p className="text-slate-700 dark:text-text-dark">
-              <button
-                type="button"
-                className="cursor-pointer font-medium py-1 px-2 bg-red-100 dark:bg-red-200 rounded-full text-xs text-red-800 dark:text-red-900 mr-2 focus:outline-none"
-                onClick={handleFullScan}
-              >
-                <FontAwesomeIcon icon={faArrowRight} className="pr-1" />
-                Full Scan
-              </button>
-              Performs a comprehensive scan of all projects.
-            </p>
-          </div>
+                <DebounceInput
+                  value={settings.projectsPath}
+                  onChange={(value) =>
+                    setSettings((old) => ({ ...old, projectsPath: value }))
+                  }
+                  placeholder="..."
+                  className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
+                Theme
+              </td>
+              <td className="px-4 py-2">
+                <select
+                  className="p-1 rounded bg-inherit capitalize hover:bg-gray-200 dark:hover:bg-dark-700 focus:outline-none"
+                  value={settings.theme}
+                  onChange={handleThemeChange}
+                >
+                  {['system', 'light', 'dark'].map((theme) => (
+                    <option key={theme} value={theme}>
+                      {theme}
+                    </option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
+                Scan Projects
+              </td>
+              <td className="px-4 py-2">
+                <span className="space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleFastScan}
+                    className="bg-green-400 text-white dark:text-dark rounded-md text-sm px-2"
+                  >
+                    Fast Scan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleFullScan}
+                    className="bg-red-400 text-white rounded-md text-sm px-2"
+                  >
+                    Full Scan
+                  </button>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="mt-5 mx-6 flex flex-row place-content-between text-sm text-gray-400 dark:text-gray-500">
+          <p>Legato v{appVersion}</p>
+          <p>Copyright © 2024 Pablo Ruiz</p>
         </div>
       </div>
     </Dialog>

@@ -342,6 +342,10 @@ ipcMain.on('log-error', (_event, arg) => {
   logger.log('errorRender', `${arg}`);
 });
 
+ipcMain.on('get-version', (event) => {
+  event.reply('get-version', app.getVersion());
+});
+
 autoUpdater.on('update-available', async (event) => {
   const { response } = await dialog.showMessageBox({
     type: 'info',

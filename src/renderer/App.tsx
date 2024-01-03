@@ -15,6 +15,7 @@ function Hello() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({} as Settings);
+  const [appVersion, setAppVersion] = useState('');
 
   const showScanToast = () => {
     return toast.promise(
@@ -63,6 +64,10 @@ function Hello() {
 
     window.electron.ipcRenderer.on('error', (arg) => {
       toast.error(arg as string);
+    });
+
+    window.electron.ipcRenderer.once('get-version', (arg) => {
+      setAppVersion(arg as string);
     });
 
     window.electron.ipcRenderer.sendMessage('load-settings');
@@ -130,6 +135,7 @@ function Hello() {
             window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
             setShowSettings(false);
           }}
+          appVersion={appVersion}
         />
       ) : null}
       <Toaster
