@@ -27,6 +27,7 @@ import {
   faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import { faStar } from '@fortawesome/free-regular-svg-icons';
+import { useHotkeys } from 'react-hotkeys-hook';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
@@ -54,6 +55,11 @@ const Table = ({ content }: { content: Project[] }) => {
   const [data, setData] = useState<Project[]>([]);
   const [showProject, setshowProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState({} as Project);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useHotkeys('mod+k', () => {
+    searchInputRef.current?.focus();
+  });
 
   useEffect(() => {
     if (content) {
@@ -378,6 +384,7 @@ const Table = ({ content }: { content: Project[] }) => {
     <>
       <DebounceInput
         value={filterQuery}
+        inputRef={searchInputRef}
         onChange={(value: any) => setFilter(value)}
         placeholder="Search..."
         className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"

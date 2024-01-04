@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect, SetStateAction } from 'react';
+import { useState, useEffect, SetStateAction, RefObject } from 'react';
 
 function DebounceInput({
   value: initialValue,
@@ -8,6 +8,7 @@ function DebounceInput({
   className = '',
   placeholder = '',
   debounce = 500,
+  inputRef,
 }: {
   value: any;
   onChange: (arg: string) => void;
@@ -15,8 +16,9 @@ function DebounceInput({
   className?: string;
   placeholder?: string;
   debounce?: number;
+  inputRef?: RefObject<HTMLInputElement>;
 }) {
-  const [inputValue, setInputValue] = useState(initialValue);
+  const [inputValue, setInputValue] = useState(initialValue || '');
 
   // If the initialValue is changed external, sync it up with our state
   useEffect(() => {
@@ -38,6 +40,7 @@ function DebounceInput({
 
   return (
     <input
+      ref={inputRef}
       type={type}
       className={className}
       value={inputValue}
