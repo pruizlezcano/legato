@@ -18,11 +18,15 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUpRightFromSquare,
-  faSortUp,
-  faSortDown,
+  faArrowDown,
+  faArrowUp,
   faCircleInfo,
   faRocket,
+  faStar as faStarSolid,
+  faEye,
+  faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
+import { faStar } from '@fortawesome/free-regular-svg-icons';
 import DebounceInput from './DebounceInput';
 import EditableCell from './EditableCell';
 import Pagination from './Pagination';
@@ -41,6 +45,7 @@ declare module '@tanstack/table-core' {
   interface FilterFns {
     numberFilter: FilterFn<unknown>;
     arrayFilter: FilterFn<unknown>;
+    booleanFn: FilterFn<unknown>;
   }
 }
 
@@ -137,6 +142,24 @@ const Table = ({ content }: { content: Project[] }) => {
       },
       enableGlobalFilter: false,
     }) as ColumnDef<unknown, any>,
+    columnHelper.accessor('favorite', {
+      header: 'Favorite',
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.favorite ? 'True' : 'False'}</p>;
+      },
+      enableGlobalFilter: false,
+      filterFn: 'booleanFn',
+    }) as ColumnDef<unknown, any>,
+    columnHelper.accessor('hidden', {
+      header: 'Hidden',
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.hidden ? 'True' : 'False'}</p>;
+      },
+      enableGlobalFilter: false,
+      filterFn: 'booleanFn',
+    }) as ColumnDef<unknown, any>,
     columnHelper.accessor('open', {
       header: '',
       cell: ({ row }) => {
@@ -170,7 +193,46 @@ const Table = ({ content }: { content: Project[] }) => {
               className="flex flex-row items-center gap-x-2"
             >
               <FontAwesomeIcon icon={faRocket} size="1x" />
-              Open in Ableton
+              <p>Open in Ableton</p>
+            </DropdownOption>
+            <DropdownSeparator />
+            <DropdownOption
+              onClick={() => {
+                project.favorite = !project.favorite;
+                handleProjectUpdate(project);
+                setData((old) =>
+                  old.map((p) => {
+                    if (p.id === project.id) return project;
+                    return p;
+                  }),
+                );
+              }}
+              className="flex flex-row items-center gap-x-2 text-yellow-500 dark:text-yellow-300 hover:bg-yellow-100"
+            >
+              <FontAwesomeIcon
+                icon={project.favorite ? faStarSolid : faStar}
+                size="1x"
+              />
+              <p>{project.favorite ? 'Remove favorite' : 'Add favorite'}</p>
+            </DropdownOption>
+            <DropdownOption
+              onClick={() => {
+                project.hidden = !project.hidden;
+                handleProjectUpdate(project);
+                setData((old) =>
+                  old.map((p) => {
+                    if (p.id === project.id) return project;
+                    return p;
+                  }),
+                );
+              }}
+              className="flex flex-row items-center gap-x-2 text-blue-500 dark:text-blue-300 hover:bg-blue-100"
+            >
+              <FontAwesomeIcon
+                icon={project.hidden ? faEye : faEyeSlash}
+                size="1x"
+              />
+              <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
             </DropdownOption>
           </Dropdown>
         );
@@ -259,16 +321,23 @@ const Table = ({ content }: { content: Project[] }) => {
         const filter = filterValue.toLowerCase();
         return tags.includes(filter);
       },
+      booleanFn: (row, columnId, filterValue) => {
+        const value: boolean = row.getValue(columnId);
+        if (value === undefined) return true;
+        return value === (filterValue === 'true');
+      },
     },
     // debugTable: true,
   });
 
-  // Hide the path column
+  // Initial table state
   const hasToggledVisibility = useRef(false);
-
   useEffect(() => {
     if (!hasToggledVisibility.current) {
       table.getColumn('path')!.toggleVisibility(false);
+      table.getColumn('favorite')!.toggleVisibility(false);
+      table.getColumn('hidden')!.toggleVisibility(false);
+      table.getColumn('hidden')!.setFilterValue('false');
       hasToggledVisibility.current = true;
     }
   }, [table]);
@@ -289,6 +358,7 @@ const Table = ({ content }: { content: Project[] }) => {
     for (const column of table.getAllColumns()) {
       column.setFilterValue('');
     }
+    table.getColumn('hidden')!.setFilterValue('false');
 
     // Set new filters
     // eslint-disable-next-line no-cond-assign
@@ -338,10 +408,18 @@ const Table = ({ content }: { content: Project[] }) => {
                       )}
                       {{
                         asc: (
-                          <FontAwesomeIcon icon={faSortUp} className="ml-2" />
+                          <FontAwesomeIcon
+                            icon={faArrowUp}
+                            className="ml-2"
+                            size="sm"
+                          />
                         ),
                         desc: (
-                          <FontAwesomeIcon icon={faSortDown} className="ml-2" />
+                          <FontAwesomeIcon
+                            icon={faArrowDown}
+                            className="ml-2"
+                            size="sm"
+                          />
                         ),
                       }[header.column.getIsSorted() as string] ?? null}
                     </div>
@@ -368,24 +446,8 @@ const Table = ({ content }: { content: Project[] }) => {
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          {table.getFooterGroups().map((footerGroup) => (
-            <tr key={footerGroup.id}>
-              {footerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext(),
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </tfoot>
       </table>
-      <div className="relative w-full">
+      <div className="relative w-full mb-56">
         <Pagination table={table} size={data.length} />
         {showProject ? (
           <ProjectView

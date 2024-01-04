@@ -33,6 +33,12 @@ export default class Project {
 
   tagNames?: string[];
 
+  @Column({ default: false })
+  favorite!: boolean;
+
+  @Column({ default: false })
+  hidden!: boolean;
+
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
 

@@ -30,7 +30,7 @@ export function DropdownOption({
   return (
     <button
       type="button"
-      className={`block text-sm px-4 mx-1 py-2 my-1 w-40 rounded-md hover:bg-gray-100 dark:hover:bg-dark-900 ${className}`}
+      className={`block text-sm px-4 py-2 my-1 w-40 rounded-md hover:bg-gray-100 dark:hover:bg-dark-900 ${className}`}
       onClick={onClick}
     >
       {children}

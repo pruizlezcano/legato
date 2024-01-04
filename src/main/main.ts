@@ -250,6 +250,8 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       project.genre = arg.genre;
       project.bpm = arg.bpm;
       project.tags = [];
+      project.favorite = arg.favorite;
+      project.hidden = arg.hidden;
       for (let i = 0; i < arg.tagNames!.length; i += 1) {
         let tag = await TagRepository.findOneBy({
           name: arg.tagNames![i],
