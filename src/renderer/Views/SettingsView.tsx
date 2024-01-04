@@ -3,10 +3,10 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
-import { Tooltip } from 'react-tooltip';
 import Dialog from '../Components/Dialog';
 import DebounceInput from '../Components/DebounceInput';
 import { Settings } from '../../interfaces/Settings';
+import Tooltip from '../Components/Tooltip';
 
 function SettingsView({
   onClose,
@@ -92,23 +92,21 @@ function SettingsView({
                 Projects path
               </td>
               <td className="px-4 py-2 flex flex-row space-x-4">
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.electron.ipcRenderer.sendMessage('open-path-dialog')
-                  }
-                  data-tooltip-id="select-folder"
-                >
-                  <FontAwesomeIcon
-                    icon={faFolderOpen}
-                    className="text-gray-500 dark:text-text-dark"
-                  />
-                </button>
-                <Tooltip
-                  id="select-folder"
-                  content="Open folder"
-                  place="bottom"
-                />
+                <Tooltip message="Open folder">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.electron.ipcRenderer.sendMessage(
+                        'open-path-dialog',
+                      )
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faFolderOpen}
+                      className="text-gray-500 dark:text-text-dark"
+                    />
+                  </button>
+                </Tooltip>
                 <DebounceInput
                   value={settings.projectsPath}
                   onChange={(value) =>
