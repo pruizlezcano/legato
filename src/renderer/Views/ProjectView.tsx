@@ -1,40 +1,54 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import { useEffect, useState } from 'react';
-import {
-  faStar as faStarSolid,
-  faEye,
-  faEyeSlash,
-} from '@fortawesome/free-solid-svg-icons';
-import { faStar } from '@fortawesome/free-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useCallback, useEffect, useState } from 'react';
+import { Sheet, SheetContent, SheetHeader } from '@/Components/ui/sheet';
+import { Label } from '@/Components/ui/label';
+import { Badge } from '@/Components/ui/badge';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
-import Dialog from '../Components/Dialog';
 import {
   handleOpenInAbleton,
   handleOpenInFinder,
   handleProjectUpdate,
 } from '../hooks/handlers';
 import TagInput from '../Components/TagInput';
-import Tooltip from '../Components/Tooltip';
 
 function ProjectView({
   project: initialProject,
   onClose,
+  open,
 }: {
   project: Project;
   onClose: () => void;
+  open: boolean;
 }) {
   const [project, setProject] = useState(initialProject);
+  const [oldProject, setOldProject] = useState(initialProject);
+  const [isOpen, setIsOpen] = useState(open);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  }, [onClose]);
 
   useEffect(() => {
-    handleProjectUpdate(project);
-  }, [project]);
+    setIsOpen(open);
+  }, [open]);
+
+  useEffect(() => {
+    if (JSON.stringify(project) !== JSON.stringify(oldProject)) {
+      handleProjectUpdate(project);
+      setOldProject(project);
+    }
+  }, [project, oldProject]);
 
   useEffect(() => {
     const handleKeyDown = (e: { key: string }) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -42,134 +56,153 @@ function ProjectView({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose]);
+  }, [handleClose]);
+
+  const handleOpen = (b: boolean): void => {
+    if (b) {
+      return;
+    }
+    handleClose();
+  };
 
   return (
-    <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-3xl">
-      <Dialog onClose={onClose}>
-        <div className="flex flex-row pr-6 pl-4 space-x-3">
+    <Sheet open={isOpen} onOpenChange={handleOpen}>
+      <SheetContent className="w-[100%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[45%] 2xl:max-w-[45%]  sm:max-w-[80%]">
+        <SheetHeader>
           <DebounceInput
             value={project.title}
-            onChange={(value: string) =>
-              setProject((old) => ({ ...old, projectsPath: value }))
-            }
+            onChange={(value: string) => {
+              if (value !== project.title)
+                setProject((old) => ({ ...old, title: value }));
+            }}
             placeholder="Title..."
-            className="w-11/12 p-4 flex-grow bg-inherit text-xl font-bold focus:outline-none"
+            className="w-11/12 p-0 border-none shadow-none text-2xl font-semibold focus:ring-0 focus:outline-none"
           />
-          <Tooltip message={project.hidden ? 'Unhide' : 'Hide'}>
-            <button
-              type="button"
-              onClick={() => {
-                project.hidden = !project.hidden;
-                setProject(project);
-              }}
-            >
-              <FontAwesomeIcon
-                icon={project.hidden ? faEye : faEyeSlash}
-                className="text-blue-500 dark:text-blue-300"
+        </SheetHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <span className="space-x-2 select-none">
+              <Badge
+                onClick={() => {
+                  setProject((old) => ({ ...old, favorite: !old.favorite }));
+                }}
+                variant="outline"
+                className="cursor-pointer"
+              >
+                {project.favorite ? (
+                  <>
+                    <StarSolidIcon className="h-4 w-4 mr-1" />
+                    Remove from favorites
+                  </>
+                ) : (
+                  <>
+                    <StarIcon className="h-4 w-4 mr-1" />
+                    Add to favorites
+                  </>
+                )}
+              </Badge>
+              <Badge
+                onClick={() => {
+                  setProject((old) => ({ ...old, hidden: !old.hidden }));
+                }}
+                variant="outline"
+                className="cursor-pointer"
+              >
+                {project.hidden ? (
+                  <>
+                    <EyeIcon className="h-4 w-4 mr-1" />
+                    Unhide
+                  </>
+                ) : (
+                  <>
+                    <EyeSlashIcon className="h-4 w-4 mr-1" />
+                    Hide
+                  </>
+                )}
+              </Badge>
+            </span>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="name">BPM</Label>
+            <div className="col-span-3 flex">
+              <DebounceInput
+                type="number"
+                value={project.bpm ?? ''}
+                onChange={(value: string) => {
+                  const bpm = parseInt(value, 10);
+                  if (bpm !== project.bpm)
+                    setProject((old) => ({ ...old, bpm }));
+                }}
+                placeholder="BPM..."
+                className="w-32"
               />
-            </button>
-          </Tooltip>
-          <Tooltip
-            message={project.favorite ? 'Remove favorite' : 'Add favorite'}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                project.favorite = !project.favorite;
-                setProject(project);
+            </div>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Genre</Label>
+            <DebounceInput
+              value={project.genre ?? ''}
+              onChange={(value: string) => {
+                const genre = value;
+                if (genre !== project.genre)
+                  setProject((old) => ({ ...old, genre }));
               }}
-            >
-              <FontAwesomeIcon
-                icon={project.favorite ? faStarSolid : faStar}
-                className="text-yellow-500 dark:text-yellow-300"
+              placeholder="Genre..."
+              className="w-32"
+            />
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Tags</Label>
+            <span className="space-x-2 col-span-3 -ml-1">
+              <TagInput
+                value={project.tagNames ?? []}
+                onChange={(value: string[]) => {
+                  if (
+                    JSON.stringify(value) !== JSON.stringify(project.tagNames)
+                  )
+                    setProject((old) => ({ ...old, tagNames: value }));
+                }}
+                className="w-full bg-inherit focus:outline-none"
               />
-            </button>
-          </Tooltip>
+            </span>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Path</Label>
+            <p className="text-muted-foreground">{project.path}</p>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Last modified</Label>
+            <p className="text-muted-foreground">
+              {project.modifiedAt.toString()}
+            </p>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Added</Label>
+            <p className="text-muted-foreground">
+              {project.createdAt.toString()}
+            </p>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Open in</Label>
+            <span className="space-x-2 select-none">
+              <Badge
+                onClick={() => handleOpenInAbleton(project.id)}
+                className="cursor-pointer"
+              >
+                Ableton
+              </Badge>
+              <Badge
+                onClick={() => handleOpenInFinder(project.id)}
+                className="cursor-pointer"
+                variant="secondary"
+              >
+                Finder
+              </Badge>
+            </span>
+          </div>
         </div>
-        <table className="table-auto mx-4 mb-4">
-          <tbody>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">BPM</td>
-              <td className="px-4 py-2">
-                <DebounceInput
-                  type="number"
-                  value={project.bpm ?? ''}
-                  onChange={(value: string) => {
-                    project.bpm = parseInt(value, 10);
-                    setProject(project);
-                  }}
-                  placeholder="BPM..."
-                  className="w-16 bg-inherit focus:outline-none"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">Genre</td>
-              <td className="px-4 py-2">
-                <DebounceInput
-                  value={project.genre ?? ''}
-                  onChange={(value: string) => {
-                    project.genre = value;
-                    setProject((old) => ({ ...old, genre: value }));
-                  }}
-                  placeholder="Genre..."
-                  className="w-full bg-inherit focus:outline-none"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">Tags</td>
-              <td className="px-4 py-2">
-                <TagInput
-                  value={project.tagNames ?? []}
-                  onChange={(value: string[]) => {
-                    project.tagNames = value;
-                    setProject(project);
-                  }}
-                  className="w-full bg-inherit focus:outline-none"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">Path</td>
-              <td className="px-4 py-2">{project.path}</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">
-                Last Modified
-              </td>
-              <td className="px-4 py-2">{project.modifiedAt.toString()}</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">Created</td>
-              <td className="px-4 py-2">{project.createdAt.toString()}</td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-400 font-bold">Open in</td>
-              <td className="px-4 py-2">
-                <span className="space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenInAbleton(project.id)}
-                    className="bg-black dark:bg-white text-white dark:text-black rounded-md text-sm px-2"
-                  >
-                    Ableton
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenInFinder(project.id)}
-                    className="bg-blue-400 text-white rounded-md text-sm px-2"
-                  >
-                    Finder
-                  </button>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </Dialog>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 

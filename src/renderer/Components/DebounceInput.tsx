@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect, SetStateAction, RefObject } from 'react';
+import { useState, useEffect, KeyboardEvent, useRef } from 'react';
+import { Input } from '@/Components/ui/input';
 
 function DebounceInput({
   value: initialValue,
@@ -8,44 +9,52 @@ function DebounceInput({
   className = '',
   placeholder = '',
   debounce = 500,
-  inputRef,
+  onBlur,
+  id = '',
 }: {
   value: any;
   onChange: (arg: string) => void;
+  onBlur?: () => void;
   type?: string;
   className?: string;
   placeholder?: string;
   debounce?: number;
-  inputRef?: RefObject<HTMLInputElement>;
+  id?: string;
 }) {
   const [inputValue, setInputValue] = useState(initialValue || '');
+  const timeoutId = useRef<any>();
 
   // If the initialValue is changed external, sync it up with our state
   useEffect(() => {
     setInputValue(initialValue);
   }, [initialValue]);
 
-  const handleInputChange = (e: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setInputValue(e.target.value);
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setInputValue((e.target as HTMLInputElement).value);
+      onChange((e.target as HTMLInputElement).value);
+      (e.target as HTMLInputElement).blur();
+      if (timeoutId.current) clearTimeout(timeoutId.current);
+    }
   };
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
+    timeoutId.current = setTimeout(() => {
       onChange(inputValue);
     }, debounce);
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(timeoutId.current);
   }, [inputValue, debounce, onChange]);
 
   return (
-    <input
-      ref={inputRef}
+    <Input
       type={type}
       className={className}
       value={inputValue}
-      onChange={handleInputChange}
+      onChange={(e) => setInputValue(e.target.value)}
+      onBlur={onBlur}
       placeholder={placeholder}
+      id={id}
+      onKeyDown={handleKeyDown}
     />
   );
 }

@@ -162,13 +162,20 @@ const checkFile = (filePath: string) => {
   }
 };
 
+let isScanning = false;
 ipcMain.on('scan-projects', async (event, arg) => {
+  if (isScanning) {
+    logger.info('Scan already in progress');
+    return event.reply('error', 'Scan already in progress');
+  }
+  isScanning = true;
   if (mainWindow) mainWindow.webContents.send('scan-started');
   const projectsPath = await SettingRepository.findOneBy({
     key: 'projectsPath',
   });
   if (!projectsPath!.value) {
     logger.warning('Projects path not set');
+    isScanning = false;
     return event.reply('scan-projects', 'Projects path not set');
   }
   try {
@@ -184,10 +191,12 @@ ipcMain.on('scan-projects', async (event, arg) => {
       });
       if (response) await fullScan(projectsPath!.value);
     }
+    isScanning = false;
     return event.reply('scan-projects', 'OK');
-  } catch (error) {
+  } catch (error: any) {
+    isScanning = false;
     logger.error(`Error scanning projects: ${error}`);
-    return event.reply('scan-projects', error);
+    return event.reply('scan-projects', error.message);
   }
 });
 
@@ -239,7 +248,7 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
 });
 
 ipcMain.on('update-project', async (event, arg: Project) => {
-  logger.info(`Updating project ${arg.id}`);
+  logger.info(`Updating project ${JSON.stringify(arg)}`);
 
   try {
     const project = await ProjectRepository.findOneBy({
@@ -299,7 +308,7 @@ ipcMain.on('load-settings', async (event) => {
 });
 
 ipcMain.on('save-settings', async (event, arg) => {
-  logger.info('Saving settings');
+  logger.info(`Saving settings: ${JSON.stringify(arg)}`);
   try {
     Object.entries(arg).forEach(async ([key, value]) => {
       const setting = await SettingRepository.findOneBy({

@@ -1,24 +1,57 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import { useState, useEffect, ChangeEvent } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen } from '@fortawesome/free-regular-svg-icons';
-import Dialog from '../Components/Dialog';
+import { useState, useEffect } from 'react';
+import { Button } from '@/Components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/Components/ui/dialog';
+import { FolderIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { handleList } from '@/hooks/handlers';
+import { Label } from '@/Components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/Components/ui/select';
 import DebounceInput from '../Components/DebounceInput';
 import { Settings } from '../../interfaces/Settings';
-import Tooltip from '../Components/Tooltip';
 
-function SettingsView({
+export function SettingsButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      className="relative h-10 w-10 sm:w-fit justify-start px-3 py-2"
+      onClick={onClick}
+    >
+      <Cog6ToothIcon className="h-4 w-4 sm:mr-2" />
+      <span className="hidden sm:inline-flex">Settings</span>
+    </Button>
+  );
+}
+
+export function SettingsView({
   onClose,
   settings: initialSettings,
-  appVersion,
+  open,
+  scanDisabled = false,
 }: {
   onClose: () => void;
   settings: Settings;
-  appVersion: string;
+  open: boolean;
+  // eslint-disable-next-line react/require-default-props
+  scanDisabled?: boolean;
 }) {
   const [settings, setSettings] = useState(initialSettings);
   const [oldSettings, setOldSettings] = useState(initialSettings);
+
+  useEffect(() => {
+    setSettings(initialSettings);
+    setOldSettings(initialSettings);
+  }, [initialSettings]);
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -39,8 +72,7 @@ function SettingsView({
     }
   }, [settings, oldSettings]);
 
-  const handleThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const newTheme = e.target.value;
+  const handleThemeChange = (newTheme: string) => {
     if (
       newTheme === 'dark' ||
       (newTheme === 'system' &&
@@ -61,9 +93,10 @@ function SettingsView({
     };
 
     window.electron.ipcRenderer.on('open-path-dialog', (arg) => {
-      setSettings(
-        (old: Settings) => ({ ...old, projectsPath: arg }) as Settings,
-      );
+      if (arg)
+        setSettings(
+          (old: Settings) => ({ ...old, projectsPath: arg }) as Settings,
+        );
     });
 
     window.addEventListener('keydown', handleKeyDown);
@@ -74,99 +107,85 @@ function SettingsView({
   }, [onClose]);
 
   useEffect(() => {
-    window.electron.ipcRenderer.sendMessage('get-version');
-  });
+    window.electron.ipcRenderer.on('open-settings', () => {
+      handleList();
+    });
+  }, []);
+
+  const handleOpen = (b: boolean): void => {
+    if (b) {
+      return;
+    }
+    onClose();
+  };
 
   return (
-    <Dialog onClose={onClose}>
-      <div className="relative flex flex-col w-screen bg-white dark:bg-dark outline-none focus:outline-none mx-auto my-4 max-w-xl">
-        {/* header */}
-        <h1 className="w-11/12 ml-6 my-1 flex-grow text-xl font-bold">
-          Settings
-        </h1>
-        {/* body */}
-        <table className="table-auto mx-2 mb-4">
-          <tbody>
-            <tr>
-              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
-                Projects path
-              </td>
-              <td className="px-4 py-2 flex flex-row space-x-4">
-                <Tooltip message="Open folder">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      window.electron.ipcRenderer.sendMessage(
-                        'open-path-dialog',
-                      )
-                    }
-                  >
-                    <FontAwesomeIcon
-                      icon={faFolderOpen}
-                      className="text-gray-500 dark:text-text-dark"
-                    />
-                  </button>
-                </Tooltip>
-                <DebounceInput
-                  value={settings.projectsPath}
-                  onChange={(value) =>
-                    setSettings((old) => ({ ...old, projectsPath: value }))
-                  }
-                  placeholder="..."
-                  className="flex-grow m-2 bg-inherit text-gray-700 focus:outline-0 dark:text-text-dark"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
-                Theme
-              </td>
-              <td className="px-4 py-2">
-                <select
-                  className="p-1 rounded bg-inherit capitalize hover:bg-gray-200 dark:hover:bg-dark-700 focus:outline-none"
-                  value={settings.theme}
-                  onChange={handleThemeChange}
-                >
-                  {['system', 'light', 'dark'].map((theme) => (
-                    <option key={theme} value={theme}>
-                      {theme}
-                    </option>
-                  ))}
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold">
-                Scan Projects
-              </td>
-              <td className="px-4 py-2">
-                <span className="space-x-2">
-                  <button
-                    type="button"
-                    onClick={handleFastScan}
-                    className="bg-green-400 text-white dark:text-dark rounded-md text-sm px-2"
-                  >
-                    Fast Scan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleFullScan}
-                    className="bg-red-400 text-white rounded-md text-sm px-2"
-                  >
-                    Full Scan
-                  </button>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="mt-5 mx-6 flex flex-row place-content-between text-sm text-gray-400 dark:text-gray-500">
-          <p>Legato v{appVersion}</p>
-          <p>Copyright © 2024 Pablo Ruiz</p>
+    <Dialog open={open} onOpenChange={handleOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="path">Projects path</Label>
+            <div className="col-span-3 flex">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  window.electron.ipcRenderer.sendMessage('open-path-dialog');
+                }}
+                className="border-r-0 rounded-r-none p-3"
+              >
+                <FolderIcon className="h-4 w-4" />
+              </Button>
+
+              <DebounceInput
+                id="path"
+                value={settings.projectsPath}
+                onChange={(value) => {
+                  if (value !== settings.projectsPath)
+                    setSettings((old) => ({ ...old, projectsPath: value }));
+                }}
+                placeholder="Projects path..."
+                className="rounded-l-none"
+              />
+            </div>
+          </div>
+          <div className="grid w-32 max-w-sm items-center gap-1.5">
+            <Label>Theme</Label>
+            <Select value={settings.theme} onValueChange={handleThemeChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={settings.theme} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Scan Projects</Label>
+            <span className="space-x-2 col-span-3">
+              <Button onClick={handleFastScan} disabled={scanDisabled}>
+                Fast Scan
+              </Button>
+              <Button
+                onClick={handleFullScan}
+                variant="secondary"
+                disabled={scanDisabled}
+              >
+                Full Scan
+              </Button>
+            </span>
+          </div>
         </div>
-      </div>
+        <DialogFooter>
+          <p className="text-xs text-muted-foreground/60">
+            Copyright © 2024 Pablo Ruiz
+          </p>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }
-
-export default SettingsView;

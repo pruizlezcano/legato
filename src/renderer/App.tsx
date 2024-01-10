@@ -1,11 +1,21 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import SettingsView from './Views/SettingsView';
-import Table from './Components/Table';
+import { DataTableFilterCommand } from '@/Components/datatable/data-table-filter-command';
+import { Button } from '@/Components/ui/button';
+import { Badge } from '@/Components/ui/badge';
+import { toast } from 'sonner';
+import { Toaster } from '@/Components/ui/sonner';
+import ProjectsTable from '@/Components/ProjectsTable';
+import { LoadingSpinner } from '@/Components/ui/spinner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/Components/ui/tooltip';
+import { SettingsView, SettingsButton } from './Views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
 import { Settings } from '../interfaces/Settings';
@@ -16,13 +26,14 @@ function Hello() {
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({} as Settings);
   const [appVersion, setAppVersion] = useState('');
+  const [filter, setFilter] = useState('');
+  const [scanInProgress, setScanInProgress] = useState(false);
 
   const showScanToast = () => {
     return toast.promise(
       new Promise((resolve, reject) => {
         window.electron.ipcRenderer.once('scan-projects', (arg) => {
           if (arg !== 'OK') {
-            toast.error('Error scanning projects');
             reject(arg);
           }
           logger.info('projects received');
@@ -31,9 +42,17 @@ function Hello() {
         });
       }),
       {
-        loading: 'Scanning projects...',
+        loading: <b>Scanning projects...</b>,
         success: <b>Scanning completed successfully</b>,
-        error: <b>Error while scanning projects</b>,
+        // eslint-disable-next-line react/no-unstable-nested-components
+        error: (err) => {
+          return (
+            <div className="group-[.toaster]:text-destructive-foreground">
+              <b>Error while scanning projects</b>
+              <p>{err}</p>
+            </div>
+          );
+        },
       },
     );
   };
@@ -43,27 +62,29 @@ function Hello() {
   };
 
   useEffect(() => {
+    window.electron.ipcRenderer.on('load-settings', (arg) => {
+      logger.info('loading settings');
+      if (JSON.stringify(settings) !== JSON.stringify(arg))
+        setSettings(arg as Settings);
+    });
+  }, [settings]);
+
+  useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
       setProjects(arg as Project[]);
+      setScanInProgress(false);
     });
 
     window.electron.ipcRenderer.on('scan-started', () => {
+      setScanInProgress(true);
       showScanToast();
     });
 
-    window.electron.ipcRenderer.on('open-settings', () => {
-      setShowSettings(true);
-      handleList();
-    });
-
-    window.electron.ipcRenderer.on('load-settings', (arg) => {
-      logger.info('loading settings');
-      setSettings(arg as Settings);
-    });
-
     window.electron.ipcRenderer.on('error', (arg) => {
-      toast.error(arg as string);
+      toast.error('Error', {
+        description: arg as string,
+      });
     });
 
     window.electron.ipcRenderer.once('get-version', (arg) => {
@@ -71,6 +92,7 @@ function Hello() {
     });
 
     window.electron.ipcRenderer.sendMessage('load-settings');
+    window.electron.ipcRenderer.sendMessage('get-version');
     handleList();
   }, []);
 
@@ -88,62 +110,60 @@ function Hello() {
 
   return (
     <div className="overflow-x-auto w-full flex flex-wrap dark:text-white">
-      <div className="flex justify-start items-center p-5 pr-10">
-        <h1 className="text-2xl font-bold">Legato</h1>
-        <span className="ml-4 font-medium py-1 px-2 bg-gray-200 rounded-full text-xs dark:text-dark">
-          {projects.length} projects
-        </span>
-        <button
-          type="button"
-          className="ml-4 font-medium py-1 px-3 bg-gray-200 rounded-full text-xs dark:text-dark"
-          onClick={() => setShowSettings(true)}
-        >
-          <FontAwesomeIcon icon={faGear} className="pr-1" />
-          Settings
-        </button>
+      <div className="flex items-center my-4 mx-6 justify-between select-none">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button type="button" onClick={() => setFilter('')}>
+                <h1 className="text-3xl font-bold tracking-tight xl:text-4xl">
+                  Legato
+                </h1>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reset search filter</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <div className="flex space-x-2 ml-2">
+          <Badge variant="outline">v{appVersion}</Badge>
+          <Badge variant="outline">{projects.length} projects loaded</Badge>
+        </div>
+        <div className="absolute right-0 top-0 mt-4 mr-6 flex items-center space-x-2">
+          <DataTableFilterCommand value={filter} onEnter={setFilter} />
+          <SettingsButton onClick={() => setShowSettings(true)} />
+        </div>
       </div>
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full pt-60">
           <p className="text-2xl font-bold">No projects found</p>
-          <p className="text-slate-700 dark:text-text-dark">
-            Check your projects folder in the settings and scan again
+          <p className="mb-6 text-muted-foreground">
+            Check your projects folder and scan again
           </p>
-          <div className="flex flex-row">
-            <button
-              type="button"
-              className="font-medium py-1 px-2 bg-blue-100 rounded-full text-xs text-blue-800 m-1 focus:outline-none"
-              onClick={() => setShowSettings(true)}
-            >
-              Open Settings
-            </button>
-            <button
-              type="button"
-              className="font-medium py-1 px-2 bg-green-100 rounded-full text-xs text-green-800 m-1 focus:outline-none"
+          <div className="flex flex-row space-x-3">
+            <Button onClick={() => setShowSettings(true)}>Open Settings</Button>
+            <Button
+              variant="secondary"
               onClick={handleFastScan}
+              disabled={scanInProgress}
             >
               Run Fast Scan
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <Table content={projects} />
+        <ProjectsTable content={projects} filter={filter} />
       )}
-      {showSettings ? (
-        <SettingsView
-          settings={settings}
-          onClose={() => {
-            window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
-            setShowSettings(false);
-          }}
-          appVersion={appVersion}
-        />
-      ) : null}
-      <Toaster
-        toastOptions={{
-          className:
-            'bg-white dark:bg-dark-900 text-slate-700 dark:text-text-dark',
+      <SettingsView
+        settings={settings}
+        onClose={() => {
+          setShowSettings(false);
+          window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
         }}
+        open={showSettings}
+        scanDisabled={scanInProgress}
       />
+      <Toaster position="top-center" loadingIcon={<LoadingSpinner />} />
     </div>
   );
 }
