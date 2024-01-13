@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectSettings, updateSettings } from '@/store/Slices/settingsSlice';
 import DebounceInput from '../Components/DebounceInput';
 import { Settings } from '../../interfaces/Settings';
 
@@ -35,23 +37,16 @@ export function SettingsButton({ onClick }: { onClick: () => void }) {
 
 export function SettingsView({
   onClose,
-  settings: initialSettings,
   open,
   scanDisabled = false,
 }: {
   onClose: () => void;
-  settings: Settings;
   open: boolean;
   // eslint-disable-next-line react/require-default-props
   scanDisabled?: boolean;
 }) {
-  const [settings, setSettings] = useState(initialSettings);
-  const [oldSettings, setOldSettings] = useState(initialSettings);
-
-  useEffect(() => {
-    setSettings(initialSettings);
-    setOldSettings(initialSettings);
-  }, [initialSettings]);
+  const dispatch = useDispatch();
+  const settings = useSelector(selectSettings) as Settings;
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -60,17 +55,6 @@ export function SettingsView({
   const handleFullScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'full');
   };
-
-  const saveSettings = (newSettings: Settings) => {
-    window.electron.ipcRenderer.sendMessage('save-settings', newSettings);
-  };
-
-  useEffect(() => {
-    if (JSON.stringify(settings) !== JSON.stringify(oldSettings)) {
-      saveSettings(settings);
-      setOldSettings(settings);
-    }
-  }, [settings, oldSettings]);
 
   const handleThemeChange = (newTheme: string) => {
     if (
@@ -82,7 +66,7 @@ export function SettingsView({
     } else {
       document.documentElement.classList.remove('dark');
     }
-    setSettings((old) => ({ ...old, theme: newTheme }));
+    dispatch(updateSettings({ theme: newTheme }));
   };
 
   useEffect(() => {
@@ -93,10 +77,7 @@ export function SettingsView({
     };
 
     window.electron.ipcRenderer.on('open-path-dialog', (arg) => {
-      if (arg)
-        setSettings(
-          (old: Settings) => ({ ...old, projectsPath: arg }) as Settings,
-        );
+      if (arg) dispatch(updateSettings({ projectsPath: arg }));
     });
 
     window.addEventListener('keydown', handleKeyDown);
@@ -104,7 +85,7 @@ export function SettingsView({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, dispatch]);
 
   useEffect(() => {
     window.electron.ipcRenderer.on('open-settings', () => {
@@ -144,7 +125,7 @@ export function SettingsView({
                 value={settings.projectsPath}
                 onChange={(value) => {
                   if (value !== settings.projectsPath)
-                    setSettings((old) => ({ ...old, projectsPath: value }));
+                    dispatch(updateSettings({ projectsPath: value }));
                 }}
                 placeholder="Projects path..."
                 className="rounded-l-none"

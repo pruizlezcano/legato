@@ -15,6 +15,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/Components/ui/tooltip';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
+import { loadProjects, selectProjects } from '@/store/Slices/projectsSlice';
 import { SettingsView, SettingsButton } from './Views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
@@ -22,12 +25,15 @@ import { Settings } from '../interfaces/Settings';
 import { handleList } from './hooks/handlers';
 
 function Hello() {
-  const [projects, setProjects] = useState<Project[]>([]);
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState({} as Settings);
   const [appVersion, setAppVersion] = useState('');
   const [filter, setFilter] = useState('');
   const [scanInProgress, setScanInProgress] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const settings = useSelector(selectSettings);
+  const projects = useSelector(selectProjects);
+
+  const dispatch = useDispatch();
 
   const showScanToast = () => {
     return toast.promise(
@@ -64,18 +70,17 @@ function Hello() {
   useEffect(() => {
     window.electron.ipcRenderer.on('load-settings', (arg) => {
       logger.info('loading settings');
-      if (JSON.stringify(settings) !== JSON.stringify(arg))
-        setSettings(arg as Settings);
+      dispatch(loadSettings(arg as Settings));
     });
-  }, [settings]);
-
-  useEffect(() => {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
-      setProjects(arg as Project[]);
+      dispatch(loadProjects(arg as Project[]));
       setScanInProgress(false);
+      setLoading(false);
     });
+  }, [dispatch]);
 
+  useEffect(() => {
     window.electron.ipcRenderer.on('scan-started', () => {
       setScanInProgress(true);
       showScanToast();
@@ -92,8 +97,8 @@ function Hello() {
     });
 
     window.electron.ipcRenderer.sendMessage('load-settings');
-    window.electron.ipcRenderer.sendMessage('get-version');
     handleList();
+    window.electron.ipcRenderer.sendMessage('get-version');
   }, []);
 
   useEffect(() => {
@@ -134,7 +139,11 @@ function Hello() {
           <SettingsButton onClick={() => setShowSettings(true)} />
         </div>
       </div>
-      {projects.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center w-full pt-60">
+          <p className="text-2xl font-bold">Loading...</p>
+        </div>
+      ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full pt-60">
           <p className="text-2xl font-bold">No projects found</p>
           <p className="mb-6 text-muted-foreground">
@@ -152,17 +161,18 @@ function Hello() {
           </div>
         </div>
       ) : (
-        <ProjectsTable content={projects} filter={filter} />
+        <>
+          <ProjectsTable filter={filter} />
+          <SettingsView
+            onClose={() => {
+              setShowSettings(false);
+              window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
+            }}
+            open={showSettings}
+            scanDisabled={scanInProgress}
+          />
+        </>
       )}
-      <SettingsView
-        settings={settings}
-        onClose={() => {
-          setShowSettings(false);
-          window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
-        }}
-        open={showSettings}
-        scanDisabled={scanInProgress}
-      />
       <Toaster position="top-center" loadingIcon={<LoadingSpinner />} />
     </div>
   );

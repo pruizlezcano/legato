@@ -5,26 +5,25 @@ import { Label } from '@/Components/ui/label';
 import { Badge } from '@/Components/ui/badge';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  selectSelectedProject,
+  updateProject,
+} from '@/store/Slices/projectsSlice';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
-import {
-  handleOpenInAbleton,
-  handleOpenInFinder,
-  handleProjectUpdate,
-} from '../hooks/handlers';
+import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
 import TagInput from '../Components/TagInput';
 
 function ProjectView({
-  project: initialProject,
   onClose,
   open,
 }: {
-  project: Project;
   onClose: () => void;
   open: boolean;
 }) {
-  const [project, setProject] = useState(initialProject);
-  const [oldProject, setOldProject] = useState(initialProject);
+  const dispatch = useDispatch();
+  const project = useSelector(selectSelectedProject) as Project;
   const [isOpen, setIsOpen] = useState(open);
 
   const handleClose = useCallback(() => {
@@ -37,13 +36,6 @@ function ProjectView({
   useEffect(() => {
     setIsOpen(open);
   }, [open]);
-
-  useEffect(() => {
-    if (JSON.stringify(project) !== JSON.stringify(oldProject)) {
-      handleProjectUpdate(project);
-      setOldProject(project);
-    }
-  }, [project, oldProject]);
 
   useEffect(() => {
     const handleKeyDown = (e: { key: string }) => {
@@ -72,8 +64,7 @@ function ProjectView({
           <DebounceInput
             value={project.title}
             onChange={(value: string) => {
-              if (value !== project.title)
-                setProject((old) => ({ ...old, title: value }));
+              dispatch(updateProject({ ...project, title: value }));
             }}
             placeholder="Title..."
             className="w-11/12 p-0 border-none shadow-none text-2xl font-semibold focus:ring-0 focus:outline-none"
@@ -84,7 +75,9 @@ function ProjectView({
             <span className="space-x-2 select-none">
               <Badge
                 onClick={() => {
-                  setProject((old) => ({ ...old, favorite: !old.favorite }));
+                  dispatch(
+                    updateProject({ ...project, favorite: !project.favorite }),
+                  );
                 }}
                 variant="outline"
                 className="cursor-pointer"
@@ -103,7 +96,9 @@ function ProjectView({
               </Badge>
               <Badge
                 onClick={() => {
-                  setProject((old) => ({ ...old, hidden: !old.hidden }));
+                  dispatch(
+                    updateProject({ ...project, hidden: !project.hidden }),
+                  );
                 }}
                 variant="outline"
                 className="cursor-pointer"
@@ -130,8 +125,7 @@ function ProjectView({
                 value={project.bpm ?? ''}
                 onChange={(value: string) => {
                   const bpm = parseInt(value, 10);
-                  if (bpm !== project.bpm)
-                    setProject((old) => ({ ...old, bpm }));
+                  dispatch(updateProject({ ...project, bpm }));
                 }}
                 placeholder="BPM..."
                 className="w-32"
@@ -144,8 +138,7 @@ function ProjectView({
               value={project.genre ?? ''}
               onChange={(value: string) => {
                 const genre = value;
-                if (genre !== project.genre)
-                  setProject((old) => ({ ...old, genre }));
+                dispatch(updateProject({ ...project, genre }));
               }}
               placeholder="Genre..."
               className="w-32"
@@ -157,10 +150,7 @@ function ProjectView({
               <TagInput
                 value={project.tagNames ?? []}
                 onChange={(value: string[]) => {
-                  if (
-                    JSON.stringify(value) !== JSON.stringify(project.tagNames)
-                  )
-                    setProject((old) => ({ ...old, tagNames: value }));
+                  dispatch(updateProject({ ...project, tagNames: value }));
                 }}
                 className="w-full bg-inherit focus:outline-none"
               />

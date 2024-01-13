@@ -47,6 +47,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
+import {
+  updateProject,
+  selectProjects,
+  selectProjectById,
+} from '@/store/Slices/projectsSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -54,7 +60,6 @@ import {
   handleList,
   handleOpenInAbleton,
   handleOpenInFinder,
-  handleProjectUpdate,
 } from '../hooks/handlers';
 import EditableTagCell from './EditableTagCell';
 import { DataTableColumnHeader } from './datatable/data-table-column-header';
@@ -69,22 +74,10 @@ declare module '@tanstack/table-core' {
 }
 
 // eslint-disable-next-line react/function-component-definition
-const ProjectsTable = ({
-  content,
-  filter,
-}: {
-  content: Project[];
-  filter: string;
-}) => {
-  const [data, setData] = useState<Project[]>([]);
+const ProjectsTable = ({ filter }: { filter: string }) => {
+  const dispatch = useDispatch();
+  const data: Project[] = useSelector(selectProjects);
   const [showProject, setshowProject] = useState(false);
-  const [selectedProject, setSelectedProject] = useState({} as Project);
-
-  useEffect(() => {
-    if (content) {
-      setData(content);
-    }
-  }, [content]);
 
   const [filterQuery, setFilterQuery] = useState(filter);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -92,25 +85,11 @@ const ProjectsTable = ({
   const columnHelper = createColumnHelper();
 
   const handleFavorite = (project: Project) => {
-    project.favorite = !project.favorite;
-    handleProjectUpdate(project);
-    setData((old) =>
-      old.map((p) => {
-        if (p.id === project.id) return project;
-        return p;
-      }),
-    );
+    dispatch(updateProject({ ...project, hidden: !project.favorite }));
   };
 
   const handleHide = (project: Project) => {
-    project.hidden = !project.hidden;
-    handleProjectUpdate(project);
-    setData((old) =>
-      old.map((p) => {
-        if (p.id === project.id) return project;
-        return p;
-      }),
-    );
+    dispatch(updateProject({ ...project, hidden: !project.hidden }));
   };
 
   const columns: ColumnDef<Project>[] = [
@@ -288,7 +267,7 @@ const ProjectsTable = ({
             <DropdownMenuContent>
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedProject(project);
+                  dispatch(selectProjectById(project.id));
                   setshowProject(true);
                 }}
               >
@@ -385,19 +364,7 @@ const ProjectsTable = ({
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
         skipAutoResetPageIndex();
-        setData((old) =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              const updatedRow = {
-                ...old[rowIndex]!,
-                [columnId]: value,
-              };
-              handleProjectUpdate(updatedRow);
-              return updatedRow;
-            }
-            return row;
-          }),
-        );
+        dispatch(updateProject({ ...data[rowIndex]!, [columnId]: value }));
       },
     },
     filterFns: {
@@ -542,7 +509,6 @@ const ProjectsTable = ({
       </div>
       {showProject && (
         <ProjectView
-          project={selectedProject}
           onClose={() => {
             setshowProject(false);
             handleList();
