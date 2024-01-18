@@ -227,6 +227,7 @@ ipcMain.on('open-project', async (event, arg: number) => {
     shell.openPath(project!.path);
     project!.modifiedAt = new Date();
     await ProjectRepository.save(project!);
+    event.sender.send('project-updated', project);
     return event.reply('open-project', 'OK');
   } catch (error: any) {
     logger.error(`Error launching project: ${error}`);

@@ -17,7 +17,11 @@ import {
 } from '@/Components/ui/tooltip';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
-import { loadProjects, selectProjects } from '@/store/Slices/projectsSlice';
+import {
+  loadProjects,
+  selectProjects,
+  loadProject,
+} from '@/store/Slices/projectsSlice';
 import { SettingsView, SettingsButton } from './Views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
@@ -48,7 +52,12 @@ function Hello() {
         });
       }),
       {
-        loading: <b>Scanning projects...</b>,
+        loading: (
+          <>
+            <LoadingSpinner />
+            <b>Scanning projects...</b>
+          </>
+        ),
         success: <b>Scanning completed successfully</b>,
         // eslint-disable-next-line react/no-unstable-nested-components
         error: (err) => {
@@ -72,11 +81,16 @@ function Hello() {
       logger.info('loading settings');
       dispatch(loadSettings(arg as Settings));
     });
+
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
       dispatch(loadProjects(arg as Project[]));
       setScanInProgress(false);
       setLoading(false);
+    });
+
+    window.electron.ipcRenderer.on('project-updated', (arg) => {
+      dispatch(loadProject(arg as Project));
     });
   }, [dispatch]);
 
@@ -164,16 +178,13 @@ function Hello() {
         <>
           <ProjectsTable filter={filter} />
           <SettingsView
-            onClose={() => {
-              setShowSettings(false);
-              window.electron.ipcRenderer.sendMessage('load-settings'); // reload settings
-            }}
+            onClose={() => setShowSettings(false)}
             open={showSettings}
             scanDisabled={scanInProgress}
           />
         </>
       )}
-      <Toaster position="top-center" loadingIcon={<LoadingSpinner />} />
+      <Toaster position="top-center" />
     </div>
   );
 }
