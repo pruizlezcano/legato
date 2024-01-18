@@ -34,6 +34,8 @@ class AppUpdater {
   }
 }
 
+let autoUpdatErevent: any = null;
+
 let mainWindow: BrowserWindow | null = null;
 
 const processProject = async (project: Path, update = false) => {
@@ -360,24 +362,26 @@ ipcMain.on('get-version', (event) => {
 });
 
 autoUpdater.on('update-available', async (event) => {
+  logger.info('There is a new version available');
+  autoUpdatErevent = event;
+});
+
+autoUpdater.on('error', async (message) => {
+  logger.error('There was a problem updating the application, showing dialog');
+  logger.error(message);
   const { response } = await dialog.showMessageBox({
     type: 'info',
     buttons: ['Discard', 'Go to download page'],
     title: 'Application Update',
     message: (process.platform === 'win32'
-      ? event.releaseNotes
-      : event.releaseName) as string,
+      ? autoUpdatErevent.releaseNotes
+      : autoUpdatErevent.releaseName) as string,
     detail: 'There is a new version available, do you want to download it now?',
   });
   if (response === 1)
     shell.openExternal(
       'https://github.com/pruizlezcano/legato/releases/latest',
     );
-});
-
-autoUpdater.on('error', (message) => {
-  logger.error('There was a problem updating the application');
-  logger.error(message);
 });
 
 if (process.env.NODE_ENV === 'production') {
