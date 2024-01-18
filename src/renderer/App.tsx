@@ -175,15 +175,13 @@ function Hello() {
           </div>
         </div>
       ) : (
-        <>
-          <ProjectsTable filter={filter} />
-          <SettingsView
-            onClose={() => setShowSettings(false)}
-            open={showSettings}
-            scanDisabled={scanInProgress}
-          />
-        </>
+        <ProjectsTable filter={filter} />
       )}
+      <SettingsView
+        onClose={() => setShowSettings(false)}
+        open={showSettings}
+        scanDisabled={scanInProgress}
+      />
       <Toaster position="top-center" />
     </div>
   );
