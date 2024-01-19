@@ -56,11 +56,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
-import {
-  handleList,
-  handleOpenInAbleton,
-  handleOpenInFinder,
-} from '../hooks/handlers';
+import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
 import EditableTagCell from './EditableTagCell';
 import { DataTableColumnHeader } from './datatable/data-table-column-header';
 import { DataTablePagination } from './datatable/data-table-pagination';
@@ -130,6 +126,25 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       enableGlobalFilter: false,
       size: 30,
       filterFn: 'numberFilter',
+    }) as ColumnDef<Project>,
+    columnHelper.accessor('scale', {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Scale" />
+      ),
+      cell: ({ row, column, table }) => {
+        const project = row.original as Project;
+        return (
+          <EditableCell
+            value={project.scale ?? ''}
+            row={{ index: row.index }}
+            column={{ id: column.id }}
+            table={table}
+            placeholder="Add Scale"
+          />
+        );
+      },
+      enableGlobalFilter: false,
+      size: 2000,
     }) as ColumnDef<Project>,
     columnHelper.accessor('genre', {
       header: ({ column }) => (
@@ -508,13 +523,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         <DataTablePagination table={table} />
       </div>
       {showProject && (
-        <ProjectView
-          onClose={() => {
-            setshowProject(false);
-            handleList();
-          }}
-          open={showProject}
-        />
+        <ProjectView onClose={() => setshowProject(false)} open={showProject} />
       )}
     </>
   );

@@ -133,6 +133,19 @@ function ProjectView({
             </div>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="name">Scale</Label>
+            <div className="col-span-3 flex">
+              <DebounceInput
+                value={project.scale ?? ''}
+                onChange={(value: string) => {
+                  dispatch(updateProject({ ...project, scale: value }));
+                }}
+                placeholder="Add Scale..."
+                className="w-32"
+              />
+            </div>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Genre</Label>
             <DebounceInput
               value={project.genre ?? ''}

@@ -52,6 +52,7 @@ const projectSlice = createSlice({
           }
         });
         if (update) {
+          state.selectedProject = existingProject;
           window.electron.ipcRenderer.sendMessage(
             'update-project',
             JSON.parse(JSON.stringify(existingProject)),

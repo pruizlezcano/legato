@@ -176,7 +176,7 @@ ipcMain.on('scan-projects', async (event, arg) => {
     key: 'projectsPath',
   });
   if (!projectsPath!.value) {
-    logger.warning('Projects path not set');
+    logger.error('Projects path not set');
     isScanning = false;
     return event.reply('scan-projects', 'Projects path not set');
   }
@@ -264,6 +264,7 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       project.tags = [];
       project.favorite = arg.favorite;
       project.hidden = arg.hidden;
+      project.scale = arg.scale;
       for (let i = 0; i < arg.tagNames!.length; i += 1) {
         let tag = await TagRepository.findOneBy({
           name: arg.tagNames![i],

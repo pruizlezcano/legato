@@ -17,7 +17,8 @@ export type Channels =
   | 'log-warn'
   | 'log-error'
   | 'error'
-  | 'get-version';
+  | 'get-version'
+  | 'project-updated';
 
 const electronHandler = {
   ipcRenderer: {

@@ -44,4 +44,7 @@ export default class Project {
 
   @Column()
   modifiedAt!: Date;
+
+  @Column({ nullable: true })
+  scale?: string;
 }
