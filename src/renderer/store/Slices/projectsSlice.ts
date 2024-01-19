@@ -37,7 +37,6 @@ const projectSlice = createSlice({
         (project: Project) => project.id === action.payload.id,
       );
       if (existingProject) {
-        let update = false;
         Object.keys(action.payload).forEach((key) => {
           if (
             key !== 'id' &&
@@ -48,17 +47,17 @@ const projectSlice = createSlice({
             existingProject[key as keyof Project] = action.payload[
               key as keyof Project
             ] as never;
-            update = true;
           }
         });
-        if (update) {
-          state.selectedProject = existingProject;
-          window.electron.ipcRenderer.sendMessage(
-            'update-project',
-            JSON.parse(JSON.stringify(existingProject)),
-          );
-        }
+        state.selectedProject = existingProject;
       }
+    },
+    saveProject(state, action: PayloadAction<Project>) {
+      updateProject(action.payload);
+      window.electron.ipcRenderer.sendMessage(
+        'update-project',
+        JSON.parse(JSON.stringify(action.payload)),
+      );
     },
     selectProjectById(state, action: PayloadAction<number>) {
       const id = action.payload;
@@ -68,8 +67,13 @@ const projectSlice = createSlice({
   },
 });
 
-export const { loadProjects, loadProject, updateProject, selectProjectById } =
-  projectSlice.actions;
+export const {
+  loadProjects,
+  loadProject,
+  updateProject,
+  selectProjectById,
+  saveProject,
+} = projectSlice.actions;
 
 export default projectSlice.reducer;
 

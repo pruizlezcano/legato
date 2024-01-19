@@ -48,7 +48,7 @@ import {
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 import {
-  updateProject,
+  saveProject,
   selectProjects,
   selectProjectById,
 } from '@/store/Slices/projectsSlice';
@@ -81,11 +81,11 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
   const columnHelper = createColumnHelper();
 
   const handleFavorite = (project: Project) => {
-    dispatch(updateProject({ ...project, hidden: !project.favorite }));
+    dispatch(saveProject({ ...project, hidden: !project.favorite }));
   };
 
   const handleHide = (project: Project) => {
-    dispatch(updateProject({ ...project, hidden: !project.hidden }));
+    dispatch(saveProject({ ...project, hidden: !project.hidden }));
   };
 
   const columns: ColumnDef<Project>[] = [
@@ -379,7 +379,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
         skipAutoResetPageIndex();
-        dispatch(updateProject({ ...data[rowIndex]!, [columnId]: value }));
+        dispatch(saveProject({ ...data[rowIndex]!, [columnId]: value }));
       },
     },
     filterFns: {

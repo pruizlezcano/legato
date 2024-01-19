@@ -47,4 +47,7 @@ export default class Project {
 
   @Column({ nullable: true })
   scale?: string;
+
+  @Column({ nullable: true })
+  notes?: string;
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/Components/ui/input';
@@ -92,6 +91,7 @@ const TagInput = ({
     const down = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        e.stopPropagation();
         if (inputValue) handleInputConfirm();
         else if (editInputValue) handleEditInputConfirm();
       }

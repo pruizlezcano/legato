@@ -31,6 +31,8 @@ function DebounceInput({
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
       setInputValue((e.target as HTMLInputElement).value);
       onChange((e.target as HTMLInputElement).value);
       (e.target as HTMLInputElement).blur();

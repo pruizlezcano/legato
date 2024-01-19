@@ -9,7 +9,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   selectSelectedProject,
   updateProject,
+  saveProject,
 } from '@/store/Slices/projectsSlice';
+import { Textarea } from '@/Components/ui/textarea';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -64,7 +66,7 @@ function ProjectView({
           <DebounceInput
             value={project.title}
             onChange={(value: string) => {
-              dispatch(updateProject({ ...project, title: value }));
+              dispatch(saveProject({ ...project, title: value }));
             }}
             placeholder="Title..."
             className="w-11/12 p-0 border-none shadow-none text-2xl font-semibold focus:ring-0 focus:outline-none"
@@ -76,7 +78,7 @@ function ProjectView({
               <Badge
                 onClick={() => {
                   dispatch(
-                    updateProject({ ...project, favorite: !project.favorite }),
+                    saveProject({ ...project, favorite: !project.favorite }),
                   );
                 }}
                 variant="outline"
@@ -97,7 +99,7 @@ function ProjectView({
               <Badge
                 onClick={() => {
                   dispatch(
-                    updateProject({ ...project, hidden: !project.hidden }),
+                    saveProject({ ...project, hidden: !project.hidden }),
                   );
                 }}
                 variant="outline"
@@ -125,7 +127,7 @@ function ProjectView({
                 value={project.bpm ?? ''}
                 onChange={(value: string) => {
                   const bpm = parseInt(value, 10);
-                  dispatch(updateProject({ ...project, bpm }));
+                  dispatch(saveProject({ ...project, bpm }));
                 }}
                 placeholder="BPM..."
                 className="w-32"
@@ -138,7 +140,7 @@ function ProjectView({
               <DebounceInput
                 value={project.scale ?? ''}
                 onChange={(value: string) => {
-                  dispatch(updateProject({ ...project, scale: value }));
+                  dispatch(saveProject({ ...project, scale: value }));
                 }}
                 placeholder="Add Scale..."
                 className="w-32"
@@ -151,7 +153,7 @@ function ProjectView({
               value={project.genre ?? ''}
               onChange={(value: string) => {
                 const genre = value;
-                dispatch(updateProject({ ...project, genre }));
+                dispatch(saveProject({ ...project, genre }));
               }}
               placeholder="Genre..."
               className="w-32"
@@ -163,27 +165,34 @@ function ProjectView({
               <TagInput
                 value={project.tagNames ?? []}
                 onChange={(value: string[]) => {
-                  dispatch(updateProject({ ...project, tagNames: value }));
+                  dispatch(saveProject({ ...project, tagNames: value }));
                 }}
                 className="w-full bg-inherit focus:outline-none"
               />
             </span>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Notes</Label>
+            <Textarea
+              value={project.notes ?? ''}
+              onBlur={(e) => {
+                dispatch(saveProject({ ...project, notes: e.target.value }));
+              }}
+              onChange={(e) => {
+                dispatch(updateProject({ ...project, notes: e.target.value }));
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation();
+                }
+              }}
+              placeholder="Add Notes..."
+              className="w-full h-32"
+            />
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Path</Label>
             <p className="text-muted-foreground">{project.path}</p>
-          </div>
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label>Last modified</Label>
-            <p className="text-muted-foreground">
-              {project.modifiedAt.toString()}
-            </p>
-          </div>
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label>Added</Label>
-            <p className="text-muted-foreground">
-              {project.createdAt.toString()}
-            </p>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Open in</Label>
@@ -202,6 +211,18 @@ function ProjectView({
                 Finder
               </Badge>
             </span>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Last modified</Label>
+            <p className="text-muted-foreground">
+              {project.modifiedAt.toString()}
+            </p>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Added</Label>
+            <p className="text-muted-foreground">
+              {project.createdAt.toString()}
+            </p>
           </div>
         </div>
       </SheetContent>
