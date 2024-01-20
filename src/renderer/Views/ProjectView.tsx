@@ -4,7 +4,14 @@ import { Sheet, SheetContent, SheetHeader } from '@/Components/ui/sheet';
 import { Label } from '@/Components/ui/label';
 import { Badge } from '@/Components/ui/badge';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import { StarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import {
+  StarIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ArrowRightCircleIcon,
+  ClockIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectSelectedProject,
@@ -12,6 +19,13 @@ import {
   saveProject,
 } from '@/store/Slices/projectsSlice';
 import { Textarea } from '@/Components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/Components/ui/select';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -211,6 +225,39 @@ function ProjectView({
                 Finder
               </Badge>
             </span>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Progress</Label>
+            <Select
+              value={project.progress}
+              onValueChange={(newValue: Project['progress']) =>
+                dispatch(updateProject({ ...project, progress: newValue }))
+              }
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Select Progress" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todo">
+                  <span className="flex flex-row">
+                    <ArrowRightCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                    To Do
+                  </span>
+                </SelectItem>
+                <SelectItem value="inProgress">
+                  <span className="flex flex-row">
+                    <ClockIcon className="h-4 w-4 mr-1 mt-0.5" />
+                    In Progress
+                  </span>
+                </SelectItem>
+                <SelectItem value="Finished">
+                  <span className="flex flex-row">
+                    <CheckCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                    Finished
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Last modified</Label>

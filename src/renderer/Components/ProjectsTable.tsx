@@ -31,6 +31,9 @@ import {
   EyeSlashIcon,
   InformationCircleIcon,
   FolderIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  ArrowRightCircleIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
@@ -53,6 +56,7 @@ import {
   selectProjectById,
 } from '@/store/Slices/projectsSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { SelectItem } from '@/Components/ui/select';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -60,6 +64,7 @@ import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
 import EditableTagCell from './EditableTagCell';
 import { DataTableColumnHeader } from './datatable/data-table-column-header';
 import { DataTablePagination } from './datatable/data-table-pagination';
+import EditableSelectCell from './EditableSelectCell';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -184,6 +189,44 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       size: 10000,
       enableGlobalFilter: false,
       filterFn: 'arrayFilter',
+    }) as ColumnDef<Project>,
+    columnHelper.accessor('progress', {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Progress" />
+      ),
+      cell: ({ row, column, table }) => {
+        const project = row.original as Project;
+        return (
+          <EditableSelectCell
+            value={project.progress}
+            row={{ index: row.index }}
+            column={{ id: column.id }}
+            table={table}
+            className="w-32"
+          >
+            <SelectItem value="todo">
+              <span className="flex flex-row">
+                <ArrowRightCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                To Do
+              </span>
+            </SelectItem>
+            <SelectItem value="inProgress">
+              <span className="flex flex-row">
+                <ClockIcon className="h-4 w-4 mr-1 mt-0.5" />
+                In Progress
+              </span>
+            </SelectItem>
+            <SelectItem value="Finished">
+              <span className="flex flex-row">
+                <CheckCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                Finished
+              </span>
+            </SelectItem>
+          </EditableSelectCell>
+        );
+      },
+      enableSorting: true,
+      enableGlobalFilter: false,
     }) as ColumnDef<Project>,
     columnHelper.accessor('modifiedAt', {
       header: ({ column }) => (

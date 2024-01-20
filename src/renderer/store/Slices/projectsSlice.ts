@@ -53,6 +53,7 @@ const projectSlice = createSlice({
       }
     },
     saveProject(state, action: PayloadAction<Project>) {
+      // eslint-disable-next-line no-use-before-define
       updateProject(action.payload);
       window.electron.ipcRenderer.sendMessage(
         'update-project',
