@@ -53,4 +53,14 @@ export default class Project {
 
   @Column({ default: 'todo' })
   progress!: 'todo' | 'inProgress' | 'finished';
+
+  @Column({ nullable: true })
+  version?: string;
+
+  @Column({ nullable: true, type: 'json' })
+  tracks?: {
+    name: string;
+    pluginNames: string[];
+    type: 'midi' | 'audio' | 'return';
+  }[];
 }

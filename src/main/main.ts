@@ -14,14 +14,13 @@ import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { Path, glob } from 'glob';
 import fs from 'fs';
-import zlib from 'zlib';
-import { XMLParser } from 'fast-xml-parser';
 import { Repository } from 'typeorm';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
 import { Project, Setting, Tag } from '../db/entity';
 import logger from './logger';
+import { AbletonParser } from './abletonParser';
 
 let ProjectRepository: Repository<Project>;
 let SettingRepository: Repository<Setting>;
@@ -48,19 +47,10 @@ const processProject = async (project: Path, update = false) => {
     .replace(/\.|-|_/g, ' ')
     .trim();
   const projectFile = project.fullpath();
-  const zippedContent = fs.readFileSync(projectFile);
-  const content = zlib.gunzipSync(zippedContent).toString('utf-8');
-
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: '',
-  });
-  const jObj = parser.parse(content);
-  const bpm =
-    parseFloat(
-      jObj?.Ableton?.LiveSet?.MasterTrack?.DeviceChain?.Mixer?.Tempo?.Manual
-        ?.Value,
-    ) || null;
+  const parser = new AbletonParser(projectFile);
+  const { version, bpm, midiTracks, audioTracks, returnTracks } =
+    parser.parse();
+  const tracks = [...midiTracks, ...audioTracks, ...returnTracks];
 
   let p = null;
 
@@ -71,6 +61,8 @@ const processProject = async (project: Path, update = false) => {
 
     if (p) {
       p.bpm = bpm !== null ? bpm : 0;
+      p.version = version;
+      p.tracks = tracks;
       p.modifiedAt = new Date(mtimeMs || 0);
       await ProjectRepository.save(p);
     }
@@ -83,6 +75,8 @@ const processProject = async (project: Path, update = false) => {
   p.file = name;
   p.path = projectFile;
   p.bpm = bpm !== null ? bpm : 0;
+  p.version = version;
+  p.tracks = tracks;
   p.modifiedAt = new Date(mtimeMs || 0);
   await ProjectRepository.save(p);
 

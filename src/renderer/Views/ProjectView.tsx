@@ -26,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/Components/ui/accordion';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -258,6 +264,47 @@ function ProjectView({
                 </SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Tracks</Label>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Audio Tracks</AccordionTrigger>
+                <AccordionContent>
+                  {project
+                    .tracks!.filter((track) => track.type === 'audio')
+                    .map((track) => track.name)
+                    .join(', ')}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Midi Tracks</AccordionTrigger>
+                <AccordionContent>
+                  {project
+                    .tracks!.filter((track) => track.type === 'midi')
+                    .map((track) => track.name)
+                    .join(', ')}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Return Tracks</AccordionTrigger>
+                <AccordionContent>
+                  {project
+                    .tracks!.filter((track) => track.type === 'return')
+                    .map((track) => track.name)
+                    .join(', ')}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4">
+                <AccordionTrigger>Plugins</AccordionTrigger>
+                <AccordionContent>
+                  {project
+                    .tracks!.map((track) => track.pluginNames)
+                    .filter((plugins) => plugins.length)
+                    .join(', ')}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Last modified</Label>
