@@ -214,9 +214,11 @@ ipcMain.on('list-projects', async (event) => {
 ipcMain.on('open-project', async (event, arg: number) => {
   logger.info(`Launching project ${arg}`);
   try {
-    const project = await ProjectRepository.findOneBy({
-      id: arg,
+    const project = await ProjectRepository.findOne({
+      where: { id: arg },
+      relations: ['tags'],
     });
+    project!.tagNames = project!.tags!.map((tag) => tag.name);
     checkFile(project!.path);
     shell.openPath(project!.path);
     project!.modifiedAt = new Date();
@@ -279,7 +281,6 @@ ipcMain.on('update-project', async (event, arg: Project) => {
     } else {
       logger.warn(`Project ${arg.id} not found`);
     }
-
     return event.reply('update-project', project);
   } catch (error) {
     logger.error(`Error updating project: ${error}`);
@@ -397,7 +398,7 @@ if (isDebug) {
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
+  const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
 
   return installer
     .default(

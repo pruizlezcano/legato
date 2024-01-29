@@ -53,8 +53,10 @@ const projectSlice = createSlice({
       }
     },
     saveProject(state, action: PayloadAction<Project>) {
-      // eslint-disable-next-line no-use-before-define
-      updateProject(action.payload);
+      projectSlice.caseReducers.updateProject(state, {
+        type: 'proects/updateProject',
+        payload: action.payload,
+      });
       window.electron.ipcRenderer.sendMessage(
         'update-project',
         JSON.parse(JSON.stringify(action.payload)),
