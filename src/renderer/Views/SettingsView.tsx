@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/Components/ui/dialog';
 import { FolderIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { handleList } from '@/hooks/handlers';
 import { Label } from '@/Components/ui/label';
 import {
   Select,
@@ -86,12 +85,6 @@ export function SettingsView({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose, dispatch]);
-
-  useEffect(() => {
-    window.electron.ipcRenderer.on('open-settings', () => {
-      handleList();
-    });
-  }, []);
 
   const handleOpen = (b: boolean): void => {
     if (b) {

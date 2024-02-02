@@ -95,6 +95,10 @@ function Hello() {
   }, [dispatch]);
 
   useEffect(() => {
+    window.electron.ipcRenderer.on('open-settings', () => {
+      setShowSettings(true);
+    });
+
     window.electron.ipcRenderer.on('scan-started', () => {
       setScanInProgress(true);
       showScanToast();
