@@ -32,22 +32,51 @@ export class AbletonParser {
       jObj?.Ableton?.LiveSet?.MasterTrack?.DeviceChain?.Mixer?.Tempo?.Manual
         ?.Value,
     );
-    const audioTracks: Track[] = jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack.map(
-      (track: any) => {
-        return { type: 'audio', ...this.parseTrack(track) };
-      },
-    );
 
-    const midiTracks: Track[] = jObj?.Ableton?.LiveSet?.Tracks?.MidiTrack.map(
-      (track: any) => {
-        return { type: 'midi', ...this.parseTrack(track) };
-      },
-    );
+    const audioTracks: Track[] = Array.isArray(
+      jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack,
+    )
+      ? jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack.map((track: any) => {
+          return { type: 'audio', ...this.parseTrack(track) };
+        })
+      : jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack
+        ? [
+            {
+              type: 'audio',
+              ...this.parseTrack(jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack),
+            },
+          ]
+        : [];
 
-    const returnTracks: Track[] =
-      jObj?.Ableton?.LiveSet?.Tracks?.ReturnTrack.map((track: any) => {
-        return { type: 'return', ...this.parseTrack(track) };
-      });
+    const midiTracks: Track[] = Array.isArray(
+      jObj?.Ableton?.LiveSet?.Tracks?.MidiTrack,
+    )
+      ? jObj?.Ableton?.LiveSet?.Tracks?.MidiTrack.map((track: any) => {
+          return { type: 'midi', ...this.parseTrack(track) };
+        })
+      : jObj?.Ableton?.LiveSet?.Tracks?.MidiTrack
+        ? [
+            {
+              type: 'midi',
+              ...this.parseTrack(jObj?.Ableton?.LiveSet?.Tracks?.MidiTrack),
+            },
+          ]
+        : [];
+
+    const returnTracks: Track[] = Array.isArray(
+      jObj?.Ableton?.LiveSet?.Tracks?.ReturnTrack,
+    )
+      ? jObj?.Ableton?.LiveSet?.Tracks?.ReturnTrack.map((track: any) => {
+          return { type: 'return', ...this.parseTrack(track) };
+        })
+      : jObj?.Ableton?.LiveSet?.Tracks?.ReturnTrack
+        ? [
+            {
+              type: 'return',
+              ...this.parseTrack(jObj?.Ableton?.LiveSet?.Tracks?.ReturnTrack),
+            },
+          ]
+        : [];
 
     return { version, bpm, audioTracks, midiTracks, returnTracks };
   }
