@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
@@ -16,7 +17,7 @@ import { Path, glob } from 'glob';
 import fs from 'fs';
 import { Repository } from 'typeorm';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { csvJSON, resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
 import { Project, Setting, Tag } from '../db/entity';
 import logger from './logger';
@@ -358,6 +359,73 @@ ipcMain.on('log-error', (_event, arg) => {
 
 ipcMain.on('get-version', (event) => {
   event.reply('get-version', app.getVersion());
+});
+
+ipcMain.on('export-projects', async (event) => {
+  logger.info('Exporting projects');
+  // ask for file path to save
+  const result = await dialog.showSaveDialog({
+    defaultPath: 'projects.csv',
+    properties: ['createDirectory'],
+  });
+  if (result.canceled) {
+    logger.warn('No path selected');
+    return event.reply('export-projects', null);
+  }
+  // get projects
+  const projects = await ProjectRepository.find();
+  // convert to csv and save
+  const replacer = (key: any, value: any) => (value === null ? '' : value); // specify how you want to handle null values here
+  const header = Object.keys(projects[0]);
+  const csv = [
+    header.join(','), // header row first
+    ...projects.map((row: { [key: string]: any }) =>
+      header
+        .map((fieldName) => JSON.stringify(row[fieldName], replacer))
+        .join(','),
+    ),
+  ].join('\r\n');
+  fs.writeFileSync(result.filePath!, csv);
+  return logger.info(`Projects exported to ${result.filePath}`);
+});
+
+ipcMain.on('import-projects', async (event) => {
+  logger.info('Importing projects');
+  // ask for file path to import
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+  });
+  if (result.canceled) {
+    logger.warn('Inport cancelled');
+    return event.reply('import-projects', null);
+  }
+  // read file
+  const csv = fs.readFileSync(result.filePaths[0], 'utf8');
+  // parse csv
+  const projects = csvJSON(csv);
+  for (const project of projects) {
+    const existing = await ProjectRepository.findOneBy({
+      path: project.path,
+    });
+    if (existing) {
+      logger.warn(`Project ${project.path} already exists in DB, skipping`);
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    const p = new Project();
+    p.title = project.title;
+    p.file = project.file;
+    p.path = project.path;
+    p.bpm = project.bpm;
+    p.version = project.version;
+    p.tracks = project.tracks;
+    p.modifiedAt = new Date(project.modifiedAt);
+    await ProjectRepository.save(p);
+    logger.info(`Project ${project.path} imported`);
+    event.reply('project-updated', p);
+  }
+  // save to db
+  return logger.info(`Projects imported from ${result.filePaths[0]}`);
 });
 
 autoUpdater.on('update-available', async (event) => {
