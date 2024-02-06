@@ -63,4 +63,7 @@ export default class Project {
     pluginNames: string[];
     type: 'midi' | 'audio' | 'return';
   }[];
+
+  @Column({ nullable: true })
+  audioFile?: string;
 }

@@ -11,6 +11,8 @@ import {
   ArrowRightCircleIcon,
   ClockIcon,
   CheckCircleIcon,
+  PlayIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -32,6 +34,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/Components/ui/accordion';
+import Dropzone from '@/Components/ui/dropzone';
+import { useGlobalAudioPlayer } from 'react-use-audio-player';
+import { setShowAudioPlayer } from '@/store/Slices/appStateSlice';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -47,6 +52,7 @@ function ProjectView({
   const dispatch = useDispatch();
   const project = useSelector(selectSelectedProject) as Project;
   const [isOpen, setIsOpen] = useState(open);
+  const { load, stop } = useGlobalAudioPlayer();
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -266,13 +272,69 @@ function ProjectView({
             </Select>
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Audio</Label>
+            {project.audioFile ? (
+              <>
+                <span className="flex space-x-2">
+                  <Badge
+                    onClick={() => {
+                      load(`local://${project.audioFile!}`, { autoplay: true });
+                      dispatch(setShowAudioPlayer(true));
+                    }}
+                    className="cursor-pointer w-fit"
+                  >
+                    <PlayIcon className="h-4 w-4 mr-1" />
+                    Play
+                  </Badge>
+                  <Badge
+                    onClick={() => {
+                      stop();
+                      dispatch(setShowAudioPlayer(false));
+                      dispatch(
+                        saveProject({ ...project, audioFile: undefined }),
+                      );
+                    }}
+                    className="cursor-pointer w-fit"
+                    variant="destructive"
+                  >
+                    <TrashIcon className="h-4 w-4 mr-1" />
+                    Remove
+                  </Badge>
+                </span>
+                <p className="text-muted-foreground">{project.audioFile}</p>
+              </>
+            ) : (
+              <Dropzone
+                dropMessage="Drop your adio file here"
+                handleOnDrop={(files) => {
+                  if (files) {
+                    const acceptedTypes = ['audio/mpeg', 'audio/wav'];
+                    const validFiles = Array.from(files).filter((file) =>
+                      acceptedTypes.includes(file.type),
+                    );
+                    if (validFiles.length) {
+                      dispatch(
+                        saveProject({
+                          ...project,
+                          audioFile: validFiles[0].path,
+                        }),
+                      );
+                    }
+                  }
+                }}
+                fileType="audio/*"
+                multiple={false}
+              />
+            )}
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Tracks</Label>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger>Audio Tracks</AccordionTrigger>
                 <AccordionContent>
-                  {project
-                    .tracks!.filter((track) => track.type === 'audio')
+                  {project.tracks
+                    ?.filter((track) => track.type === 'audio')
                     .map((track) => track.name)
                     .join(', ')}
                 </AccordionContent>
@@ -280,8 +342,8 @@ function ProjectView({
               <AccordionItem value="item-2">
                 <AccordionTrigger>Midi Tracks</AccordionTrigger>
                 <AccordionContent>
-                  {project
-                    .tracks!.filter((track) => track.type === 'midi')
+                  {project.tracks
+                    ?.filter((track) => track.type === 'midi')
                     .map((track) => track.name)
                     .join(', ')}
                 </AccordionContent>
@@ -289,8 +351,8 @@ function ProjectView({
               <AccordionItem value="item-3">
                 <AccordionTrigger>Return Tracks</AccordionTrigger>
                 <AccordionContent>
-                  {project
-                    .tracks!.filter((track) => track.type === 'return')
+                  {project.tracks
+                    ?.filter((track) => track.type === 'return')
                     .map((track) => track.name)
                     .join(', ')}
                 </AccordionContent>
@@ -298,8 +360,8 @@ function ProjectView({
               <AccordionItem value="item-4">
                 <AccordionTrigger>Plugins</AccordionTrigger>
                 <AccordionContent>
-                  {project
-                    .tracks!.map((track) => track.pluginNames)
+                  {project.tracks
+                    ?.map((track) => track.pluginNames)
                     .filter((plugins) => plugins.length)
                     .join(', ')}
                 </AccordionContent>

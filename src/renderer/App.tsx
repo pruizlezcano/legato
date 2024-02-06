@@ -18,6 +18,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
 import {
+  selectAppState,
+  setShowAudioPlayer,
+} from '@/store/Slices/appStateSlice';
+import {
   loadProjects,
   selectProjects,
   loadProject,
@@ -27,6 +31,7 @@ import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
 import { Settings } from '../interfaces/Settings';
 import { handleList } from './hooks/handlers';
+import { AudioPlayer } from './Components/ui/audio-player';
 
 function Hello() {
   const [showSettings, setShowSettings] = useState(false);
@@ -36,6 +41,7 @@ function Hello() {
   const [loading, setLoading] = useState(true);
   const settings = useSelector(selectSettings);
   const projects = useSelector(selectProjects);
+  const appState = useSelector(selectAppState);
 
   const dispatch = useDispatch();
 
@@ -186,6 +192,9 @@ function Hello() {
         open={showSettings}
         scanDisabled={scanInProgress}
       />
+      {appState.showAudioPlayer && (
+        <AudioPlayer onClose={() => dispatch(setShowAudioPlayer(false))} />
+      )}
       <Toaster position="top-center" />
     </div>
   );

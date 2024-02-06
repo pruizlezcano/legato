@@ -34,6 +34,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
   ArrowRightCircleIcon,
+  PlayIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
@@ -57,6 +58,8 @@ import {
 } from '@/store/Slices/projectsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectItem } from '@/Components/ui/select';
+import { useGlobalAudioPlayer } from 'react-use-audio-player';
+import { setShowAudioPlayer } from '@/store/Slices/appStateSlice';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -71,6 +74,7 @@ declare module '@tanstack/table-core' {
     numberFilter: FilterFn<unknown>;
     arrayFilter: FilterFn<unknown>;
     booleanFn: FilterFn<unknown>;
+    notNullFn: FilterFn<unknown>;
   }
 }
 
@@ -83,10 +87,12 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
   const [filterQuery, setFilterQuery] = useState(filter);
   const [globalFilter, setGlobalFilter] = useState('');
 
+  const { load } = useGlobalAudioPlayer();
+
   const columnHelper = createColumnHelper();
 
   const handleFavorite = (project: Project) => {
-    dispatch(saveProject({ ...project, hidden: !project.favorite }));
+    dispatch(saveProject({ ...project, favorite: !project.favorite }));
   };
 
   const handleHide = (project: Project) => {
@@ -109,7 +115,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
           />
         );
       },
-      size: 3000,
+      size: 160,
     }) as ColumnDef<Project>,
     columnHelper.accessor('bpm', {
       header: ({ column }) => (
@@ -129,7 +135,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         );
       },
       enableGlobalFilter: false,
-      size: 30,
+      size: 10,
       filterFn: 'numberFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('scale', {
@@ -149,7 +155,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         );
       },
       enableGlobalFilter: false,
-      size: 2000,
+      size: 105,
     }) as ColumnDef<Project>,
     columnHelper.accessor('genre', {
       header: ({ column }) => (
@@ -167,7 +173,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
           />
         );
       },
-      size: 4700,
+      size: 110,
       enableGlobalFilter: false,
     }) as ColumnDef<Project>,
     columnHelper.accessor('tagNames', {
@@ -186,7 +192,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         );
       },
       enableSorting: true,
-      size: 10000,
+      size: 220,
       enableGlobalFilter: false,
       filterFn: 'arrayFilter',
     }) as ColumnDef<Project>,
@@ -227,6 +233,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       },
       enableSorting: true,
       enableGlobalFilter: false,
+      size: 50,
     }) as ColumnDef<Project>,
     columnHelper.accessor('modifiedAt', {
       header: ({ column }) => (
@@ -238,7 +245,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
           <p className="ml-3">{project.modifiedAt.toLocaleDateString()}</p>
         );
       },
-      size: 50,
+      size: 10,
       enableGlobalFilter: false,
     }) as ColumnDef<Project>,
     columnHelper.accessor('path', {
@@ -313,6 +320,33 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       filterFn: 'booleanFn',
       size: 0,
     }) as ColumnDef<Project>,
+    columnHelper.accessor('audioFile', {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Audio" />
+      ),
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              load(`local://${project.audioFile!}`, { autoplay: true });
+              dispatch(setShowAudioPlayer(true));
+            }}
+            disabled={!project.audioFile}
+          >
+            <PlayIcon
+              className={`w-5 h-5 ${
+                !project.audioFile && 'text-muted-foreground/70'
+              }`}
+            />
+          </button>
+        );
+      },
+      enableGlobalFilter: false,
+      filterFn: 'notNullFn',
+      size: 0,
+    }) as ColumnDef<Project>,
     columnHelper.accessor('controls', {
       header: '',
       cell: ({ row }) => {
@@ -329,12 +363,9 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                   setshowProject(true);
                 }}
               >
-                <>
-                  <InformationCircleIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
-                  Project details
-                </>
+                <InformationCircleIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                Project details
               </DropdownMenuItem>
-
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
@@ -353,6 +384,16 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                 <p>Open in Ableton</p>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  load(`local://${project.audioFile!}`, { autoplay: true });
+                  dispatch(setShowAudioPlayer(true));
+                }}
+                disabled={!project.audioFile}
+              >
+                <PlayIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                <p>Play audio</p>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
                   handleFavorite(project);
@@ -384,6 +425,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       enableGlobalFilter: false,
       size: 0,
       enableHiding: false,
+      enableColumnFilter: false,
     }) as ColumnDef<Project>,
   ];
 
@@ -458,6 +500,12 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         if (value === undefined) return true;
         return value === (filterValue === 'true');
       },
+      notNullFn: (row, columnId, filterValue) => {
+        const value = row.getValue(columnId);
+        if (filterValue === 'true')
+          return value !== undefined && value !== null;
+        return value === undefined || value === null;
+      },
     },
     // debugTable: true,
   });
@@ -470,6 +518,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
       table.getColumn('favorite')!.toggleVisibility(false);
       table.getColumn('hidden')!.toggleVisibility(false);
       table.getColumn('hidden')!.setFilterValue('false');
+      table.getColumn('audioFile')!.toggleVisibility(false);
     }
   }, [table]);
 

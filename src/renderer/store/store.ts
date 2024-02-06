@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import projectReducer from './Slices/projectsSlice';
 import settingsReducer from './Slices/settingsSlice';
+import appStateReducer from './Slices/appStateSlice';
 
 export default configureStore({
   middleware: (getDefaultMiddleware: any) =>
@@ -12,5 +13,6 @@ export default configureStore({
   reducer: {
     projects: projectReducer,
     settings: settingsReducer,
+    appState: appStateReducer,
   },
 });

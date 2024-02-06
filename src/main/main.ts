@@ -11,7 +11,15 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  dialog,
+  protocol,
+  net,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { Path, glob } from 'glob';
 import fs from 'fs';
@@ -264,6 +272,7 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       project.scale = arg.scale;
       project.notes = arg.notes;
       project.progress = arg.progress;
+      project.audioFile = arg.audioFile;
       for (let i = 0; i < arg.tagNames!.length; i += 1) {
         let tag = await TagRepository.findOneBy({
           name: arg.tagNames![i],
@@ -420,6 +429,7 @@ ipcMain.on('import-projects', async (event) => {
     p.version = project.version;
     p.tracks = project.tracks;
     p.modifiedAt = new Date(project.modifiedAt);
+    p.audioFile = project.audioFile;
     await ProjectRepository.save(p);
     logger.info(`Project ${project.path} imported`);
     event.reply('project-updated', p);
@@ -530,11 +540,19 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
-  const { Projects, Settings, Tags } = await initDb();
-  ProjectRepository = Projects;
-  SettingRepository = Settings;
-  TagRepository = Tags;
 };
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'local',
+    privileges: {
+      secure: true,
+      // standard: true,
+      // supportFetchAPI: true,
+      stream: true,
+    },
+  },
+]);
 
 /**
  * Add event listeners...
@@ -551,6 +569,20 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(async () => {
+    protocol.handle('local', async (request) => {
+      const file = `file://${request.url.slice('local://'.length)}`;
+      try {
+        const response = net.fetch(file);
+        return response;
+      } catch (error) {
+        console.error('Error handling local protocol for URL:', file, error);
+        throw error;
+      }
+    });
+    const { Projects, Settings, Tags } = await initDb();
+    ProjectRepository = Projects;
+    SettingRepository = Settings;
+    TagRepository = Tags;
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

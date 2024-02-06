@@ -20,7 +20,7 @@ export const AppDataSource = new DataSource({
   entities: [Project, Setting, Tag],
   migrations: [],
   migrationsTableName: '_migrations',
-  migrationsRun: true, // Auto-run migrations
+  migrationsRun: false, // Auto-run migrations
 });
 
 const seedSettings = async (SettingRepository: Repository<Setting>) => {
