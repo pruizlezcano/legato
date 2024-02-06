@@ -430,6 +430,8 @@ ipcMain.on('import-projects', async (event) => {
     p.tracks = project.tracks;
     p.modifiedAt = new Date(project.modifiedAt);
     p.audioFile = project.audioFile;
+    p.tags = project.tags ?? [];
+    p.tagNames = project.tagNames ?? [];
     await ProjectRepository.save(p);
     logger.info(`Project ${project.path} imported`);
     event.reply('project-updated', p);
