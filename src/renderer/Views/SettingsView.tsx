@@ -1,5 +1,4 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import { useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
 import {
   Dialog,
@@ -8,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/Components/ui/dialog';
-import { FolderIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { Label } from '@/Components/ui/label';
 import {
   Select,
@@ -17,15 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
-import { useSelector, useDispatch } from 'react-redux';
+import { selectAppState } from '@/store/Slices/appStateSlice';
 import { selectSettings, updateSettings } from '@/store/Slices/settingsSlice';
-import DebounceInput from '../Components/DebounceInput';
+import { Cog6ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Settings } from '../../interfaces/Settings';
+import DebounceInput from '../Components/DebounceInput';
 
 export function SettingsButton({ onClick }: { onClick: () => void }) {
   return (
     <Button
-      className="relative h-10 w-10 sm:w-fit justify-start px-3 py-2"
+      className="relative h-10 w-10 justify-start px-3 py-2 sm:w-fit"
       onClick={onClick}
     >
       <Cog6ToothIcon className="h-4 w-4 sm:mr-2" />
@@ -37,15 +38,13 @@ export function SettingsButton({ onClick }: { onClick: () => void }) {
 export function SettingsView({
   onClose,
   open,
-  scanDisabled = false,
 }: {
   onClose: () => void;
   open: boolean;
-  // eslint-disable-next-line react/require-default-props
-  scanDisabled?: boolean;
 }) {
   const dispatch = useDispatch();
   const settings = useSelector(selectSettings) as Settings;
+  const appState = useSelector(selectAppState);
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -116,7 +115,7 @@ export function SettingsView({
                 onClick={() => {
                   window.electron.ipcRenderer.sendMessage('open-path-dialog');
                 }}
-                className="border-r-0 rounded-r-none p-3"
+                className="rounded-r-none border-r-0 p-3"
               >
                 <FolderIcon className="h-4 w-4" />
               </Button>
@@ -148,14 +147,17 @@ export function SettingsView({
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Scan Projects</Label>
-            <span className="space-x-2 col-span-3">
-              <Button onClick={handleFastScan} disabled={scanDisabled}>
+            <span className="col-span-3 space-x-2">
+              <Button
+                onClick={handleFastScan}
+                disabled={appState.scanInProgress}
+              >
                 Fast Scan
               </Button>
               <Button
                 onClick={handleFullScan}
                 variant="secondary"
-                disabled={scanDisabled}
+                disabled={appState.scanInProgress}
               >
                 Full Scan
               </Button>
@@ -163,7 +165,7 @@ export function SettingsView({
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Inport/Export Projects</Label>
-            <span className="space-x-2 col-span-3">
+            <span className="col-span-3 space-x-2">
               <Button onClick={handleInport}>Import</Button>
               <Button onClick={handleExport} variant="secondary">
                 Export
@@ -172,7 +174,7 @@ export function SettingsView({
           </div>
         </div>
         <DialogFooter>
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-muted-foreground/60 text-xs">
             Copyright © 2024 Pablo Ruiz
           </p>
         </DialogFooter>

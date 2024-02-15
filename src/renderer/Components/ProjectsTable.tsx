@@ -59,7 +59,10 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectItem } from '@/Components/ui/select';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
-import { setShowAudioPlayer } from '@/store/Slices/appStateSlice';
+import {
+  selectAppState,
+  setShowAudioPlayer,
+} from '@/store/Slices/appStateSlice';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -79,12 +82,13 @@ declare module '@tanstack/table-core' {
 }
 
 // eslint-disable-next-line react/function-component-definition
-const ProjectsTable = ({ filter }: { filter: string }) => {
+const ProjectsTable = () => {
   const dispatch = useDispatch();
   const data: Project[] = useSelector(selectProjects);
   const [showProject, setshowProject] = useState(false);
+  const appState = useSelector(selectAppState);
 
-  const [filterQuery, setFilterQuery] = useState(filter);
+  const [filterQuery, setFilterQuery] = useState(appState.filter);
   const [globalFilter, setGlobalFilter] = useState('');
 
   const { load } = useGlobalAudioPlayer();
@@ -212,19 +216,19 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
           >
             <SelectItem value="todo">
               <span className="flex flex-row">
-                <ArrowRightCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                <ArrowRightCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
                 To Do
               </span>
             </SelectItem>
             <SelectItem value="inProgress">
               <span className="flex flex-row">
-                <ClockIcon className="h-4 w-4 mr-1 mt-0.5" />
+                <ClockIcon className="mr-1 mt-0.5 h-4 w-4" />
                 In Progress
               </span>
             </SelectItem>
             <SelectItem value="Finished">
               <span className="flex flex-row">
-                <CheckCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
+                <CheckCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
                 Finished
               </span>
             </SelectItem>
@@ -270,9 +274,9 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
               <TooltipTrigger asChild>
                 <button type="button" onClick={() => handleFavorite(project)}>
                   {project.favorite ? (
-                    <StarSolidIcon className="w-5 h-5" />
+                    <StarSolidIcon className="h-5 w-5" />
                   ) : (
-                    <StarIcon className="w-5 h-5" />
+                    <StarIcon className="h-5 w-5" />
                   )}
                 </button>
               </TooltipTrigger>
@@ -303,9 +307,9 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
               <TooltipTrigger asChild>
                 <button type="button" onClick={() => handleHide(project)}>
                   {project.hidden ? (
-                    <EyeIcon className="w-5 h-5" />
+                    <EyeIcon className="h-5 w-5" />
                   ) : (
-                    <EyeSlashIcon className="w-5 h-5" />
+                    <EyeSlashIcon className="h-5 w-5" />
                   )}
                 </button>
               </TooltipTrigger>
@@ -336,7 +340,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
             disabled={!project.audioFile}
           >
             <PlayIcon
-              className={`w-5 h-5 ${
+              className={`h-5 w-5 ${
                 !project.audioFile && 'text-muted-foreground/70'
               }`}
             />
@@ -354,7 +358,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <EllipsisHorizontalIcon className="h-6 w-6 text-muted-foreground" />
+              <EllipsisHorizontalIcon className="text-muted-foreground h-6 w-6" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
@@ -363,7 +367,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                   setshowProject(true);
                 }}
               >
-                <InformationCircleIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                <InformationCircleIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 Project details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -372,7 +376,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                   handleOpenInFinder(project.id);
                 }}
               >
-                <FolderIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                <FolderIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 Open in Finder
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -380,7 +384,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                   handleOpenInAbleton(project.id);
                 }}
               >
-                <RocketLaunchIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                <RocketLaunchIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 <p>Open in Ableton</p>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -391,7 +395,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                 }}
                 disabled={!project.audioFile}
               >
-                <PlayIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                <PlayIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 <p>Play audio</p>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -400,9 +404,9 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                 }}
               >
                 {project.favorite ? (
-                  <StarSolidIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                  <StarSolidIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 ) : (
-                  <StarIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                  <StarIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 )}
                 <p>{project.favorite ? 'Remove favorite' : 'Add favorite'}</p>
               </DropdownMenuItem>
@@ -412,9 +416,9 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
                 }}
               >
                 {project.hidden ? (
-                  <EyeIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                  <EyeIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 ) : (
-                  <EyeSlashIcon className="mr-2 h-4 w-4 text-muted-foreground/70" />
+                  <EyeSlashIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                 )}
                 <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
               </DropdownMenuItem>
@@ -555,12 +559,12 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
   };
 
   useEffect(() => {
-    setFilter(filter);
+    setFilter(appState.filter);
   });
 
   return (
     <>
-      <div className="rounded-md border w-full mx-6 my-2">
+      <div className="mx-6 my-2 w-full rounded-md border">
         <Table>
           <TableHeader className="bg-muted/60">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -610,7 +614,7 @@ const ProjectsTable = ({ filter }: { filter: string }) => {
           </TableBody>
         </Table>
       </div>
-      <div className="relative w-full mb-3">
+      <div className="relative mb-3 w-full">
         {/* <Pagination table={table} size={data.length} /> */}
         <DataTablePagination table={table} />
       </div>

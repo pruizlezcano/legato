@@ -19,7 +19,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
 import {
   selectAppState,
+  setScanInProgress,
   setShowAudioPlayer,
+  setShowSettings,
+  setFilter,
 } from '@/store/Slices/appStateSlice';
 import {
   loadProjects,
@@ -34,10 +37,7 @@ import { handleList } from './hooks/handlers';
 import { AudioPlayer } from './Components/ui/audio-player';
 
 function Hello() {
-  const [showSettings, setShowSettings] = useState(false);
   const [appVersion, setAppVersion] = useState('');
-  const [filter, setFilter] = useState('');
-  const [scanInProgress, setScanInProgress] = useState(false);
   const [loading, setLoading] = useState(true);
   const settings = useSelector(selectSettings);
   const projects = useSelector(selectProjects);
@@ -91,7 +91,7 @@ function Hello() {
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
       dispatch(loadProjects(arg as Project[]));
-      setScanInProgress(false);
+      dispatch(setScanInProgress(false));
       setLoading(false);
     });
 
@@ -102,11 +102,11 @@ function Hello() {
 
   useEffect(() => {
     window.electron.ipcRenderer.on('open-settings', () => {
-      setShowSettings(true);
+      dispatch(setShowSettings(true));
     });
 
     window.electron.ipcRenderer.on('scan-started', () => {
-      setScanInProgress(true);
+      dispatch(setScanInProgress(true));
       showScanToast();
     });
 
@@ -123,7 +123,7 @@ function Hello() {
     window.electron.ipcRenderer.sendMessage('load-settings');
     handleList();
     window.electron.ipcRenderer.sendMessage('get-version');
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (
@@ -138,12 +138,12 @@ function Hello() {
   }, [settings]);
 
   return (
-    <div className="overflow-x-auto w-full flex flex-wrap dark:text-white">
-      <div className="flex items-center my-4 mx-6 justify-between select-none">
+    <div className="flex w-full flex-wrap overflow-x-auto dark:text-white">
+      <div className="mx-6 my-4 flex select-none items-center justify-between">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button type="button" onClick={() => setFilter('')}>
+              <button type="button" onClick={() => dispatch(setFilter(''))}>
                 <h1 className="text-3xl font-bold tracking-tight xl:text-4xl">
                   Legato
                 </h1>
@@ -154,43 +154,44 @@ function Hello() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="flex space-x-2 ml-2">
+        <div className="ml-2 flex space-x-2">
           <Badge variant="outline">v{appVersion}</Badge>
           <Badge variant="outline">{projects.length} projects loaded</Badge>
         </div>
-        <div className="absolute right-0 top-0 mt-4 mr-6 flex items-center space-x-2">
-          <DataTableFilterCommand value={filter} onEnter={setFilter} />
-          <SettingsButton onClick={() => setShowSettings(true)} />
+        <div className="absolute right-0 top-0 mr-6 mt-4 flex items-center space-x-2">
+          <DataTableFilterCommand />
+          <SettingsButton onClick={() => dispatch(setShowSettings(true))} />
         </div>
       </div>
       {loading ? (
-        <div className="flex flex-col items-center justify-center w-full pt-60">
+        <div className="flex w-full flex-col items-center justify-center pt-60">
           <p className="text-2xl font-bold">Loading...</p>
         </div>
       ) : projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center w-full pt-60">
+        <div className="flex w-full flex-col items-center justify-center pt-60">
           <p className="text-2xl font-bold">No projects found</p>
-          <p className="mb-6 text-muted-foreground">
+          <p className="text-muted-foreground mb-6">
             Check your projects folder and scan again
           </p>
           <div className="flex flex-row space-x-3">
-            <Button onClick={() => setShowSettings(true)}>Open Settings</Button>
+            <Button onClick={() => dispatch(setShowSettings(true))}>
+              Open Settings
+            </Button>
             <Button
               variant="secondary"
               onClick={handleFastScan}
-              disabled={scanInProgress}
+              disabled={appState.scanInProgress}
             >
               Run Fast Scan
             </Button>
           </div>
         </div>
       ) : (
-        <ProjectsTable filter={filter} />
+        <ProjectsTable />
       )}
       <SettingsView
-        onClose={() => setShowSettings(false)}
-        open={showSettings}
-        scanDisabled={scanInProgress}
+        onClose={() => dispatch(setShowSettings(false))}
+        open={appState.showSettings}
       />
       {appState.showAudioPlayer && (
         <AudioPlayer onClose={() => dispatch(setShowAudioPlayer(false))} />
