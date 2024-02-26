@@ -14,7 +14,7 @@ function DebounceInput({
 }: {
   value: any;
   onChange: (arg: string) => void;
-  onBlur?: () => void;
+  onBlur?: (arg?: string) => void;
   type?: string;
   className?: string;
   placeholder?: string;
@@ -53,7 +53,7 @@ function DebounceInput({
       className={className}
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
-      onBlur={onBlur}
+      onBlur={(e) => onBlur && onBlur(e.target.value)}
       placeholder={placeholder}
       id={id}
       onKeyDown={handleKeyDown}
