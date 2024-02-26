@@ -1,12 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Project } from '../../../db/entity';
+import { type RootState } from '../store';
+
+interface ProjectState {
+  projects: Project[];
+  selectedProject: Project | null;
+}
+
+const initialState: ProjectState = {
+  projects: [],
+  selectedProject: null,
+};
 
 const projectSlice = createSlice({
   name: 'projects',
-  initialState: {
-    projects: [] as Project[],
-    selectedProject: null as Project | null,
-  },
+  initialState,
   reducers: {
     loadProjects(state, action) {
       state.projects = action.payload;
@@ -80,6 +88,6 @@ export const {
 
 export default projectSlice.reducer;
 
-export const selectProjects = (state: any) => state.projects.projects;
-export const selectSelectedProject = (state: any) =>
+export const selectProjects = (state: RootState) => state.projects.projects;
+export const selectSelectedProject = (state: RootState) =>
   state.projects.selectedProject;

@@ -16,7 +16,11 @@ import {
   TooltipTrigger,
 } from '@/Components/ui/tooltip';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
+import {
+  selectSettings,
+  loadSettings,
+  Settings,
+} from '@/store/Slices/settingsSlice';
 import {
   selectAppState,
   setScanInProgress,
@@ -31,7 +35,6 @@ import {
 import { SettingsView, SettingsButton } from './Views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
-import { Settings } from '../interfaces/Settings';
 import { handleList } from './hooks/handlers';
 import { AudioPlayer } from './Components/ui/audio-player';
 

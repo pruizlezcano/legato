@@ -4,7 +4,7 @@ import projectReducer from './Slices/projectsSlice';
 import settingsReducer from './Slices/settingsSlice';
 import appStateReducer from './Slices/appStateSlice';
 
-export default configureStore({
+export const store = configureStore({
   middleware: (getDefaultMiddleware: any) =>
     getDefaultMiddleware({
       serializableCheck: false,
@@ -16,3 +16,6 @@ export default configureStore({
     appState: appStateReducer,
   },
 });
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

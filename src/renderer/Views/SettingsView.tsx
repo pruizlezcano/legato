@@ -16,11 +16,14 @@ import {
   SelectValue,
 } from '@/Components/ui/select';
 import { selectAppState, setShowSettings } from '@/store/Slices/appStateSlice';
-import { selectSettings, updateSettings } from '@/store/Slices/settingsSlice';
+import {
+  selectSettings,
+  updateSettings,
+  Settings,
+} from '@/store/Slices/settingsSlice';
 import { Cog6ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Settings } from '../../interfaces/Settings';
 import DebounceInput from '../Components/DebounceInput';
 
 export function SettingsButton({ onClick }: { onClick: () => void }) {
@@ -77,7 +80,7 @@ export function SettingsView() {
     };
 
     window.electron.ipcRenderer.on('open-path-dialog', (arg) => {
-      if (arg) dispatch(updateSettings({ projectsPath: arg }));
+      if (arg) dispatch(updateSettings({ projectsPath: arg as string }));
     });
 
     window.addEventListener('keydown', handleKeyDown);
