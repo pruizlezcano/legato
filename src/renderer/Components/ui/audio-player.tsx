@@ -12,6 +12,11 @@ import {
   PauseCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  selectAppState,
+  setShowAudioPlayer,
+} from '@/store/Slices/appStateSlice';
 import { Slider } from './slider';
 
 function useAudioTime() {
@@ -44,11 +49,14 @@ function posToString(pos: number) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function AudioPlayer({ onClose }: { onClose?: () => void }) {
+export function AudioPlayer() {
   const { playing, togglePlayPause, duration, seek, stop } =
     useGlobalAudioPlayer();
   const pos = useAudioTime();
   const [sliderPos, setSliderPos] = useState(pos);
+  const [showTitle, setShowTitle] = useState(false);
+  const dispatch = useDispatch();
+  const appState = useSelector(selectAppState);
 
   const handleSliderChange = ([newValue]: number[]) => {
     seek(newValue);
@@ -61,26 +69,41 @@ export function AudioPlayer({ onClose }: { onClose?: () => void }) {
 
   return (
     <>
-      <div className="fixed bottom-4 left-0 right-0 z-50 mx-auto w-96">
+      <div
+        className="fixed bottom-4 left-0 right-0 z-50 mx-auto w-96 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+        data-state={appState.showAudioPlayer ? 'open' : 'closed'}
+      >
         <Card className="w-96">
-          <CardContent className="flex space-x-2 p-4">
-            <button type="button" onClick={togglePlayPause}>
-              {playing ? (
-                <PauseCircleIcon className="h-5 w-5" />
-              ) : (
-                <PlayCircleIcon className="h-5 w-5" />
-              )}
-            </button>
-            <span>{posToString(pos)}</span>
-            <Slider
-              value={[sliderPos]}
-              min={0}
-              max={duration}
-              onValueChange={handleSliderChange}
-              step={0.1}
-            />
-            <span>{posToString(duration)}</span>
-            {onClose && (
+          <CardContent
+            className={`flex p-4 flex-col duration-700 ${showTitle && 'pt-2'}`}
+            onMouseEnter={() => setShowTitle(true)}
+            onMouseLeave={() => setShowTitle(false)}
+          >
+            <p
+              className="text-sm m-auto pb-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+              data-state={showTitle ? 'open' : 'closed'}
+              hidden={!showTitle}
+            >
+              <span className="text-muted-foreground">now playing: </span>
+              {appState.nowPlaying || 'No track playing'}
+            </p>
+            <div className="flex space-x-2">
+              <button type="button" onClick={togglePlayPause}>
+                {playing ? (
+                  <PauseCircleIcon className="h-5 w-5" />
+                ) : (
+                  <PlayCircleIcon className="h-5 w-5" />
+                )}
+              </button>
+              <span>{posToString(pos)}</span>
+              <Slider
+                value={[sliderPos]}
+                min={0}
+                max={duration}
+                onValueChange={handleSliderChange}
+                step={0.1}
+              />
+              <span>{posToString(duration)}</span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -88,7 +111,7 @@ export function AudioPlayer({ onClose }: { onClose?: () => void }) {
                       type="button"
                       onClick={() => {
                         stop();
-                        onClose();
+                        dispatch(setShowAudioPlayer(false));
                       }}
                       aria-label="Close"
                     >
@@ -100,7 +123,7 @@ export function AudioPlayer({ onClose }: { onClose?: () => void }) {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>

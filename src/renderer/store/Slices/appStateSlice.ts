@@ -7,6 +7,7 @@ const appStateSlice = createSlice({
     filter: '',
     scanInProgress: false,
     showSettings: false,
+    nowPlaying: '',
   },
   reducers: {
     setShowAudioPlayer(state, action) {
@@ -21,6 +22,9 @@ const appStateSlice = createSlice({
     setShowSettings(state, action) {
       state.showSettings = action.payload;
     },
+    setNowPlaying(state, action) {
+      state.nowPlaying = action.payload;
+    },
   },
 });
 
@@ -29,6 +33,7 @@ export const {
   setFilter,
   setScanInProgress,
   setShowSettings,
+  setNowPlaying,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

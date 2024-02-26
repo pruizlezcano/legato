@@ -20,7 +20,6 @@ import { selectSettings, loadSettings } from '@/store/Slices/settingsSlice';
 import {
   selectAppState,
   setScanInProgress,
-  setShowAudioPlayer,
   setShowSettings,
   setFilter,
 } from '@/store/Slices/appStateSlice';
@@ -189,13 +188,8 @@ function Hello() {
       ) : (
         <ProjectsTable />
       )}
-      <SettingsView
-        onClose={() => dispatch(setShowSettings(false))}
-        open={appState.showSettings}
-      />
-      {appState.showAudioPlayer && (
-        <AudioPlayer onClose={() => dispatch(setShowAudioPlayer(false))} />
-      )}
+      <SettingsView />
+      {appState.showAudioPlayer && <AudioPlayer />}
       <Toaster position="top-center" />
     </div>
   );

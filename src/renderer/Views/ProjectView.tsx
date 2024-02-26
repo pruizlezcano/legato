@@ -36,7 +36,10 @@ import {
 } from '@/Components/ui/accordion';
 import Dropzone from '@/Components/ui/dropzone';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
-import { setShowAudioPlayer } from '@/store/Slices/appStateSlice';
+import {
+  setNowPlaying,
+  setShowAudioPlayer,
+} from '@/store/Slices/appStateSlice';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -280,6 +283,7 @@ function ProjectView({
                     onClick={() => {
                       load(`local://${project.audioFile!}`, { autoplay: true });
                       dispatch(setShowAudioPlayer(true));
+                      dispatch(setNowPlaying(project.title));
                     }}
                     className="cursor-pointer w-fit"
                   >
