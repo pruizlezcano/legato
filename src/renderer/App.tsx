@@ -121,6 +121,9 @@ function Hello() {
     window.electron.ipcRenderer.once('get-version', (arg) => {
       setAppVersion(arg as string);
     });
+    window.electron.ipcRenderer.on('succes', (arg) => {
+      toast.success(arg as string, { duration: 1500 });
+    });
 
     window.electron.ipcRenderer.sendMessage('load-settings');
     handleList();

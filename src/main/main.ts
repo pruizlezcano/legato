@@ -288,6 +288,7 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       logger.info(`Project ${arg.id} updated`);
 
       project.tagNames = project.tags.map((tag) => tag.name);
+      event.sender.send('succes', `Project "${project.title}" updated`);
     } else {
       logger.warn(`Project ${arg.id} not found`);
     }
