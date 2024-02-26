@@ -1,17 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { type RootState } from '../store';
+
+export interface Settings {
+  projectsPath: string | null;
+  theme: string;
+  [key: string]: string | null;
+}
+
+const initialState: Settings = {
+  projectsPath: null,
+  theme: 'system',
+};
 
 const settingSlice = createSlice({
   name: 'settings',
-  initialState: {
-    projectsPath: null,
-    theme: 'system',
-  },
+  initialState,
   reducers: {
-    loadSettings(state, action) {
+    loadSettings(state, action: PayloadAction<Settings>) {
       state.projectsPath = action.payload.projectsPath;
       state.theme = action.payload.theme;
     },
-    updateSettings(state, action) {
+    updateSettings(state, action: PayloadAction<Partial<Settings>>) {
       let update = false;
       Object.keys(action.payload).forEach((key) => {
         if (
@@ -35,4 +44,4 @@ export const { loadSettings, updateSettings } = settingSlice.actions;
 
 export default settingSlice.reducer;
 
-export const selectSettings = (state: any) => state.settings;
+export const selectSettings = (state: RootState) => state.settings;
