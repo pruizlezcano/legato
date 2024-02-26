@@ -95,6 +95,7 @@ function ProjectView({
           <DebounceInput
             value={project.title}
             onChange={(value: string) => {
+              if (value === project.title) return;
               dispatch(saveProject({ ...project, title: value }));
             }}
             placeholder="Title..."
@@ -156,6 +157,7 @@ function ProjectView({
                 value={project.bpm ?? ''}
                 onChange={(value: string) => {
                   const bpm = parseInt(value, 10);
+                  if (bpm === project.bpm) return;
                   dispatch(saveProject({ ...project, bpm }));
                 }}
                 placeholder="BPM..."
@@ -169,6 +171,7 @@ function ProjectView({
               <DebounceInput
                 value={project.scale ?? ''}
                 onChange={(value: string) => {
+                  if (value === project.scale) return;
                   dispatch(saveProject({ ...project, scale: value }));
                 }}
                 placeholder="Add Scale..."
@@ -182,6 +185,7 @@ function ProjectView({
               value={project.genre ?? ''}
               onChange={(value: string) => {
                 const genre = value;
+                if (genre === project.genre) return;
                 dispatch(saveProject({ ...project, genre }));
               }}
               placeholder="Genre..."
