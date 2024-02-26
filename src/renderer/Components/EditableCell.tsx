@@ -17,8 +17,8 @@ function EditableCell({
   placeholder?: string;
 }) {
   const [value, setValue] = useState(initialValue);
-  const onBlur = () => {
-    table.options.meta?.updateData(index, id, value);
+  const onBlur = (actualValue: string) => {
+    table.options.meta?.updateData(index, id, actualValue);
   };
 
   return (
@@ -28,7 +28,7 @@ function EditableCell({
       onChange={(newValue) => {
         setValue(newValue);
       }}
-      onBlur={onBlur}
+      onBlur={(actualValue) => onBlur(actualValue!)}
       placeholder={placeholder}
       className="border-0 shadow-none"
     />
