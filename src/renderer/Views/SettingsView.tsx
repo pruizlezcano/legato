@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
-import { selectAppState } from '@/store/Slices/appStateSlice';
+import { selectAppState, setShowSettings } from '@/store/Slices/appStateSlice';
 import { selectSettings, updateSettings } from '@/store/Slices/settingsSlice';
 import { Cog6ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { useEffect } from 'react';
@@ -35,13 +35,7 @@ export function SettingsButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function SettingsView({
-  onClose,
-  open,
-}: {
-  onClose: () => void;
-  open: boolean;
-}) {
+export function SettingsView() {
   const dispatch = useDispatch();
   const settings = useSelector(selectSettings) as Settings;
   const appState = useSelector(selectAppState);
@@ -78,7 +72,7 @@ export function SettingsView({
   useEffect(() => {
     const handleKeyDown = (e: { key: string }) => {
       if (e.key === 'Escape') {
-        onClose();
+        dispatch(setShowSettings(false));
       }
     };
 
@@ -91,17 +85,16 @@ export function SettingsView({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose, dispatch]);
+  }, [dispatch]);
 
   const handleOpen = (b: boolean): void => {
     if (b) {
       return;
     }
-    onClose();
+    dispatch(setShowSettings(false));
   };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={appState.showSettings} onOpenChange={handleOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>

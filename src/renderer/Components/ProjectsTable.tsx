@@ -61,6 +61,7 @@ import { SelectItem } from '@/Components/ui/select';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import {
   selectAppState,
+  setNowPlaying,
   setShowAudioPlayer,
 } from '@/store/Slices/appStateSlice';
 import EditableCell from './EditableCell';
@@ -392,6 +393,7 @@ const ProjectsTable = () => {
                 onClick={() => {
                   load(`local://${project.audioFile!}`, { autoplay: true });
                   dispatch(setShowAudioPlayer(true));
+                  dispatch(setNowPlaying(project.title));
                 }}
                 disabled={!project.audioFile}
               >
