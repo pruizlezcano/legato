@@ -533,10 +533,10 @@ const ProjectsTable = () => {
 
     setFilterQuery(query);
     // Parse the general search term
-    const generalSearch = query.replace(/(\w+):([^" ]+|"[^"]*")/g, '').trim();
+    const generalSearch = query.replace(/(\w+):("[^"]*"|[^ ]+)/g, '').trim();
 
     // Parse additional filters
-    const regex = /(\w+):([^" ]+|"[^"]*")/g;
+    const regex = /(\w+):("[^"]*"|[^ ]+)/g;
     let match;
     const filters: { [key: string]: string } = {};
 
@@ -554,6 +554,10 @@ const ProjectsTable = () => {
       if (field === 'tags') field = 'tagNames';
       filters[field] = value;
       const column = table.getColumn(field);
+      value =
+        value.startsWith('"') && value.endsWith('"')
+          ? value.slice(1, -1)
+          : value; // remove quotes if present
       if (column) column.setFilterValue(filters[field]);
     }
 
