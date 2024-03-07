@@ -1,0 +1,48 @@
+---
+title: Getting Started
+description: What is Legato? Learn how to download and install it.
+---
+import { Steps } from '@astrojs/starlight/components';
+
+Welcome to Legato, your ultimate manager for Ableton projects!
+
+Legato simplifies project organization and enhances your workflow, allowing you to focus more on your music creation process and less on file management.
+
+This guide will help you get started with Legato quickly and efficiently.
+
+## Installation
+
+Before you can start using Legato, you'll need to install it on your system. Follow these steps:
+
+<Steps>
+1. **Download Legato:** Visit the [GitHub releases page](https://github.com/pruizlezcano/legato/releases/latest) and download the appropriate version of Legato for your operating system.
+
+2. **Install Legato:** Once the download is complete, follow the installation instructions provided in the installation wizard.
+
+3. **Launch Legato:** After installation, launch Legato from your applications folder or desktop shortcut.
+</Steps>
+
+:::note
+During the installation you may found some security issues. This ocurs because the installer is not signed by a certificate.
+
+When you download a file from the internet, **macOS** automatically adds a `quarantine` attribute to it. This attribute is used to trigger certain security measures, such as warning you when you try to open the file, or preventing the file from being opened at all.
+
+You can remove the `quarantine` attribute by running this command in the Terminal app.
+```shell
+xattr -d com.apple.quarantine /Applications/Legato.app
+```
+
+In **Windows** you can ignore the alert and open Legato normaly.
+:::
+
+## Adding Ableton Projects
+
+Legato seamlessly integrates with your Ableton projects, providing a centralized platform for managing them. In order to connect Legato to your Ableton projects, follow these steps:
+
+<Steps>
+1. In Legato, open the settings page.
+2. Modify your projects path.
+3. Click on the scan button to start adding your Ableton projects to Legato.
+</Steps>
+
+Learn more about the scanning modes [here](/legato/scanning-projects).

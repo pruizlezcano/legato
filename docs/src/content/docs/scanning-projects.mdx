@@ -1,0 +1,60 @@
+---
+title: Scanning projects
+---
+import { FileTree } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+
+In summary, [**Fast scan**](#fast-scan) is quicker but less thorough, while [**Full scan**](#full-scan) is slower but more comprehensive. The choice between the two would depend on whether speed or accuracy is more important in your specific use case.
+
+## Fast Scan
+
+This function scans the project directory and processes only the projects that are not already saved in the database. If a project is already saved, it simply skips it. This makes the scan faster, but it won't pick up any changes to existing projects.
+
+<Steps>
+1. Scans the directory for Ableton projects.
+2. If a project is found in the directory but not in the database, it is processed and added to the database.
+3. If a project is already in the database, it is skipped. This means that any changes to the project since the last scan will not be detected.
+</Steps>
+
+This scan is faster because it only processes new projects. However, it may not accurately reflect the current state of all projects if existing projects have been modified.
+
+
+## Full scan
+
+This function also scans the project directory, but it processes all projects, whether they are already saved in the database or not. If a project is already saved, it updates the existing database entry. If a project is not found in the scan but exists in the database, it is removed from the database. This scan is more thorough and will pick up any changes to existing projects, but it is also slower.
+
+<Steps>
+1. Scans the directory for Ableton projects.
+2. If a project is found in the directory and in the database, it is updated in the database. This means that any changes to the project since the last scan will be detected.
+3. If a project is found in the directory but not in the database, it is processed and added to the database.
+4. If a project is in the database but not found in the directory, it is removed from the database. This means that if a project has been deleted since the last scan, it will be removed from the database.
+</Steps>
+
+This scan is slower because it processes all projects, whether they are new, existing, or deleted. However, it accurately reflects the current state of all projects.
+
+## Example file structure
+
+Legato only loads projects from subdirectories of the root directory. It does not load projects from subdirectories of subdirectories. For example, it will not load automatic backup projects because those are in a subdirectory of the project directory.
+
+<FileTree>
+- my-projects (root directory)
+  - project1_Project
+    - Ableton_Project_Info/
+    - Backup
+      - project1_[2024-03-01_195216].als not added to Legato
+      - project1_[2024-03-01_195647].als not added to Legato
+      - ...
+    - Samples/
+    - Icon
+    - **project1.als** added to Legato
+  - project2_Project
+    - Ableton_Project_Info/
+    - Backup
+      - project2_[2024-03-01_195216].als not added to Legato
+      - project2_[2024-03-01_195647].als not added to Legato
+      - ...
+    - Samples/
+    - Icon
+    - **project2.als** added to Legato
+    - **project2 Copy.als** added to Legato
+</FileTree>
