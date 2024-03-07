@@ -34,6 +34,3 @@ npm-debug.log.*
 
 # migration files for typeorm
 src/db/migrations/*.ts
-
-# docs
-docs
