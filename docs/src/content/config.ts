@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { defineCollection } from 'astro:content';
 import { docsSchema } from '@astrojs/starlight/schema';
 
