@@ -1,0 +1,52 @@
+---
+title: Search Filters
+---
+
+When using the search bar, by default, Legato will search for projects based on the project title. You can also use the search bar to search for projects based on other properties.
+
+Lean more about the properties [here](/legato/managing-projects#project-properties).
+
+## Text
+
+It filters projects based on the value of a specific column and a filter value provided by the user.
+
+Examples:
+```text
+scale:C Major
+genre:House
+tags:master
+progress:inProgress
+```
+
+
+
+## Number
+
+It filters projects based on the value of a specific column and a filter value provided by the user. The filter value can be in several formats:
+
+- **Number interval:** If the filter value is in the format `120-150`, it will filter for projects where the column's value is between `120` and `150` inclusive.
+
+- **Greater than:** If the filter value is in the format `>120`, it will filter for projects where the column's value is greater than `120`.
+
+- **Less than:** If the filter value is in the format `<120`, it will filter for projects where the column's value is less than 120.
+
+- **Exact number:** If the filter value is a single number like `120`, it will filter for projects where the column's value is exactly `120`.
+
+Examples:
+```text
+bpm:120-150
+bpm:>120
+bpm:<120
+bpm:120
+```
+
+## Boolean
+
+It filters projects based on the value of a specific column and a filter value provided by the user. The filter value can be `true` or `false`.
+
+Examples:
+```text
+favorite:true      (is a favorite)
+hidden:false       (is not hidden)
+audioFile:true     (has an audio file)
+```
