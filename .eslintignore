@@ -36,4 +36,4 @@ npm-debug.log.*
 src/db/migrations/*.ts
 
 # docs
-docs
+docs/*
