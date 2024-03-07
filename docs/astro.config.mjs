@@ -6,8 +6,6 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://pruizlezcano.github.io',
-  base: '/legato',
   integrations: [
     starlight({
       title: 'Legato',
