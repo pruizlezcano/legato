@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import heroImgDark from '../assets/legato-screenshot-dark.png';

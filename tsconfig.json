@@ -20,7 +20,7 @@
       "@/*": ["./src/renderer/*"],
     }
   },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"],
+  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll", "docs"],
   "experimentalDecorators": true,
   "emitDecoratorMetadata": true,
 }
