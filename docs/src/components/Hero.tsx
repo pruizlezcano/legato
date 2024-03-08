@@ -18,7 +18,7 @@ function Header({ translate }: { translate: any }) {
         The manager for your Ableton projects
       </p>
       <div className="flex flex-row space-x-2 mt-4 animate-fade-in-up animate-delay-800">
-        <a href="/getting-started">
+        <a href="/legato/getting-started">
           <button
             className="p-2 bg-black dark:bg-white text-white dark:text-black rounded-md cursor-pointer text-sm"
             type="button"
