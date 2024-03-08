@@ -26,12 +26,14 @@ import {
   setScanInProgress,
   setShowSettings,
   setFilter,
+  setShowAudioPlayer,
 } from '@/store/Slices/appStateSlice';
 import {
   loadProjects,
   selectProjects,
   loadProject,
 } from '@/store/Slices/projectsSlice';
+import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import { SettingsView, SettingsButton } from './Views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
@@ -44,6 +46,7 @@ function Hello() {
   const settings = useSelector(selectSettings);
   const projects = useSelector(selectProjects);
   const appState = useSelector(selectAppState);
+  const { error: audioError } = useGlobalAudioPlayer();
 
   const dispatch = useDispatch();
 
@@ -141,6 +144,22 @@ function Hello() {
       document.documentElement.classList.remove('dark');
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (audioError) {
+      const errorCodes: { [key: string]: string } = {
+        '1': 'The user canceled the audio',
+        '2': 'A network error occurred while fetching the audio',
+        '3': 'An error occurred while decoding the audio',
+        '4': 'The audio is missing or is in a format not supported by your browser',
+      };
+
+      toast.error('Error', {
+        description: errorCodes[audioError] || 'An unknown error occurred',
+      });
+      dispatch(setShowAudioPlayer(false));
+    }
+  }, [audioError, dispatch]);
 
   return (
     <div className="flex w-full flex-wrap overflow-x-auto dark:text-white">
