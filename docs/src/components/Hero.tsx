@@ -83,7 +83,7 @@ export function Hero() {
 
   return (
     <div
-      className="md:pt-32 md:pb-20 flex items-center justify-center"
+      className="pb-12 md:pt-32 md:pb-20 flex items-center justify-center"
       ref={ref}
     >
       <div

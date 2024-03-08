@@ -1,10 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Hero } from '../components/Hero';
+import { Features, Feature } from '../components/Features';
 ---
 
 <Layout title="Welcome to Astro.">
   <main>
     <Hero client:load />
+    <Features>
+      <Feature>Open Ableton sets directly through Legato</Feature>
+      <Feature>Search, categorize, tag, and take notes</Feature>
+      <Feature>Play your exported audio directly through Legato</Feature>
+      <Feature>Completely free</Feature>
+    </Features>
   </main>
 </Layout>
