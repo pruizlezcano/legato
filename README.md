@@ -46,7 +46,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-![Legato Screen Shot Dark](/docs/src/assets/legato-screenshot-dark.png#gh-dark-mode-only)![Legato Screen Shot Light](/docs/src/assets/legato-screenshot-light.png#gh-light-mode-only)
+![Legato Screen Shot Dark](/docs/src/assets/legato-screenshot-dark.webp#gh-dark-mode-only)![Legato Screen Shot Light](/docs/src/assets/legato-screenshot-light.webp#gh-light-mode-only)
 
 Welcome to Legato, your ultimate manager for Ableton projects!
 
