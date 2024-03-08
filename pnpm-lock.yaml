@@ -115,6 +115,9 @@ devDependencies:
   '@testing-library/react':
     specifier: ^14.0.0
     version: 14.1.2(react-dom@18.2.0)(react@18.2.0)
+  '@types/howler':
+    specifier: ^2.2.11
+    version: 2.2.11
   '@types/jest':
     specifier: ^29.5.5
     version: 29.5.10
@@ -3623,6 +3626,10 @@ packages:
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
     dependencies:
       '@types/node': 16.18.65
+    dev: true
+
+  /@types/howler@2.2.11:
+    resolution: {integrity: sha512-7aBoUL6RbSIrqKnpEgfa1wSNUBK06mn08siP2QI0zYk7MXfEJAaORc4tohamQYqCqVESoDyRWSdQn2BOKWj2Qw==}
     dev: true
 
   /@types/html-minifier-terser@6.1.0:
