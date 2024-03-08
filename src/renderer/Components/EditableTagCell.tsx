@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import '@yaireo/tagify/dist/tagify.css'; // Tagify CSS
 import TagInput from './TagInput';
 
 function EditableTagCell({
