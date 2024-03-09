@@ -57,8 +57,7 @@ const processProject = async (project: Path, update = false) => {
     .trim();
   const projectFile = project.fullpath();
   const parser = new AbletonParser(projectFile);
-  const { version, bpm, midiTracks, audioTracks, returnTracks } =
-    parser.parse();
+  const { daw, bpm, midiTracks, audioTracks, returnTracks } = parser.parse();
   const tracks = [...midiTracks, ...audioTracks, ...returnTracks];
 
   let p = null;
@@ -70,7 +69,7 @@ const processProject = async (project: Path, update = false) => {
 
     if (p) {
       p.bpm = bpm !== null ? bpm : 0;
-      p.version = version;
+      p.daw = daw;
       p.tracks = tracks;
       p.modifiedAt = new Date(mtimeMs || 0);
       await ProjectRepository.save(p);
@@ -84,7 +83,7 @@ const processProject = async (project: Path, update = false) => {
   p.file = name;
   p.path = projectFile;
   p.bpm = bpm !== null ? bpm : 0;
-  p.version = version;
+  p.daw = daw;
   p.tracks = tracks;
   p.modifiedAt = new Date(mtimeMs || 0);
   await ProjectRepository.save(p);
@@ -427,7 +426,7 @@ ipcMain.on('import-projects', async (event) => {
     p.file = project.file;
     p.path = project.path;
     p.bpm = project.bpm;
-    p.version = project.version;
+    p.daw = project.daw;
     p.tracks = project.tracks;
     p.modifiedAt = new Date(project.modifiedAt);
     p.audioFile = project.audioFile;
