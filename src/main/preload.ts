@@ -19,8 +19,6 @@ export type Channels =
   | 'error'
   | 'get-version'
   | 'project-updated'
-  | 'import-projects'
-  | 'export-projects'
   | 'succes';
 
 const electronHandler = {

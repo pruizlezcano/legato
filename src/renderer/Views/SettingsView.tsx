@@ -51,14 +51,6 @@ export function SettingsView() {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'full');
   };
 
-  const handleInport = () => {
-    window.electron.ipcRenderer.sendMessage('import-projects');
-  };
-
-  const handleExport = () => {
-    window.electron.ipcRenderer.sendMessage('export-projects');
-  };
-
   const handleThemeChange = (newTheme: string) => {
     if (
       newTheme === 'dark' ||
@@ -156,15 +148,6 @@ export function SettingsView() {
                 disabled={appState.scanInProgress}
               >
                 Full Scan
-              </Button>
-            </span>
-          </div>
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label>Inport/Export Projects</Label>
-            <span className="col-span-3 space-x-2">
-              <Button onClick={handleInport}>Import</Button>
-              <Button onClick={handleExport} variant="secondary">
-                Export
               </Button>
             </span>
           </div>
