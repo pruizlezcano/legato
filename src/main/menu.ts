@@ -166,7 +166,9 @@ export default class MenuBuilder {
         {
           label: 'Documentation',
           click() {
-            shell.openExternal('https://pruizlezcano.github.io/legato/docs');
+            shell.openExternal(
+              'https://pruizlezcano.github.io/legato/getting-started',
+            );
           },
         },
         {
@@ -253,7 +255,9 @@ export default class MenuBuilder {
           {
             label: 'Documentation',
             click() {
-              shell.openExternal('https://pruizlezcano.github.io/legato/docs');
+              shell.openExternal(
+                'https://pruizlezcano.github.io/legato/getting-started',
+              );
             },
           },
           {
