@@ -15,7 +15,7 @@ export const AppDataSource = new DataSource({
   type: 'sqlite',
   database: dbPath,
   driver: sqlite3,
-  synchronize: true,
+  synchronize: false,
   // logging: true,
   logger: 'advanced-console',
   entities: [Project, Setting, Tag],
@@ -59,7 +59,7 @@ const initDb = async (): Promise<{
   Tags: Repository<Tag>;
 }> => {
   await AppDataSource.initialize();
-
+  await AppDataSource.runMigrations();
   const Projects = AppDataSource.getRepository(Project);
   const Settings = AppDataSource.getRepository(Setting);
   const Tags = AppDataSource.getRepository(Tag);

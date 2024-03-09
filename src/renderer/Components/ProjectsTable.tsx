@@ -263,7 +263,7 @@ const ProjectsTable = () => {
       },
       enableGlobalFilter: false,
     }) as ColumnDef<Project>,
-    columnHelper.accessor('version', {
+    columnHelper.accessor('daw', {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="DAW" />
       ),
