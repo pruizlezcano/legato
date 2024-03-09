@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import Tag from './Tag';
 
-@Entity()
+@Entity({ name: 'project' })
 export default class Project {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -54,8 +54,8 @@ export default class Project {
   @Column({ default: 'todo' })
   progress!: 'todo' | 'inProgress' | 'finished';
 
-  @Column({ nullable: true })
-  version?: string;
+  @Column()
+  daw!: string;
 
   @Column({ nullable: true, type: 'json' })
   tracks?: {

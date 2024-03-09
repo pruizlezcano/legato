@@ -13,7 +13,7 @@ export class AbletonParser {
   }
 
   public parse(this: AbletonParser): {
-    version: string;
+    daw: string;
     bpm: number;
     audioTracks: Track[];
     midiTracks: Track[];
@@ -86,7 +86,7 @@ export class AbletonParser {
           ]
         : [];
 
-    return { version, bpm, audioTracks, midiTracks, returnTracks };
+    return { daw: version, bpm, audioTracks, midiTracks, returnTracks };
   }
 
   private parseTrack(track: any): { name: string; pluginNames: string[] } {

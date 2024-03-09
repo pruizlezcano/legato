@@ -263,6 +263,16 @@ const ProjectsTable = () => {
       },
       enableGlobalFilter: false,
     }) as ColumnDef<Project>,
+    columnHelper.accessor('version', {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="DAW" />
+      ),
+      cell: ({ row }) => {
+        const project = row.original as Project;
+        return <p>{project.daw}</p>;
+      },
+      enableGlobalFilter: false,
+    }) as ColumnDef<Project>,
     columnHelper.accessor('favorite', {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Favorite" />
@@ -525,6 +535,7 @@ const ProjectsTable = () => {
       table.getColumn('hidden')!.toggleVisibility(false);
       table.getColumn('hidden')!.setFilterValue('false');
       table.getColumn('audioFile')!.toggleVisibility(false);
+      table.getColumn('daw')!.toggleVisibility(false);
     }
   }, [table]);
 

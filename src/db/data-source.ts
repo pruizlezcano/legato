@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import path from 'path';
 import { app } from 'electron';
 import { Project, Setting, Tag } from './entity';
+import { RenameDAWColumn1709996613943 } from './migrations/1709996613943-RenameDAWColumn';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -18,7 +19,7 @@ export const AppDataSource = new DataSource({
   // logging: true,
   logger: 'advanced-console',
   entities: [Project, Setting, Tag],
-  migrations: [],
+  migrations: [RenameDAWColumn1709996613943],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations
 });
