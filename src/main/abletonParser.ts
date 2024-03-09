@@ -28,10 +28,18 @@ export class AbletonParser {
     });
     const jObj = parser.parse(content);
     const version = jObj?.Ableton?.Creator;
-    const bpm = parseFloat(
-      jObj?.Ableton?.LiveSet?.MasterTrack?.DeviceChain?.Mixer?.Tempo?.Manual
-        ?.Value,
-    );
+    let bpm;
+    if (version.includes('Ableton Live 12')) {
+      bpm = parseFloat(
+        jObj?.Ableton?.LiveSet?.MainTrack?.DeviceChain?.Mixer?.Tempo?.Manual
+          ?.Value,
+      );
+    } else {
+      bpm = parseFloat(
+        jObj?.Ableton?.LiveSet?.MasterTrack?.DeviceChain?.Mixer?.Tempo?.Manual
+          ?.Value,
+      );
+    }
 
     const audioTracks: Track[] = Array.isArray(
       jObj?.Ableton?.LiveSet?.Tracks?.AudioTrack,
