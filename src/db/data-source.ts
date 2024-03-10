@@ -61,7 +61,11 @@ const initDb = async (): Promise<{
   Tags: Repository<Tag>;
 }> => {
   await AppDataSource.initialize();
+  logger.info('Database initialized');
+
+  logger.info('Running migrations...');
   await AppDataSource.runMigrations();
+
   const Projects = AppDataSource.getRepository(Project);
   const Settings = AppDataSource.getRepository(Setting);
   const Tags = AppDataSource.getRepository(Tag);

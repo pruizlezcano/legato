@@ -27,9 +27,12 @@ const logger = winston.createLogger({
   levels: customLevels.levels,
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(
-      (info) => `${info.timestamp} ${info.level}: ${info.message}`,
-    ),
+    winston.format.printf((info) => {
+      if (info.stack) {
+        return `${info.timestamp} ${info.level}: ${info.message} - ${info.stack}`;
+      }
+      return `${info.timestamp} ${info.level}: ${info.message}`;
+    }),
   ),
   transports: [
     new winston.transports.File({
@@ -51,7 +54,12 @@ if (process.env.NODE_ENV !== 'production') {
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf((info) => `${info.level}: ${info.message}`),
+        winston.format.printf((info) => {
+          if (info.stack) {
+            return `${info.level}: ${info.message} - ${info.stack}`;
+          }
+          return `${info.level}: ${info.message}`;
+        }),
       ),
     }),
   );
