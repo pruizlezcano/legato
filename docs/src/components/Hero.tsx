@@ -1,7 +1,7 @@
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import heroImgDark from '../assets/legato-screenshot-dark.webp';
-import heroImgLight from '../assets/legato-screenshot-light.webp';
+import heroImgDark from '../assets/legato-screenshot-dark.jpg';
+import heroImgLight from '../assets/legato-screenshot-light.jpg';
 
 function Header({ translate }: { translate: any }) {
   return (
