@@ -51,8 +51,8 @@ export default class Project {
   @Column({ nullable: true })
   notes?: string;
 
-  @Column({ default: 'todo' })
-  progress!: 'todo' | 'inProgress' | 'finished';
+  @Column({ default: 'to-do' })
+  progress!: 'to-do' | 'in-progress' | 'finished';
 
   @Column()
   daw!: string;

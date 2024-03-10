@@ -209,25 +209,25 @@ const ProjectsTable = () => {
         const project = row.original as Project;
         return (
           <EditableSelectCell
-            value={project.progress}
+            value={project.progress.toLowerCase().replace(' ', '-')}
             row={{ index: row.index }}
             column={{ id: column.id }}
             table={table}
             className="w-32"
           >
-            <SelectItem value="todo">
+            <SelectItem value="to-do">
               <span className="flex flex-row">
                 <ArrowRightCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
                 To Do
               </span>
             </SelectItem>
-            <SelectItem value="inProgress">
+            <SelectItem value="in-progress">
               <span className="flex flex-row">
                 <ClockIcon className="mr-1 mt-0.5 h-4 w-4" />
                 In Progress
               </span>
             </SelectItem>
-            <SelectItem value="Finished">
+            <SelectItem value="finished">
               <span className="flex flex-row">
                 <CheckCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
                 Finished

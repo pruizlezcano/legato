@@ -523,4 +523,4 @@ app
       if (mainWindow === null) createWindow();
     });
   })
-  .catch(logger.error);
+  .catch((error: Error) => logger.error('Error initializing app:', error));
