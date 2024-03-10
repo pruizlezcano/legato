@@ -3,8 +3,10 @@ import sqlite3 from 'sqlite3';
 import { DataSource, Repository } from 'typeorm';
 import path from 'path';
 import { app } from 'electron';
+import logger from '../main/logger';
 import { Project, Setting, Tag } from './entity';
 import { RenameDAWColumn1709996613943 } from './migrations/1709996613943-RenameDAWColumn';
+import { RenameProgressValues1710065040059 } from './migrations/1710065040059-RenameProgressValues';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -15,11 +17,11 @@ export const AppDataSource = new DataSource({
   type: 'sqlite',
   database: dbPath,
   driver: sqlite3,
-  synchronize: false,
+  synchronize: true,
   // logging: true,
   logger: 'advanced-console',
   entities: [Project, Setting, Tag],
-  migrations: [RenameDAWColumn1709996613943],
+  migrations: [RenameDAWColumn1709996613943, RenameProgressValues1710065040059],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations
 });
@@ -59,7 +61,11 @@ const initDb = async (): Promise<{
   Tags: Repository<Tag>;
 }> => {
   await AppDataSource.initialize();
+  logger.info('Database initialized');
+
+  logger.info('Running migrations...');
   await AppDataSource.runMigrations();
+
   const Projects = AppDataSource.getRepository(Project);
   const Settings = AppDataSource.getRepository(Setting);
   const Tags = AppDataSource.getRepository(Tag);

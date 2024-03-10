@@ -248,7 +248,7 @@ function ProjectView({
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Progress</Label>
             <Select
-              value={project.progress}
+              value={project.progress.toLowerCase().replace(' ', '-')}
               onValueChange={(newValue: Project['progress']) =>
                 dispatch(updateProject({ ...project, progress: newValue }))
               }
@@ -257,19 +257,19 @@ function ProjectView({
                 <SelectValue placeholder="Select Progress" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todo">
+                <SelectItem value="to-do">
                   <span className="flex flex-row">
                     <ArrowRightCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
                     To Do
                   </span>
                 </SelectItem>
-                <SelectItem value="inProgress">
+                <SelectItem value="in-rogress">
                   <span className="flex flex-row">
                     <ClockIcon className="h-4 w-4 mr-1 mt-0.5" />
                     In Progress
                   </span>
                 </SelectItem>
-                <SelectItem value="Finished">
+                <SelectItem value="finished">
                   <span className="flex flex-row">
                     <CheckCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
                     Finished
