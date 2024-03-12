@@ -5,7 +5,6 @@ export class SeedSettings1709996613942 implements MigrationInterface {
     const projectsPath = await queryRunner.query(
       `SELECT * FROM "setting" WHERE "key" = 'projectsPath'`,
     );
-    console.log(projectsPath);
 
     if (!projectsPath || !projectsPath.length) {
       await queryRunner.query(

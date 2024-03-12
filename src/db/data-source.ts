@@ -8,8 +8,6 @@ import { Project, Setting, Tag } from './entity';
 
 import { CreateDatabase1709996613942 } from './migrations/1709996613941-CreateDatabase';
 import { SeedSettings1709996613942 } from './migrations/1709996613942-SeedSettings';
-import { RenameDAWColumn1709996613943 } from './migrations/1709996613943-RenameDAWColumn';
-import { RenameProgressValues1710065040059 } from './migrations/1710065040059-RenameProgressValues';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -24,12 +22,7 @@ export const AppDataSource = new DataSource({
   // logging: true,
   logger: 'advanced-console',
   entities: [Project, Setting, Tag],
-  migrations: [
-    CreateDatabase1709996613942,
-    SeedSettings1709996613942,
-    RenameDAWColumn1709996613943,
-    RenameProgressValues1710065040059,
-  ],
+  migrations: [CreateDatabase1709996613942, SeedSettings1709996613942],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations
 });
