@@ -107,7 +107,8 @@ const scanPath = async (projectsPath: string) => {
     logger.warn(`No projects found in ${projectsPath}`);
     return [];
   } catch (error) {
-    logger.error(`Error scanning path: ${error}`);
+    logger.error('Error scanning path');
+    logger.error(error);
     return [];
   }
 };
@@ -199,7 +200,8 @@ ipcMain.on('scan-projects', async (event, arg) => {
     return event.reply('scan-projects', 'OK');
   } catch (error: any) {
     isScanning = false;
-    logger.error(`Error scanning projects: ${error}`);
+    logger.error('Error scanning projects');
+    logger.error(error);
     return event.reply('scan-projects', error.message);
   }
 });
@@ -234,7 +236,8 @@ ipcMain.on('open-project', async (event, arg: number) => {
     event.sender.send('project-updated', project);
     return event.reply('open-project', 'OK');
   } catch (error: any) {
-    logger.error(`Error launching project: ${error}`);
+    logger.error('Error launching project');
+    logger.error(error);
     return event.reply('error', error.message);
   }
 });
@@ -249,7 +252,8 @@ ipcMain.on('open-project-folder', async (event, arg: number) => {
     shell.showItemInFolder(project!.path);
     return event.reply('open-project-folder', 'OK');
   } catch (error: any) {
-    logger.error(`Error opening project folder: ${error}`);
+    logger.error('Error opening project folder');
+    logger.error(error);
     return event.reply('error', error.message);
   }
 });
@@ -293,7 +297,8 @@ ipcMain.on('update-project', async (event, arg: Project) => {
     }
     return event.reply('update-project', project);
   } catch (error) {
-    logger.error(`Error updating project: ${error}`);
+    logger.error('Error updating project');
+    logger.error(error);
     return event.reply('error', error);
   }
 });
@@ -312,9 +317,10 @@ ipcMain.on('load-settings', async (event) => {
       settingsObj[setting.key] = setting.value;
     });
     event.reply('load-settings', settingsObj);
-  } catch (error) {
-    logger.error(`Error loading settings: ${error}`);
-    event.reply('error', error);
+  } catch (error: any) {
+    logger.error('Error loading settings');
+    logger.error(error);
+    event.reply('error', error.message);
   }
 });
 
@@ -331,8 +337,9 @@ ipcMain.on('save-settings', async (event, arg) => {
       }
     });
     event.reply('save-settings', 'done');
-  } catch (error) {
-    logger.error(`Error saving settings: ${error}`);
+  } catch (error: any) {
+    logger.error('Error saving settings');
+    logger.error(error);
     event.reply('error', error);
   }
 });
@@ -523,4 +530,4 @@ app
       if (mainWindow === null) createWindow();
     });
   })
-  .catch((error: Error) => logger.error('Error initializing app:', error));
+  .catch(logger.error);
