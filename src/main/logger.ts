@@ -28,8 +28,8 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf((info) => {
-      if (info.stack) {
-        return `${info.timestamp} ${info.level}: ${info.message} - ${info.stack}`;
+      if (info instanceof Error) {
+        return `${info.timestamp} ${info.stack}`;
       }
       return `${info.timestamp} ${info.level}: ${info.message}`;
     }),
