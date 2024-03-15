@@ -6,7 +6,7 @@ import { app } from 'electron';
 import logger from '../main/logger';
 import { Project, Setting, Tag } from './entity';
 
-import { CreateDatabase1709996613942 } from './migrations/1709996613941-CreateDatabase';
+import { CreateDatabase1709996613941 } from './migrations/1709996613941-CreateDatabase';
 import { SeedSettings1709996613942 } from './migrations/1709996613942-SeedSettings';
 
 const dbPath =
@@ -22,7 +22,7 @@ export const AppDataSource = new DataSource({
   // logging: true,
   logger: 'advanced-console',
   entities: [Project, Setting, Tag],
-  migrations: [CreateDatabase1709996613942, SeedSettings1709996613942],
+  migrations: [CreateDatabase1709996613941, SeedSettings1709996613942],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations
 });
