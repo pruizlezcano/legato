@@ -56,6 +56,9 @@ dependencies:
   fast-xml-parser:
     specifier: ^4.3.2
     version: 4.3.2
+  pako:
+    specifier: ^2.1.0
+    version: 2.1.0
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -124,6 +127,9 @@ devDependencies:
   '@types/node':
     specifier: ^16.11.10
     version: 16.18.65
+  '@types/pako':
+    specifier: ^2.0.3
+    version: 2.0.3
   '@types/react':
     specifier: ^18.2.21
     version: 18.2.39
@@ -3720,6 +3726,10 @@ packages:
     resolution: {integrity: sha512-vXYZGRrSCreZmq1rEjMRLXJhiy8MrIeVasx+PCVlP414N7CJLHnMf+juVvjdprHyH+XRy3zKZLHeNueOpJCn0g==}
     dependencies:
       undici-types: 5.26.5
+    dev: true
+
+  /@types/pako@2.0.3:
+    resolution: {integrity: sha512-bq0hMV9opAcrmE0Byyo0fY3Ew4tgOevJmQ9grUhpXQhYfyLJ1Kqg3P33JT5fdbT2AjeAjR51zqqVjAL/HMkx7Q==}
     dev: true
 
   /@types/plist@3.0.5:
@@ -9804,6 +9814,10 @@ packages:
   /pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
     dev: true
+
+  /pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+    dev: false
 
   /param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}

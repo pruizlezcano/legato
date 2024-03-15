@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import zlib from 'zlib';
+import pako from 'pako';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import { Track } from '../interfaces/Track';
@@ -20,7 +20,7 @@ export class AbletonParser {
     returnTracks: Track[];
   } {
     const zippedContent = fs.readFileSync(this.filePath);
-    const content = zlib.gunzipSync(zippedContent).toString('utf-8');
+    const content = pako.ungzip(zippedContent, { to: 'string' });
 
     const parser = new XMLParser({
       ignoreAttributes: false,
