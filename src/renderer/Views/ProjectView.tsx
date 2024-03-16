@@ -174,7 +174,11 @@ function ProjectView({
               <DebounceInput
                 value={project.scale ?? ''}
                 onChange={(value: string) => {
-                  if (value === project.scale) return;
+                  if (
+                    value === project.scale ||
+                    (project.scale == null && value === '')
+                  )
+                    return;
                   dispatch(saveProject({ ...project, scale: value }));
                 }}
                 placeholder="Add Scale..."
@@ -188,7 +192,11 @@ function ProjectView({
               value={project.genre ?? ''}
               onChange={(value: string) => {
                 const genre = value;
-                if (genre === project.genre) return;
+                if (
+                  genre === project.genre ||
+                  (project.genre == null && value === '')
+                )
+                  return;
                 dispatch(saveProject({ ...project, genre }));
               }}
               placeholder="Genre..."
