@@ -56,9 +56,31 @@ const processProject = async (project: Path, update = false) => {
     .replace(/\.|-|_/g, ' ')
     .trim();
   const projectFile = project.fullpath();
-  const parser = new AbletonParser(projectFile);
-  const { daw, bpm, midiTracks, audioTracks, returnTracks } = parser.parse();
-  const tracks = [...midiTracks, ...audioTracks, ...returnTracks];
+  let daw = 'Ableton Live';
+  let bpm = 0;
+  let tracks: any[] = [];
+  try {
+    const parser = new AbletonParser(projectFile);
+    const parseResult = parser.parse();
+    daw = parseResult.daw;
+    bpm = parseResult.bpm;
+
+    tracks = [
+      ...parseResult.midiTracks,
+      ...parseResult.audioTracks,
+      ...parseResult.returnTracks,
+    ];
+  } catch (error: any) {
+    logger.error(
+      `Error parsing project ${projectFile}, parsing will be skipped`,
+    );
+    logger.error(error.message);
+    if (mainWindow)
+      mainWindow.webContents.send(
+        'warning',
+        `Error parsing project ${projectFile}, parsing will be skipped`,
+      );
+  }
 
   let p = null;
 

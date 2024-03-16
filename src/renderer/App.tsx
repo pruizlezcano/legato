@@ -121,6 +121,10 @@ function Hello() {
       });
     });
 
+    window.electron.ipcRenderer.once('warning', (arg) => {
+      toast.warning('Warning', { description: arg as string, duration: 3000 });
+    });
+
     window.electron.ipcRenderer.once('get-version', (arg) => {
       setAppVersion(arg as string);
     });
