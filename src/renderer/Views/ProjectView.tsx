@@ -90,7 +90,10 @@ function ProjectView({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpen}>
-      <SheetContent className="w-[100%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[45%] 2xl:max-w-[45%]  sm:max-w-[80%]">
+      <SheetContent
+        className="w-[100%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[45%] 2xl:max-w-[45%] sm:max-w-[80%]"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <SheetHeader>
           <DebounceInput
             value={project.title}
