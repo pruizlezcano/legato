@@ -90,7 +90,10 @@ function ProjectView({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpen}>
-      <SheetContent className="w-[100%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[45%] 2xl:max-w-[45%]  sm:max-w-[80%]">
+      <SheetContent
+        className="w-[100%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[45%] 2xl:max-w-[45%] sm:max-w-[80%]"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <SheetHeader>
           <DebounceInput
             value={project.title}
@@ -171,7 +174,11 @@ function ProjectView({
               <DebounceInput
                 value={project.scale ?? ''}
                 onChange={(value: string) => {
-                  if (value === project.scale) return;
+                  if (
+                    value === project.scale ||
+                    (project.scale == null && value === '')
+                  )
+                    return;
                   dispatch(saveProject({ ...project, scale: value }));
                 }}
                 placeholder="Add Scale..."
@@ -185,7 +192,11 @@ function ProjectView({
               value={project.genre ?? ''}
               onChange={(value: string) => {
                 const genre = value;
-                if (genre === project.genre) return;
+                if (
+                  genre === project.genre ||
+                  (project.genre == null && value === '')
+                )
+                  return;
                 dispatch(saveProject({ ...project, genre }));
               }}
               placeholder="Genre..."
