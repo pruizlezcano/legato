@@ -298,6 +298,7 @@ ipcMain.on('update-project', async (event, arg: Project) => {
       project.notes = arg.notes;
       project.progress = arg.progress;
       project.audioFile = arg.audioFile;
+      project.daw = arg.daw;
       for (let i = 0; i < arg.tagNames!.length; i += 1) {
         let tag = await TagRepository.findOneBy({
           name: arg.tagNames![i],
