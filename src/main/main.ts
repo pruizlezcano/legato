@@ -71,16 +71,33 @@ const processProject = async (project: Path, update = false) => {
       ...parseResult.returnTracks,
     ];
   } catch (error: any) {
-    logger.error(
+    logger.warn(
       `Error parsing project ${projectFile}, parsing will be skipped`,
     );
-    logger.error(error.message);
+    logger.warn(error.message);
     if (mainWindow)
       mainWindow.webContents.send(
         'warning',
         `Error parsing project ${projectFile}, parsing will be skipped`,
       );
   }
+
+  // look for audio file
+  let audioFile = glob.sync(
+    `${path.dirname(projectFile)}/**/${name.replace('.als', '')}.{wav,mp3,flac}`,
+  )[0];
+
+  if (!audioFile) {
+    // audio file is the newest file in the project folder
+    const files = glob.sync(`${path.dirname(projectFile)}/*.{wav,mp3,flac}`);
+    const sortedFiles = files.sort((a, b) => {
+      const statA = fs.statSync(a);
+      const statB = fs.statSync(b);
+      return statA.mtimeMs - statB.mtimeMs;
+    });
+    audioFile = sortedFiles[sortedFiles.length - 1];
+  }
+  if (audioFile) logger.info(`Found audio file: ${audioFile}`);
 
   let p = null;
 
@@ -90,10 +107,11 @@ const processProject = async (project: Path, update = false) => {
     });
 
     if (p) {
-      p.bpm = bpm !== null ? bpm : 0;
+      p.bpm = bpm ?? 0;
       p.daw = daw;
       p.tracks = tracks;
       p.modifiedAt = new Date(mtimeMs || 0);
+      p.audioFile = audioFile ?? null;
       await ProjectRepository.save(p);
     }
     logger.info(`Updating DB entry for ${name}`);
@@ -104,9 +122,10 @@ const processProject = async (project: Path, update = false) => {
   p.title = title;
   p.file = name;
   p.path = projectFile;
-  p.bpm = bpm !== null ? bpm : 0;
+  p.bpm = bpm ?? 0;
   p.daw = daw;
   p.tracks = tracks;
+  p.audioFile = audioFile ?? null;
   p.modifiedAt = new Date(mtimeMs || 0);
   await ProjectRepository.save(p);
 
