@@ -14,7 +14,7 @@ import {
   ColumnDef,
   FilterFn,
 } from '@tanstack/react-table';
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -445,22 +445,6 @@ const ProjectsTable = () => {
     }) as ColumnDef<Project>,
   ];
 
-  const useSkipper = () => {
-    const shouldSkipRef = useRef(true);
-    const shouldSkip = shouldSkipRef.current;
-
-    const skip = useCallback(() => {
-      shouldSkipRef.current = false;
-    }, []);
-
-    useEffect(() => {
-      shouldSkipRef.current = true;
-    });
-
-    return [shouldSkip, skip] as const;
-  };
-
-  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -476,10 +460,9 @@ const ProjectsTable = () => {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex,
+    autoResetPageIndex: false,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
-        skipAutoResetPageIndex();
         dispatch(saveProject({ ...data[rowIndex]!, [columnId]: value }));
       },
     },
