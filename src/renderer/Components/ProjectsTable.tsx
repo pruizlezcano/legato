@@ -75,10 +75,11 @@ import EditableSelectCell from './EditableSelectCell';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
+    textFilter: FilterFn<unknown>;
     numberFilter: FilterFn<unknown>;
     arrayFilter: FilterFn<unknown>;
-    booleanFn: FilterFn<unknown>;
-    notNullFn: FilterFn<unknown>;
+    booleanFilter: FilterFn<unknown>;
+    notNullFilter: FilterFn<unknown>;
   }
 }
 
@@ -121,6 +122,7 @@ const ProjectsTable = () => {
         );
       },
       size: 160,
+      filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('bpm', {
       header: ({ column }) => (
@@ -161,6 +163,7 @@ const ProjectsTable = () => {
       },
       enableGlobalFilter: false,
       size: 105,
+      filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('genre', {
       header: ({ column }) => (
@@ -180,8 +183,10 @@ const ProjectsTable = () => {
       },
       size: 110,
       enableGlobalFilter: false,
+      filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('tagNames', {
+      id: 'tags',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Tags" />
       ),
@@ -239,6 +244,7 @@ const ProjectsTable = () => {
       enableSorting: true,
       enableGlobalFilter: false,
       size: 50,
+      filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('modifiedAt', {
       header: ({ column }) => (
@@ -272,6 +278,7 @@ const ProjectsTable = () => {
         return <p>{project.daw}</p>;
       },
       enableGlobalFilter: false,
+      filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('favorite', {
       header: ({ column }) => (
@@ -303,7 +310,7 @@ const ProjectsTable = () => {
         );
       },
       enableGlobalFilter: false,
-      filterFn: 'booleanFn',
+      filterFn: 'booleanFilter',
       size: 0,
     }) as ColumnDef<Project>,
     columnHelper.accessor('hidden', {
@@ -332,7 +339,7 @@ const ProjectsTable = () => {
         );
       },
       enableGlobalFilter: false,
-      filterFn: 'booleanFn',
+      filterFn: 'booleanFilter',
       size: 0,
     }) as ColumnDef<Project>,
     columnHelper.accessor('audioFile', {
@@ -359,7 +366,7 @@ const ProjectsTable = () => {
         );
       },
       enableGlobalFilter: false,
-      filterFn: 'notNullFn',
+      filterFn: 'notNullFilter',
       size: 0,
     }) as ColumnDef<Project>,
     columnHelper.accessor('controls', {
@@ -467,41 +474,61 @@ const ProjectsTable = () => {
       },
     },
     filterFns: {
-      numberFilter: (row, columnId, filterValue) => {
+      textFilter: (row, columnId, filterValue: string[]) => {
+        const value: string = row.getValue(columnId);
+        if (value === undefined || value === null) return false;
+        return filterValue.some((filter) =>
+          value.toLowerCase().includes(filter.toLowerCase()),
+        );
+      },
+      numberFilter: (row, columnId, filterValue: string[]) => {
         const value: number = row.getValue(columnId);
-        if (value === undefined) return true;
-        if (/\d+-\d+/.test(filterValue)) {
-          // Number interval: number:120-150
-          const [min, max] = filterValue.split('-');
-          return value >= Number(min) && value <= Number(max);
+        if (value === undefined) return false;
+        for (const filter of filterValue) {
+          if (/\d+-\d+/.test(filter)) {
+            // Number interval: number:120-150
+            const [min, max] = filter.split('-');
+            if (value >= Number(min) && value <= Number(max)) {
+              return true;
+            }
+          }
+          if (/>\d+/.test(filter)) {
+            // Greater than: number:>120
+            const threshold = Number(filter.slice(1)); // Remove '>'
+            if (value > threshold) {
+              return true;
+            }
+          }
+          if (/<\d+/.test(filter)) {
+            // Less than: number:<120
+            const threshold = Number(filter.slice(1)); // Remove '<'
+            if (value < threshold) {
+              return true;
+            }
+          }
+          // Exact number: number:123
+          if (value === Number(filter)) {
+            return true;
+          }
         }
-        if (/>\d+/.test(filterValue)) {
-          // Greater than: number:>120
-          const threshold = Number(filterValue.slice(1)); // Remove '>'
-          return value > threshold;
-        }
-        if (/<\d+/.test(filterValue)) {
-          // Less than: number:<120
-          const threshold = Number(filterValue.slice(1)); // Remove '<'
-          return value < threshold;
-        }
-        // Exact number: number:123
-        return value === Number(filterValue);
+        return false;
       },
-      arrayFilter: (row, columnId, filterValue) => {
+      arrayFilter: (row, columnId, filterValue: string[]) => {
         const value: string[] = row.getValue(columnId);
-        if (value === undefined) return true;
-        const tags = value.map((tag) => tag.toLowerCase()).join(' ');
-        return tags.includes(filterValue.toLowerCase());
+        if (value === undefined) return false;
+        const arrayValues = value.map((tag) => tag.toLowerCase()).join(' ');
+        return filterValue.some((filter) =>
+          arrayValues.includes(filter.toLowerCase()),
+        );
       },
-      booleanFn: (row, columnId, filterValue) => {
+      booleanFilter: (row, columnId, filterValue: string[]) => {
         const value: boolean = row.getValue(columnId);
-        if (value === undefined) return true;
-        return value === (filterValue === 'true');
+        if (value === undefined) return false;
+        return value === (filterValue[0] === 'true');
       },
-      notNullFn: (row, columnId, filterValue) => {
+      notNullFilter: (row, columnId, filterValue: string[]) => {
         const value = row.getValue(columnId);
-        if (filterValue === 'true')
+        if (filterValue[0] === 'true')
           return value !== undefined && value !== null;
         return value === undefined || value === null;
       },
@@ -527,12 +554,12 @@ const ProjectsTable = () => {
 
     setFilterQuery(query);
     // Parse the general search term
-    const generalSearch = query.replace(/(\w+):([^" ]+|"[^"]*")/g, '').trim();
+    const regex = /(\w+):(\w+|"[^"]*")/g;
+    const generalSearch = query.replace(regex, '').trim();
 
     // Parse additional filters
-    const regex = /(\w+):([^" ]+|"[^"]*")/g;
     let match;
-    const filters: { [key: string]: string } = {};
+    const filters: { [key: string]: string[] } = {};
 
     // Reset all filters
     for (const column of table.getAllColumns()) {
@@ -545,8 +572,8 @@ const ProjectsTable = () => {
     while ((match = regex.exec(query)) !== null) {
       // eslint-disable-next-line prefer-const
       let [, field, value] = match;
-      if (field === 'tags') field = 'tagNames';
-      filters[field] = value;
+      if (!filters[field]) filters[field] = [];
+      filters[field] = [...filters[field], value.replace(/^"|"$/g, '').trim()];
       const column = table.getColumn(field);
       if (column) column.setFilterValue(filters[field]);
     }
