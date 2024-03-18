@@ -347,6 +347,24 @@ function ProjectView({
             )}
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="name">DAW</Label>
+            <div className="col-span-3 flex">
+              <DebounceInput
+                value={project.daw ?? ''}
+                onChange={(value: string) => {
+                  if (
+                    value === project.daw ||
+                    (project.daw == null && value === '')
+                  )
+                    return;
+                  dispatch(saveProject({ ...project, daw: value }));
+                }}
+                placeholder="Add Scale..."
+                className="w-40"
+              />
+            </div>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Tracks</Label>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
