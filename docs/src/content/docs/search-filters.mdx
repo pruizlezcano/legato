@@ -9,16 +9,18 @@ Lean more about the properties [here](/legato/managing-projects#project-properti
 ## Text
 
 It filters projects based on the value of a specific column and a filter value provided by the user.
+If the filter value contains a space, it must be enclosed in double quotes (`"`).
 
 Examples:
 ```text
-scale:C
+scale:"C minor"
 genre:House
 tags:master
-progress:inProgress
+progress:in-progress
 ```
 
-
+You can use the same field multiple times to filter multiple values.
+For example, `genre:House genre:Techno` will filter for projects that have both `House` and `Techno` as genres.
 
 ## Number
 
