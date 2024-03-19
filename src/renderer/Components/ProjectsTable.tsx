@@ -186,7 +186,6 @@ const ProjectsTable = () => {
       filterFn: 'textFilter',
     }) as ColumnDef<Project>,
     columnHelper.accessor('tagNames', {
-      id: 'tags',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Tags" />
       ),
@@ -572,6 +571,7 @@ const ProjectsTable = () => {
     while ((match = regex.exec(query)) !== null) {
       // eslint-disable-next-line prefer-const
       let [, field, value] = match;
+      if (field === 'tags') field = 'tagNames';
       if (!filters[field]) filters[field] = [];
       filters[field] = [...filters[field], value.replace(/^"|"$/g, '').trim()];
       const column = table.getColumn(field);
