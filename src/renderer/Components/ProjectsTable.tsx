@@ -72,6 +72,7 @@ import EditableTagCell from './EditableTagCell';
 import { DataTableColumnHeader } from './datatable/data-table-column-header';
 import { DataTablePagination } from './datatable/data-table-pagination';
 import EditableSelectCell from './EditableSelectCell';
+import { DataTableViewOptions } from './datatable/data-table-column-toggle';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -121,8 +122,9 @@ const ProjectsTable = () => {
           />
         );
       },
-      size: 160,
+      size: 180,
       filterFn: 'textFilter',
+      id: 'title',
     }) as ColumnDef<Project>,
     columnHelper.accessor('bpm', {
       header: ({ column }) => (
@@ -144,6 +146,7 @@ const ProjectsTable = () => {
       enableGlobalFilter: false,
       size: 10,
       filterFn: 'numberFilter',
+      id: 'bpm',
     }) as ColumnDef<Project>,
     columnHelper.accessor('scale', {
       header: ({ column }) => (
@@ -164,6 +167,7 @@ const ProjectsTable = () => {
       enableGlobalFilter: false,
       size: 105,
       filterFn: 'textFilter',
+      id: 'scale',
     }) as ColumnDef<Project>,
     columnHelper.accessor('genre', {
       header: ({ column }) => (
@@ -184,6 +188,7 @@ const ProjectsTable = () => {
       size: 110,
       enableGlobalFilter: false,
       filterFn: 'textFilter',
+      id: 'genre',
     }) as ColumnDef<Project>,
     columnHelper.accessor('tagNames', {
       header: ({ column }) => (
@@ -200,8 +205,9 @@ const ProjectsTable = () => {
           />
         );
       },
+      id: 'tags',
       enableSorting: true,
-      size: 220,
+      size: 250,
       enableGlobalFilter: false,
       filterFn: 'arrayFilter',
     }) as ColumnDef<Project>,
@@ -244,6 +250,7 @@ const ProjectsTable = () => {
       enableGlobalFilter: false,
       size: 50,
       filterFn: 'textFilter',
+      id: 'progress',
     }) as ColumnDef<Project>,
     columnHelper.accessor('modifiedAt', {
       header: ({ column }) => (
@@ -255,7 +262,8 @@ const ProjectsTable = () => {
           <p className="ml-3">{project.modifiedAt.toLocaleDateString()}</p>
         );
       },
-      size: 10,
+      size: 0,
+      id: 'modified',
       enableGlobalFilter: false,
     }) as ColumnDef<Project>,
     columnHelper.accessor('path', {
@@ -267,6 +275,7 @@ const ProjectsTable = () => {
         return <p>{project.path}</p>;
       },
       enableGlobalFilter: false,
+      id: 'path',
     }) as ColumnDef<Project>,
     columnHelper.accessor('daw', {
       header: ({ column }) => (
@@ -278,6 +287,7 @@ const ProjectsTable = () => {
       },
       enableGlobalFilter: false,
       filterFn: 'textFilter',
+      id: 'daw',
     }) as ColumnDef<Project>,
     columnHelper.accessor('favorite', {
       header: ({ column }) => (
@@ -311,6 +321,7 @@ const ProjectsTable = () => {
       enableGlobalFilter: false,
       filterFn: 'booleanFilter',
       size: 0,
+      id: 'favorite',
     }) as ColumnDef<Project>,
     columnHelper.accessor('hidden', {
       header: ({ column }) => (
@@ -340,6 +351,7 @@ const ProjectsTable = () => {
       enableGlobalFilter: false,
       filterFn: 'booleanFilter',
       size: 0,
+      id: 'hidden',
     }) as ColumnDef<Project>,
     columnHelper.accessor('audioFile', {
       header: ({ column }) => (
@@ -364,84 +376,87 @@ const ProjectsTable = () => {
           </button>
         );
       },
+      id: 'audio',
       enableGlobalFilter: false,
       filterFn: 'notNullFilter',
       size: 0,
     }) as ColumnDef<Project>,
     columnHelper.accessor('controls', {
-      header: '',
+      header: ({ table }) => <DataTableViewOptions table={table} />,
       cell: ({ row }) => {
         const project = row.original as Project;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <EllipsisHorizontalIcon className="text-muted-foreground h-6 w-6" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => {
-                  dispatch(selectProjectById(project.id));
-                  setshowProject(true);
-                }}
-              >
-                <InformationCircleIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                Project details
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  handleOpenInFinder(project.id);
-                }}
-              >
-                <FolderIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                Open in Finder
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  handleOpenInAbleton(project.id);
-                }}
-              >
-                <RocketLaunchIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                <p>Open in Ableton</p>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  load(`local://${project.audioFile!}`, { autoplay: true });
-                  dispatch(setShowAudioPlayer(true));
-                  dispatch(setNowPlaying(project.title));
-                }}
-                disabled={!project.audioFile}
-              >
-                <PlayIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                <p>Play audio</p>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  handleFavorite(project);
-                }}
-              >
-                {project.favorite ? (
-                  <StarSolidIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                ) : (
-                  <StarIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                )}
-                <p>{project.favorite ? 'Remove favorite' : 'Add favorite'}</p>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  handleHide(project);
-                }}
-              >
-                {project.hidden ? (
-                  <EyeIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                ) : (
-                  <EyeSlashIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                )}
-                <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-end mr-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <EllipsisHorizontalIcon className="text-muted-foreground h-6 w-6" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => {
+                    dispatch(selectProjectById(project.id));
+                    setshowProject(true);
+                  }}
+                >
+                  <InformationCircleIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  Project details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleOpenInFinder(project.id);
+                  }}
+                >
+                  <FolderIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  Open in Finder
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleOpenInAbleton(project.id);
+                  }}
+                >
+                  <RocketLaunchIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  <p>Open in Ableton</p>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    load(`local://${project.audioFile!}`, { autoplay: true });
+                    dispatch(setShowAudioPlayer(true));
+                    dispatch(setNowPlaying(project.title));
+                  }}
+                  disabled={!project.audioFile}
+                >
+                  <PlayIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  <p>Play audio</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleFavorite(project);
+                  }}
+                >
+                  {project.favorite ? (
+                    <StarSolidIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  ) : (
+                    <StarIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  )}
+                  <p>{project.favorite ? 'Remove favorite' : 'Add favorite'}</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleHide(project);
+                  }}
+                >
+                  {project.hidden ? (
+                    <EyeIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  ) : (
+                    <EyeSlashIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  )}
+                  <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
       enableGlobalFilter: false,
@@ -549,7 +564,7 @@ const ProjectsTable = () => {
       table.getColumn('favorite')!.toggleVisibility(false);
       table.getColumn('hidden')!.toggleVisibility(false);
       table.getColumn('hidden')!.setFilterValue('false');
-      table.getColumn('audioFile')!.toggleVisibility(false);
+      table.getColumn('audio')!.toggleVisibility(false);
       table.getColumn('daw')!.toggleVisibility(false);
     }
   }, [table]);
@@ -577,7 +592,6 @@ const ProjectsTable = () => {
     while ((match = regex.exec(query)) !== null) {
       // eslint-disable-next-line prefer-const
       let [, field, value] = match;
-      if (field === 'tags') field = 'tagNames';
       if (!filters[field]) filters[field] = [];
       filters[field] = [...filters[field], value.replace(/^"|"$/g, '').trim()];
       const column = table.getColumn(field);

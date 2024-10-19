@@ -2,6 +2,7 @@ import {
   ChevronUpDownIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import { Column } from '@tanstack/react-table';
 
@@ -10,6 +11,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 import { cn } from '@/utils';
@@ -59,13 +61,11 @@ export function DataTableColumnHeader<TData, TValue>({
             <ChevronDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Desc
           </DropdownMenuItem>
-          {/**
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
             <EyeSlashIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Hide
           </DropdownMenuItem>
-          */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
