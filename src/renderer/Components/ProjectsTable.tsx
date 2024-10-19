@@ -460,8 +460,14 @@ const ProjectsTable = () => {
       globalFilter,
       sorting,
     },
-    onGlobalFilterChange: setGlobalFilter,
-    onSortingChange: setSorting,
+    onGlobalFilterChange: (state) => {
+      setGlobalFilter(state);
+      table.resetPageIndex();
+    },
+    onSortingChange: (state) => {
+      setSorting(state);
+      table.resetPageIndex();
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -638,7 +644,6 @@ const ProjectsTable = () => {
         </Table>
       </div>
       <div className="relative mb-3 w-full">
-        {/* <Pagination table={table} size={data.length} /> */}
         <DataTablePagination table={table} />
       </div>
       {showProject && (
