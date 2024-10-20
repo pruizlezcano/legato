@@ -11,6 +11,13 @@ import {
   DropdownMenuSeparator,
 } from '@/Components/ui/dropdown-menu';
 
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  updateSettings,
+  selectSettings,
+  Settings,
+} from '@/store/Slices/settingsSlice';
+
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
 }
@@ -19,6 +26,8 @@ interface DataTableViewOptionsProps<TData> {
 export function DataTableViewOptions<TData>({
   table,
 }: DataTableViewOptionsProps<TData>) {
+  const dispatch = useDispatch();
+  const settings = useSelector(selectSettings) as Settings;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,7 +55,23 @@ export function DataTableViewOptions<TData>({
                 key={column.id}
                 className="capitalize"
                 checked={column.getIsVisible()}
-                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                onCheckedChange={(value) => {
+                  column.toggleVisibility(!!value);
+                  let displayedColumns = [...settings.displayedColumns];
+
+                  if (value) {
+                    displayedColumns.push(column.id);
+                  } else {
+                    displayedColumns = displayedColumns.filter(
+                      (col) => col !== column.id,
+                    );
+                  }
+                  dispatch(
+                    updateSettings({
+                      displayedColumns,
+                    }),
+                  );
+                }}
               >
                 {column.id}
               </DropdownMenuCheckboxItem>

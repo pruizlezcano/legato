@@ -356,7 +356,15 @@ ipcMain.on('load-settings', async (event) => {
     const settingsObj: { [key: string]: any } = {}; // Add type annotation for settingsObj
 
     settings.forEach((setting: Setting) => {
-      settingsObj[setting.key] = setting.value;
+      if (setting.value) {
+        if (setting.key === 'sorting') {
+          settingsObj[setting.key] = JSON.parse(setting.value);
+        } else if (setting.key === 'displayedColumns') {
+          settingsObj[setting.key] = setting.value.split(',');
+        } else {
+          settingsObj[setting.key] = setting.value;
+        }
+      }
     });
     event.reply('load-settings', settingsObj);
   } catch (error: any) {
@@ -374,7 +382,13 @@ ipcMain.on('save-settings', async (event, arg) => {
         key,
       });
       if (setting) {
-        setting.value = value as string | undefined;
+        if (key === 'sorting') {
+          setting.value = JSON.stringify(value);
+        } else if (key === 'displayedColumns') {
+          setting.value = (value as string[]).join(',');
+        } else {
+          setting.value = value as string | undefined;
+        }
         await SettingRepository.save(setting);
       }
     });

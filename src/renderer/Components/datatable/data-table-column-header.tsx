@@ -17,6 +17,13 @@ import {
 import { cn } from '@/utils';
 import * as React from 'react';
 
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  updateSettings,
+  selectSettings,
+  Settings,
+} from '@/store/Slices/settingsSlice';
+
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
@@ -29,6 +36,8 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const dispatch = useDispatch();
+  const settings = useSelector(selectSettings) as Settings;
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
@@ -62,7 +71,18 @@ export function DataTableColumnHeader<TData, TValue>({
             Desc
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+          <DropdownMenuItem
+            onClick={() => {
+              column.toggleVisibility(false);
+              dispatch(
+                updateSettings({
+                  displayedColumns: settings.displayedColumns.filter(
+                    (col) => col !== column.id,
+                  ),
+                }),
+              );
+            }}
+          >
             <EyeSlashIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Hide
           </DropdownMenuItem>

@@ -14,7 +14,7 @@ import {
   ColumnDef,
   FilterFn,
 } from '@tanstack/react-table';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -64,6 +64,11 @@ import {
   setNowPlaying,
   setShowAudioPlayer,
 } from '@/store/Slices/appStateSlice';
+import {
+  selectSettings,
+  updateSettings,
+  Settings,
+} from '@/store/Slices/settingsSlice';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -90,6 +95,7 @@ const ProjectsTable = () => {
   const data: Project[] = useSelector(selectProjects);
   const [showProject, setshowProject] = useState(false);
   const appState = useSelector(selectAppState);
+  const settings = useSelector(selectSettings) as Settings;
 
   const [filterQuery, setFilterQuery] = useState(appState.filter);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -463,10 +469,19 @@ const ProjectsTable = () => {
       size: 0,
       enableHiding: false,
       enableColumnFilter: false,
+      id: 'controls',
     }) as ColumnDef<Project>,
   ];
 
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  useEffect(() => {
+    dispatch(
+      updateSettings({
+        sorting: sorting[0],
+      }),
+    );
+  }, [sorting, dispatch]);
 
   const table = useReactTable({
     columns,
@@ -557,17 +572,22 @@ const ProjectsTable = () => {
   });
 
   // Initial table state
-  const hasToggledVisibility = useRef(false);
   useEffect(() => {
-    if (!hasToggledVisibility.current) {
-      table.getColumn('path')!.toggleVisibility(false);
-      table.getColumn('favorite')!.toggleVisibility(false);
-      table.getColumn('hidden')!.toggleVisibility(false);
-      table.getColumn('hidden')!.setFilterValue('false');
-      table.getColumn('audio')!.toggleVisibility(false);
-      table.getColumn('daw')!.toggleVisibility(false);
+    table.setPageSize(settings.pageSize);
+    setSorting([settings.sorting]);
+    const columnsIds = columns.map((column) => column.id);
+    for (const id of columnsIds) {
+      const column = table.getColumn(id!);
+      // eslint-disable-next-line no-continue
+      if (!column) continue;
+      if (settings.displayedColumns.includes(id!)) {
+        column.toggleVisibility(true);
+      } else {
+        column.toggleVisibility(false);
+      }
     }
-  }, [table]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setFilter = (query: string) => {
     if (query === filterQuery) return;

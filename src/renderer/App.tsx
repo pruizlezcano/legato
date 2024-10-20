@@ -42,7 +42,8 @@ import { AudioPlayer } from './Components/ui/audio-player';
 
 function Hello() {
   const [appVersion, setAppVersion] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const settings = useSelector(selectSettings);
   const projects = useSelector(selectProjects);
   const appState = useSelector(selectAppState);
@@ -91,13 +92,14 @@ function Hello() {
     window.electron.ipcRenderer.on('load-settings', (arg) => {
       logger.info('loading settings');
       dispatch(loadSettings(arg as Settings));
+      setIsLoadingSettings(false);
     });
 
     window.electron.ipcRenderer.on('list-projects', (arg) => {
       logger.info('updating projects list');
       dispatch(loadProjects(arg as Project[]));
       dispatch(setScanInProgress(false));
-      setLoading(false);
+      setIsLoadingProjects(false);
     });
 
     window.electron.ipcRenderer.on('project-updated', (arg) => {
@@ -191,7 +193,7 @@ function Hello() {
           <SettingsButton onClick={() => dispatch(setShowSettings(true))} />
         </div>
       </div>
-      {loading ? (
+      {isLoadingProjects || isLoadingSettings ? (
         <div className="flex w-full flex-col items-center justify-center pt-60">
           <p className="text-2xl font-bold">Loading...</p>
         </div>

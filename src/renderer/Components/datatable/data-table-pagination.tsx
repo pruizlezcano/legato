@@ -15,6 +15,9 @@ import {
   SelectValue,
 } from '@/Components/ui/select';
 
+import { useDispatch } from 'react-redux';
+import { updateSettings } from '@/store/Slices/settingsSlice';
+
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
 }
@@ -23,6 +26,7 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
+  const dispatch = useDispatch();
   return (
     <div className="flex items-center justify-between px-2 mx-6">
       <div className="flex-1 text-sm text-muted-foreground">
@@ -36,6 +40,7 @@ export function DataTablePagination<TData>({
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
+              dispatch(updateSettings({ pageSize: Number(value) }));
             }}
           >
             <SelectTrigger className="h-8 w-[70px]">
