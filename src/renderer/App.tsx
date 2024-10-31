@@ -184,7 +184,7 @@ function Hello() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="ml-2 flex space-x-2">
+        <div className="ml-2 mt-1 xl:mt-2 flex space-x-2">
           <Badge variant="outline">v{appVersion}</Badge>
           <Badge variant="outline">{projects.length} projects loaded</Badge>
         </div>
