@@ -8,9 +8,6 @@ import {
   StarIcon,
   EyeIcon,
   EyeSlashIcon,
-  ArrowRightCircleIcon,
-  ClockIcon,
-  CheckCircleIcon,
   PlayIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -40,6 +37,8 @@ import {
   setNowPlaying,
   setShowAudioPlayer,
 } from '@/store/Slices/appStateSlice';
+import { capitalize } from '@/utils';
+import { Progress, progressColors } from '../../types/Progress';
 import { Project } from '../../db/entity';
 import DebounceInput from '../Components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
@@ -259,7 +258,7 @@ function ProjectView({
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Progress</Label>
             <Select
-              value={project.progress.toLowerCase().replace(' ', '-')}
+              value={project.progress}
               onValueChange={(newValue: Project['progress']) =>
                 dispatch(updateProject({ ...project, progress: newValue }))
               }
@@ -268,24 +267,17 @@ function ProjectView({
                 <SelectValue placeholder="Select Progress" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="to-do">
-                  <span className="flex flex-row">
-                    <ArrowRightCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
-                    To Do
-                  </span>
-                </SelectItem>
-                <SelectItem value="in-rogress">
-                  <span className="flex flex-row">
-                    <ClockIcon className="h-4 w-4 mr-1 mt-0.5" />
-                    In Progress
-                  </span>
-                </SelectItem>
-                <SelectItem value="finished">
-                  <span className="flex flex-row">
-                    <CheckCircleIcon className="h-4 w-4 mr-1 mt-0.5" />
-                    Finished
-                  </span>
-                </SelectItem>
+                {Object.values(Progress).map((status: Progress) => {
+                  return (
+                    <SelectItem key={status} value={status}>
+                      <span
+                        className={`flex flex-row ${progressColors[status]}`}
+                      >
+                        {capitalize(status.replace('-', ' '))}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

@@ -31,9 +31,6 @@ import {
   EyeSlashIcon,
   InformationCircleIcon,
   FolderIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ArrowRightCircleIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
@@ -69,6 +66,7 @@ import {
   updateSettings,
   Settings,
 } from '@/store/Slices/settingsSlice';
+import { capitalize } from '@/utils';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
 import ProjectView from '../Views/ProjectView';
@@ -78,6 +76,7 @@ import { DataTableColumnHeader } from './datatable/data-table-column-header';
 import { DataTablePagination } from './datatable/data-table-pagination';
 import EditableSelectCell from './EditableSelectCell';
 import { DataTableViewOptions } from './datatable/data-table-column-toggle';
+import { Progress, progressColors } from '../../types/Progress';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -225,30 +224,21 @@ const ProjectsTable = () => {
         const project = row.original as Project;
         return (
           <EditableSelectCell
-            value={project.progress.toLowerCase().replace(' ', '-')}
+            value={project.progress}
             row={{ index: row.index }}
             column={{ id: column.id }}
             table={table}
             className="w-32"
           >
-            <SelectItem value="to-do">
-              <span className="flex flex-row">
-                <ArrowRightCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
-                To Do
-              </span>
-            </SelectItem>
-            <SelectItem value="in-progress">
-              <span className="flex flex-row">
-                <ClockIcon className="mr-1 mt-0.5 h-4 w-4" />
-                In Progress
-              </span>
-            </SelectItem>
-            <SelectItem value="finished">
-              <span className="flex flex-row">
-                <CheckCircleIcon className="mr-1 mt-0.5 h-4 w-4" />
-                Finished
-              </span>
-            </SelectItem>
+            {Object.values(Progress).map((status: Progress) => {
+              return (
+                <SelectItem key={status} value={status}>
+                  <span className={`flex flex-row ${progressColors[status]}`}>
+                    {capitalize(status.replace('-', ' '))}
+                  </span>
+                </SelectItem>
+              );
+            })}
           </EditableSelectCell>
         );
       },

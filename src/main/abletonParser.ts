@@ -2,7 +2,7 @@
 import pako from 'pako';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
-import { Track } from '../interfaces/Track';
+import { Track } from '../types/Track';
 
 // eslint-disable-next-line import/prefer-default-export
 export class AbletonParser {

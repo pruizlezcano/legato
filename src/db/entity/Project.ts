@@ -5,6 +5,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
+import { Progress } from '../../types/Progress';
 import Tag from './Tag';
 
 @Entity({ name: 'project' })
@@ -52,7 +53,7 @@ export default class Project {
   notes?: string;
 
   @Column({ default: 'to-do' })
-  progress!: 'to-do' | 'in-progress' | 'finished';
+  progress!: `${Progress}`;
 
   @Column()
   daw!: string;
