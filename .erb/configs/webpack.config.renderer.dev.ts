@@ -32,10 +32,10 @@ if (
 ) {
   console.log(
     chalk.black.bgYellow.bold(
-      'The DLL files are missing. Sit back while we build them for you with "npm run build-dll"',
+      'The DLL files are missing. Sit back while we build them for you with "pnpm run build-dll"',
     ),
   );
-  execSync('npm run postinstall');
+  execSync('pnpm run postinstall');
 }
 
 const configuration: webpack.Configuration = {
@@ -74,7 +74,6 @@ const configuration: webpack.Configuration = {
               importLoaders: 1,
             },
           },
-          'sass-loader',
         ],
         include: /\.module\.s?(c|a)ss$/,
       },
@@ -83,7 +82,6 @@ const configuration: webpack.Configuration = {
         use: [
           'style-loader',
           'css-loader',
-          'sass-loader',
           {
             loader: 'postcss-loader',
             options: {
@@ -149,7 +147,7 @@ const configuration: webpack.Configuration = {
      * development checks
      *
      * By default, use 'development' as NODE_ENV. This can be overriden with
-     * 'staging', for example, by changing the ENV variables in the npm scripts
+     * 'staging', for example, by changing the ENV variables in the pnpm scripts
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
@@ -194,7 +192,7 @@ const configuration: webpack.Configuration = {
     },
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');
-      const preloadProcess = spawn('npm', ['run', 'start:preload'], {
+      const preloadProcess = spawn('pnpm', ['run', 'start:preload'], {
         shell: true,
         stdio: 'inherit',
       })
@@ -208,7 +206,7 @@ const configuration: webpack.Configuration = {
           ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat(),
         );
       }
-      spawn('npm', args, {
+      spawn('pnpm', args, {
         shell: true,
         stdio: 'inherit',
       })

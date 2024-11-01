@@ -34,10 +34,8 @@ This means that the docs are kept in the same repository as the project code, an
 
 ### Prequisites
 
-- [Node.js] LTS
-- npm
-
-Instead of npm, [pnpm] is recommended
+- [Node.js] ^22
+- [pnpm] ^9
 
 ### Submit an issue
 
@@ -59,10 +57,6 @@ This often provides additional considerations and avoids unnecessary work.
 
 4. Install dependencies
     ```
-    npm install
-    ```
-    or
-    ```
     pnpm install
     ```
 
@@ -79,17 +73,12 @@ This often provides additional considerations and avoids unnecessary work.
    
 3. Run legato:
     ```
-    npm start
-    ```
-    or
-    ```
     pnpm start
     ```
     This will start legato in hot reload mode, that means that any change in the code will be added to the app in real time.
     To stop the application, you can use the Ctrl+C command in the terminal where the application is running.
 
 4. When you’re done editing, do:
-
     ```
     git add <MODIFIED FILES>
     ```
@@ -101,11 +90,6 @@ This often provides additional considerations and avoids unnecessary work.
     To commit your changes, please use the [conventional commits] specification.
 
 5. Please check that your changes don't break any unit tests with:
-
-    ```
-    npm test
-    ```
-    or
     ```
     pnpm test
     ```
@@ -119,12 +103,9 @@ This often provides additional considerations and avoids unnecessary work.
     pnpm lint
     ```
 
-
-
 ### Submit your contribution
 
 1. If everything works fine, push your local branch to the remote server with:
-
     ```
     git push -u origin my-feature
     ```

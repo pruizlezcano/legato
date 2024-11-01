@@ -27,12 +27,8 @@
     "package-lock.json": true,
     "*.{css,sass,scss}.d.ts": true
   },
-  "conventionalCommits.scopes": [
-    "project",
-    "settings",
-    "deps-dev"
-  ],
+  "conventionalCommits.scopes": ["project", "settings", "deps-dev"],
   "editor.codeActionsOnSave": {
-    "source.fixAll": true
+    "source.fixAll": "explicit"
   }
 }

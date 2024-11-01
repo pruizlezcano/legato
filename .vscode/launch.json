@@ -6,7 +6,7 @@
       "type": "node",
       "request": "launch",
       "protocol": "inspector",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "start"],
       "env": {
         "MAIN_ARGS": "--inspect=5858 --remote-debugging-port=9223"
