@@ -39,6 +39,7 @@ import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
 import { handleList } from './hooks/handlers';
 import { AudioPlayer } from './Components/ui/audio-player';
+import TableSkeleton from './Components/TableSkeleton';
 
 function Hello() {
   const [appVersion, setAppVersion] = useState('');
@@ -194,9 +195,7 @@ function Hello() {
         </div>
       </div>
       {isLoadingProjects || isLoadingSettings ? (
-        <div className="flex w-full flex-col items-center justify-center pt-60">
-          <p className="text-2xl font-bold">Loading...</p>
-        </div>
+        <TableSkeleton />
       ) : projects.length === 0 ? (
         <div className="flex w-full flex-col items-center justify-center pt-60">
           <p className="text-2xl font-bold">No projects found</p>

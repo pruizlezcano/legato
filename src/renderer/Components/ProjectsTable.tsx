@@ -14,7 +14,7 @@ import {
   ColumnDef,
   FilterFn,
 } from '@tanstack/react-table';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -77,6 +77,7 @@ import { DataTablePagination } from './datatable/data-table-pagination';
 import EditableSelectCell from './EditableSelectCell';
 import { DataTableViewOptions } from './datatable/data-table-column-toggle';
 import { Progress, progressColors } from '../../types/Progress';
+import TableSkeleton from './TableSkeleton';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -98,6 +99,7 @@ const ProjectsTable = () => {
 
   const [filterQuery, setFilterQuery] = useState(appState.filter);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [isTableLoading, setIsTableLoading] = useState(true);
 
   const { load } = useGlobalAudioPlayer();
 
@@ -579,43 +581,52 @@ const ProjectsTable = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setFilter = (query: string) => {
-    if (query === filterQuery) return;
+  const setFilter = useCallback(
+    (query: string) => {
+      if (query === filterQuery) return;
 
-    setFilterQuery(query);
-    // Parse the general search term
-    const regex = /(\w+):(\w+|"[^"]*")/g;
-    const generalSearch = query.replace(regex, '').trim();
+      setFilterQuery(query);
+      // Parse the general search term
+      const regex = /(\w+):(\w+|"[^"]*")/g;
+      const generalSearch = query.replace(regex, '').trim();
 
-    // Parse additional filters
-    let match;
-    const filters: { [key: string]: string[] } = {};
+      // Parse additional filters
+      let match;
+      const filters: { [key: string]: string[] } = {};
 
-    // Reset all filters
-    for (const column of table.getAllColumns()) {
-      column.setFilterValue('');
-    }
-    table.getColumn('hidden')!.setFilterValue('false');
+      // Reset all filters
+      for (const column of table.getAllColumns()) {
+        column.setFilterValue('');
+      }
+      table.getColumn('hidden')!.setFilterValue('false');
 
-    // Set new filters
-    // eslint-disable-next-line no-cond-assign
-    while ((match = regex.exec(query)) !== null) {
-      // eslint-disable-next-line prefer-const
-      let [, field, value] = match;
-      if (!filters[field]) filters[field] = [];
-      filters[field] = [...filters[field], value.replace(/^"|"$/g, '').trim()];
-      const column = table.getColumn(field);
-      if (column) column.setFilterValue(filters[field]);
-    }
+      // Set new filters
+      // eslint-disable-next-line no-cond-assign
+      while ((match = regex.exec(query)) !== null) {
+        // eslint-disable-next-line prefer-const
+        let [, field, value] = match;
+        if (!filters[field]) filters[field] = [];
+        filters[field] = [
+          ...filters[field],
+          value.replace(/^"|"$/g, '').trim(),
+        ];
+        const column = table.getColumn(field);
+        if (column) column.setFilterValue(filters[field]);
+      }
 
-    table.setGlobalFilter(generalSearch);
-  };
+      table.setGlobalFilter(generalSearch);
+    },
+    [filterQuery, table],
+  );
 
   useEffect(() => {
     setFilter(appState.filter);
-  });
+    setIsTableLoading(false);
+  }, [setFilter, appState.filter]);
 
-  return (
+  return isTableLoading ? (
+    <TableSkeleton />
+  ) : (
     <>
       <div className="mx-6 my-2 w-full rounded-md border">
         <Table>
