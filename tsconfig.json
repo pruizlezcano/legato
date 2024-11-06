@@ -16,6 +16,7 @@
     "allowJs": true,
     "outDir": ".erb/dll",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/renderer/*"],
     }
