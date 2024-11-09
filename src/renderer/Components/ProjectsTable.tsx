@@ -497,7 +497,10 @@ const ProjectsTable = () => {
     autoResetPageIndex: false,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
-        dispatch(saveProject({ ...data[rowIndex]!, [columnId]: value }));
+        const column = table.getColumn(columnId);
+        // @ts-ignore
+        const accessorKey = column?.columnDef.accessorKey;
+        dispatch(saveProject({ ...data[rowIndex]!, [accessorKey]: value }));
       },
     },
     filterFns: {
