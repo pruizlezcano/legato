@@ -11,6 +11,7 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
+  createColumnHelper,
 } from '@tanstack/react-table';
 import { Skeleton } from '@/Components/ui/skeleton';
 
@@ -36,43 +37,53 @@ function PaginationSkeleton() {
 }
 
 export default function TableSkeleton() {
+  const columnHelper = createColumnHelper<{}>();
+
   const data = Array(10).fill({});
   const columns = [
-    {
+    columnHelper.display({
       id: '1',
-      header: <Skeleton className="h-5 w-[90px]" />,
-      cell: <SkeletonCell width="200" />,
-    },
-    {
+      header: () => <Skeleton className="h-5 w-[90px]" />,
+      cell: () => <SkeletonCell width="200" />,
+    }),
+    columnHelper.display({
       id: '2',
-      header: <Skeleton className="h-5 w-[90px]" />,
-      cell: <SkeletonCell width="120" />,
-    },
-    {
+      header: () => <Skeleton className="h-5 w-[90px]" />,
+      cell: () => <SkeletonCell width="120" />,
+    }),
+    columnHelper.display({
       id: '3',
-      header: <Skeleton className="h-5 w-[90px]" />,
-      cell: <SkeletonCell width="150" />,
-    },
-    {
+      header: () => <Skeleton className="h-5 w-[90px]" />,
+      cell: () => <SkeletonCell width="150" />,
+    }),
+    columnHelper.display({
       id: '4',
-      header: <Skeleton className="h-5 w-[60px]" />,
-      cell: <SkeletonCell width="100" />,
-    },
-    {
+      header: () => <Skeleton className="h-5 w-[60px]" />,
+      cell: () => <SkeletonCell width="100" />,
+    }),
+    columnHelper.display({
       id: '5',
-      header: <Skeleton className="h-5 w-[70px]" />,
-      cell: <SkeletonCell width="100" />,
-    },
-    {
+      header: () => <Skeleton className="h-5 w-[70px]" />,
+      cell: () => <SkeletonCell width="100" />,
+    }),
+    columnHelper.display({
       id: '6',
-      header: <Skeleton className="h-5 w-[90px]" />,
-      cell: <SkeletonCell width="100" />,
-    },
+      header: () => <Skeleton className="h-5 w-[90px]" />,
+      cell: () => <SkeletonCell width="100" />,
+    }),
   ];
   const table = useReactTable({
     columns,
     data,
     getCoreRowModel: getCoreRowModel(),
+    // Need to provide filterFns to avoid error
+    filterFns: {
+      textFilter: () => true,
+      numberFilter: () => true,
+      arrayFilter: () => true,
+      booleanFilter: () => true,
+      notNullFilter: () => true,
+    },
   });
   return (
     <>
