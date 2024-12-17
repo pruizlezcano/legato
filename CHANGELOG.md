@@ -1,4 +1,22 @@
 
+## [0.3.0](https://github.com/pruizlezcano/legato/compare/v0.2.0...v0.3.0) (2024-12-17)
+
+
+### Features
+
+* Added column visibility toggle ([1a0e74f](https://github.com/pruizlezcano/legato/commit/1a0e74fce6d418bb33c817d800823625bd5b66dc))
+* Added table state persistence for sorting, page size, and displayed columns ([5794023](https://github.com/pruizlezcano/legato/commit/5794023f3af124d912467c2aad21c2ddb3d99b68))
+* **project:** Added new project progress states and color coding ([a7b1906](https://github.com/pruizlezcano/legato/commit/a7b19066a460bf950c84ed0d7076a57a7a907976))
+* Return to first page when changing filter ([03cd354](https://github.com/pruizlezcano/legato/commit/03cd3547bdc225fb4397d2b6596146fb6350b8ea))
+* **ui:** Added skeleton during table load ([7886d37](https://github.com/pruizlezcano/legato/commit/7886d373e83555639ff55922ed6a327040bdbfe2))
+
+
+### Bug Fixes
+
+* **tsc:** Resolve Typescript errors ([d80a8bb](https://github.com/pruizlezcano/legato/commit/d80a8bb8f728cdd416cadf89202563f59916f6b3))
+* **ui:** Adjust margin for header badges ([c3c6ead](https://github.com/pruizlezcano/legato/commit/c3c6ead9d108f32895606b9a67c371630ad3c298))
+* **ui:** Update project saving logic to use accessorKey for column updates ([8d3d6fb](https://github.com/pruizlezcano/legato/commit/8d3d6fb927758665a292282651285dfa1e5a39e6))
+
 ## [0.2.0](https://github.com/pruizlezcano/legato/compare/v0.1.0...v0.2.0) (2024-03-19)
 
 
