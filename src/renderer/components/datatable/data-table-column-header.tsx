@@ -6,14 +6,14 @@ import {
 } from '@heroicons/react/24/outline';
 import { Column } from '@tanstack/react-table';
 
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/utils';
 import * as React from 'react';
 

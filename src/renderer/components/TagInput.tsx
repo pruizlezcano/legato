@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Input } from '@/Components/ui/input';
-import { Badge } from '@/Components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
 import {

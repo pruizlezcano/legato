@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useState, useEffect, KeyboardEvent, useRef } from 'react';
-import { Input } from '@/Components/ui/input';
+import { Input } from '@/components/ui/input';
 
 function DebounceInput({
   value: initialValue,

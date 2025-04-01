@@ -6,14 +6,14 @@ import {
 } from '@heroicons/react/24/solid';
 import { Table } from '@tanstack/react-table';
 
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
+} from '@/components/ui/select';
 
 import { useDispatch } from 'react-redux';
 import { updateSettings } from '@/store/Slices/settingsSlice';

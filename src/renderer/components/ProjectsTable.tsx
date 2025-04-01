@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/Components/ui/table';
+} from '@/components/ui/table';
 import {
   EllipsisHorizontalIcon,
   RocketLaunchIcon,
@@ -40,21 +40,21 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/Components/ui/tooltip';
+} from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import {
   saveProject,
   selectProjects,
   selectProjectById,
 } from '@/store/Slices/projectsSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { SelectItem } from '@/Components/ui/select';
+import { SelectItem } from '@/components/ui/select';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import {
   selectAppState,
@@ -69,7 +69,7 @@ import {
 import { capitalize } from '@/utils';
 import EditableCell from './EditableCell';
 import { Project } from '../../db/entity';
-import ProjectView from '../Views/ProjectView';
+import ProjectView from '../views/ProjectView';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
 import EditableTagCell from './EditableTagCell';
 import { DataTableColumnHeader } from './datatable/data-table-column-header';

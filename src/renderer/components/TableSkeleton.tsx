@@ -6,14 +6,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/Components/ui/table';
+} from '@/components/ui/table';
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { Skeleton } from '@/Components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function SkeletonCell({ width }: { width: string }) {
   return (

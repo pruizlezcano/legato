@@ -1,20 +1,20 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/Components/ui/dialog';
-import { Label } from '@/Components/ui/label';
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
+} from '@/components/ui/select';
 import { selectAppState, setShowSettings } from '@/store/Slices/appStateSlice';
 import {
   selectSettings,
@@ -24,7 +24,7 @@ import {
 import { Cog6ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import DebounceInput from '../Components/DebounceInput';
+import DebounceInput from '../components/DebounceInput';
 
 export function SettingsButton({ onClick }: { onClick: () => void }) {
   return (

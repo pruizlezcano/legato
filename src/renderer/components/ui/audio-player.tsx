@@ -1,12 +1,12 @@
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import { useEffect, useRef, useState } from 'react';
-import { Card, CardContent } from '@/Components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/Components/ui/tooltip';
+} from '@/components/ui/tooltip';
 import {
   PlayCircleIcon,
   PauseCircleIcon,

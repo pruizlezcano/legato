@@ -2,19 +2,19 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { useEffect, useState } from 'react';
-import { DataTableFilterCommand } from '@/Components/datatable/data-table-filter-command';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
+import { DataTableFilterCommand } from '@/components/datatable/data-table-filter-command';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Toaster } from '@/Components/ui/sonner';
-import ProjectsTable from '@/Components/ProjectsTable';
-import { LoadingSpinner } from '@/Components/ui/spinner';
+import { Toaster } from '@/components/ui/sonner';
+import ProjectsTable from '@/components/ProjectsTable';
+import { LoadingSpinner } from '@/components/ui/spinner';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/Components/ui/tooltip';
+} from '@/components/ui/tooltip';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectSettings,
@@ -34,12 +34,12 @@ import {
   loadProject,
 } from '@/store/Slices/projectsSlice';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
-import { SettingsView, SettingsButton } from './Views/SettingsView';
+import { SettingsView, SettingsButton } from './views/SettingsView';
 import { Project } from '../db/entity';
 import logger from './hooks/useLogger';
 import { handleList } from './hooks/handlers';
-import { AudioPlayer } from './Components/ui/audio-player';
-import TableSkeleton from './Components/TableSkeleton';
+import { AudioPlayer } from './components/ui/audio-player';
+import TableSkeleton from './components/TableSkeleton';
 
 function Hello() {
   const [appVersion, setAppVersion] = useState('');

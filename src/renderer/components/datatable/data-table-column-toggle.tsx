@@ -2,14 +2,14 @@ import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { Table } from '@tanstack/react-table';
 
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from '@/Components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 import { useDispatch, useSelector } from 'react-redux';
 import {

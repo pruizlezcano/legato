@@ -1,4 +1,4 @@
-import { CommandDialog, CommandInput } from '@/Components/ui/command';
+import { CommandDialog, CommandInput } from '@/components/ui/command';
 import { selectAppState, setFilter } from '@/store/Slices/appStateSlice';
 import { isMacOs } from '@/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';

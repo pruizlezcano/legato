@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import { useCallback, useEffect, useState } from 'react';
-import { Sheet, SheetContent, SheetHeader } from '@/Components/ui/sheet';
-import { Label } from '@/Components/ui/label';
-import { Badge } from '@/Components/ui/badge';
+import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import {
   StarIcon,
@@ -17,21 +17,21 @@ import {
   updateProject,
   saveProject,
 } from '@/store/Slices/projectsSlice';
-import { Textarea } from '@/Components/ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
+} from '@/components/ui/select';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/Components/ui/accordion';
-import Dropzone from '@/Components/ui/dropzone';
+} from '@/components/ui/accordion';
+import Dropzone from '@/components/ui/dropzone';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import {
   setNowPlaying,
@@ -40,9 +40,9 @@ import {
 import { capitalize } from '@/utils';
 import { Progress, progressColors } from '../../types/Progress';
 import { Project } from '../../db/entity';
-import DebounceInput from '../Components/DebounceInput';
+import DebounceInput from '../components/DebounceInput';
 import { handleOpenInAbleton, handleOpenInFinder } from '../hooks/handlers';
-import TagInput from '../Components/TagInput';
+import TagInput from '../components/TagInput';
 
 function ProjectView({
   onClose,

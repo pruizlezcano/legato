@@ -1,7 +1,7 @@
-import { Input } from '@/Components/ui/input';
+import { Input } from '@/components/ui/input';
 import React, { ChangeEvent, useRef } from 'react';
 import { cn } from '@/utils';
-import { Card, CardContent } from '@/Components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { InboxArrowDownIcon } from '@heroicons/react/24/outline';
 
 interface DropzoneProps
