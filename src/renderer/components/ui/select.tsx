@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {
-  ChevronUpDownIcon,
+  ChevronsUpDownIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   CheckIcon,
-} from '@heroicons/react/24/outline';
+} from 'lucide-react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 
 import { cn } from '@/utils';
@@ -29,7 +29,7 @@ const SelectTrigger = React.forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronUpDownIcon className="h-4 w-4 opacity-50" />
+      <ChevronsUpDownIcon className="h-4 w-4 opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));

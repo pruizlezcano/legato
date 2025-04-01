@@ -7,11 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import {
-  PlayCircleIcon,
-  PauseCircleIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { PlayCircleIcon, PauseCircleIcon, XIcon } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectAppState,
@@ -115,7 +111,7 @@ export function AudioPlayer() {
                       }}
                       aria-label="Close"
                     >
-                      <XMarkIcon className="h-5 w-5 text-muted-foreground/60 hover:text-inherit" />
+                      <XIcon className="h-5 w-5 text-muted-foreground/60 hover:text-inherit" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>

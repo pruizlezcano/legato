@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input';
 import React, { ChangeEvent, useRef } from 'react';
 import { cn } from '@/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { InboxArrowDownIcon } from '@heroicons/react/24/outline';
+import { DownloadIcon } from 'lucide-react';
 
 interface DropzoneProps
   extends Omit<
@@ -75,7 +75,7 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
         >
           <div className="flex items-center justify-center text-muted-foreground">
             <span className="font-medium flex">
-              <InboxArrowDownIcon className="h-4 w-4 mr-2" />
+              <DownloadIcon className="h-4 w-4 mr-2" />
               {dropMessage}
             </span>
             <Input

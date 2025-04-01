@@ -21,7 +21,7 @@ import {
   updateSettings,
   Settings,
 } from '@/store/Slices/settingsSlice';
-import { Cog6ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { SettingsIcon, FolderIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import DebounceInput from '../components/DebounceInput';
@@ -32,7 +32,7 @@ export function SettingsButton({ onClick }: { onClick: () => void }) {
       className="relative h-10 w-10 justify-start px-3 py-2 sm:w-fit"
       onClick={onClick}
     >
-      <Cog6ToothIcon className="h-4 w-4 sm:mr-2" />
+      <SettingsIcon className="h-4 w-4 sm:mr-2" />
       <span className="hidden sm:inline-flex">Settings</span>
     </Button>
   );

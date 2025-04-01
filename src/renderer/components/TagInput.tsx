@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XIcon } from 'lucide-react';
 import { cn } from '@/utils';
 import {
   Tooltip,
@@ -134,7 +134,7 @@ const TagInput = ({
               {tag}
             </span>
             <button type="button" onClick={() => handleClose(tag)}>
-              <XMarkIcon className="w-4 h-4 ml-1" />
+              <XIcon className="w-4 h-4 ml-1" />
             </button>
           </Badge>
         );

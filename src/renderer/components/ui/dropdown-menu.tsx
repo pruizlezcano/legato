@@ -1,10 +1,6 @@
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import {
-  CheckIcon,
-  ChevronRightIcon,
-  ChevronDoubleRightIcon,
-} from '@heroicons/react/24/outline';
+import { CheckIcon, ChevronRightIcon, ChevronsRightIcon } from 'lucide-react';
 
 import { cn } from '@/utils';
 
@@ -133,7 +129,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
-        <ChevronDoubleRightIcon className="h-4 w-4 fill-current" />
+        <ChevronsRightIcon className="h-4 w-4 fill-current" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

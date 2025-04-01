@@ -24,16 +24,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  EllipsisHorizontalIcon,
-  RocketLaunchIcon,
   StarIcon,
+  StarOffIcon,
+  EllipsisVerticalIcon,
+  RocketIcon,
   EyeIcon,
-  EyeSlashIcon,
-  InformationCircleIcon,
+  EyeOffIcon,
+  InfoIcon,
   FolderIcon,
   PlayIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+} from 'lucide-react';
 
 import {
   Tooltip,
@@ -299,9 +299,9 @@ const ProjectsTable = () => {
               <TooltipTrigger asChild>
                 <button type="button" onClick={() => handleFavorite(project)}>
                   {project.favorite ? (
-                    <StarSolidIcon className="h-5 w-5" />
-                  ) : (
                     <StarIcon className="h-5 w-5" />
+                  ) : (
+                    <StarOffIcon className="h-5 w-5" />
                   )}
                 </button>
               </TooltipTrigger>
@@ -335,7 +335,7 @@ const ProjectsTable = () => {
                   {project.hidden ? (
                     <EyeIcon className="h-5 w-5" />
                   ) : (
-                    <EyeSlashIcon className="h-5 w-5" />
+                    <EyeOffIcon className="h-5 w-5" />
                   )}
                 </button>
               </TooltipTrigger>
@@ -387,7 +387,7 @@ const ProjectsTable = () => {
           <div className="flex justify-end mr-4">
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <EllipsisHorizontalIcon className="text-muted-foreground h-6 w-6" />
+                <EllipsisVerticalIcon className="text-muted-foreground h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
@@ -396,7 +396,7 @@ const ProjectsTable = () => {
                     setshowProject(true);
                   }}
                 >
-                  <InformationCircleIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  <InfoIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   Project details
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -413,7 +413,7 @@ const ProjectsTable = () => {
                     handleOpenInAbleton(project.id);
                   }}
                 >
-                  <RocketLaunchIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  <RocketIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   <p>Open in Ableton</p>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -434,9 +434,9 @@ const ProjectsTable = () => {
                   }}
                 >
                   {project.favorite ? (
-                    <StarSolidIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
-                  ) : (
                     <StarIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                  ) : (
+                    <StarOffIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   )}
                   <p>{project.favorite ? 'Remove favorite' : 'Add favorite'}</p>
                 </DropdownMenuItem>
@@ -448,7 +448,7 @@ const ProjectsTable = () => {
                   {project.hidden ? (
                     <EyeIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   ) : (
-                    <EyeSlashIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
+                    <EyeOffIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   )}
                   <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
                 </DropdownMenuItem>

@@ -1,5 +1,5 @@
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { SlidersHorizontalIcon } from 'lucide-react';
 import { Table } from '@tanstack/react-table';
 
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ export function DataTableViewOptions<TData>({
           size="sm"
           className="ml-auto h-8 flex bg-inherit"
         >
-          <AdjustmentsHorizontalIcon className="h-4 w-4 lg:mr-3" />
+          <SlidersHorizontalIcon className="h-4 w-4 lg:mr-3" />
           <span className="hidden lg:flex">View</span>
         </Button>
       </DropdownMenuTrigger>

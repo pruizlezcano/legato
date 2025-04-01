@@ -1,7 +1,7 @@
 import { CommandDialog, CommandInput } from '@/components/ui/command';
 import { selectAppState, setFilter } from '@/store/Slices/appStateSlice';
 import { isMacOs } from '@/utils';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { SearchIcon } from 'lucide-react';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '../ui/button';
@@ -34,7 +34,7 @@ export function DataTableFilterCommand() {
         className="relative h-10 w-10 justify-start px-3 py-2 md:w-60"
         onClick={() => setOpen(true)}
       >
-        <MagnifyingGlassIcon className="h-4 w-4 md:mr-2" aria-hidden="true" />
+        <SearchIcon className="h-4 w-4 md:mr-2" aria-hidden="true" />
         <span className="text-muted-foreground hidden md:inline-flex">
           {appState.filter || 'Search projects...'}
         </span>

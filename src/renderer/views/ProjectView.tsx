@@ -3,14 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import {
   StarIcon,
+  StarOffIcon,
   EyeIcon,
-  EyeSlashIcon,
+  EyeOffIcon,
   PlayIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+  Trash2Icon,
+} from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectSelectedProject,
@@ -118,12 +118,12 @@ function ProjectView({
               >
                 {project.favorite ? (
                   <>
-                    <StarSolidIcon className="h-4 w-4 mr-1" />
+                    <StarIcon className="h-4 w-4 mr-1" />
                     Remove from favorites
                   </>
                 ) : (
                   <>
-                    <StarIcon className="h-4 w-4 mr-1" />
+                    <StarOffIcon className="h-4 w-4 mr-1" />
                     Add to favorites
                   </>
                 )}
@@ -144,7 +144,7 @@ function ProjectView({
                   </>
                 ) : (
                   <>
-                    <EyeSlashIcon className="h-4 w-4 mr-1" />
+                    <EyeOffIcon className="h-4 w-4 mr-1" />
                     Hide
                   </>
                 )}
@@ -308,7 +308,7 @@ function ProjectView({
                     className="cursor-pointer w-fit"
                     variant="destructive"
                   >
-                    <TrashIcon className="h-4 w-4 mr-1" />
+                    <Trash2Icon className="h-4 w-4 mr-1" />
                     Remove
                   </Badge>
                 </span>
