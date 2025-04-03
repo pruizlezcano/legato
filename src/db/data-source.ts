@@ -9,6 +9,7 @@ import { Project, Setting, Tag } from './entity';
 import { CreateDatabase1709996613941 } from './migrations/1709996613941-CreateDatabase';
 import { SeedSettings1709996613942 } from './migrations/1709996613942-SeedSettings';
 import { TableState1729347610722 } from './migrations/1729347610722-TableState';
+import { BackgroundScan1743608773462 } from './migrations/1743608773462-BackgroundScan';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -27,6 +28,7 @@ export const AppDataSource = new DataSource({
     CreateDatabase1709996613941,
     SeedSettings1709996613942,
     TableState1729347610722,
+    BackgroundScan1743608773462,
   ],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations

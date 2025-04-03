@@ -21,7 +21,6 @@ import {
   net,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import { Path, glob } from 'glob';
 import fs from 'fs';
 import { Repository } from 'typeorm';
 import MenuBuilder from './menu';
@@ -29,11 +28,12 @@ import { resolveHtmlPath } from './util';
 import initDb from '../db/data-source';
 import { Project, Setting, Tag } from '../db/entity';
 import logger from './logger';
-import { AbletonParser } from './abletonParser';
+import { ProjectScanner } from './lib/projectScanner';
 
 let ProjectRepository: Repository<Project>;
 let SettingRepository: Repository<Setting>;
 let TagRepository: Repository<Tag>;
+let projectScanner: ProjectScanner;
 
 class AppUpdater {
   constructor() {
@@ -46,187 +46,30 @@ let autoUpdatErevent: any = null;
 
 let mainWindow: BrowserWindow | null = null;
 
-const processProject = async (project: Path, update = false) => {
-  logger.info(`Processing ${project.fullpath()}`);
-
-  const { name, mtimeMs } = project;
-
-  const title = name
-    .replace('.als', '')
-    .replace(/\.|-|_/g, ' ')
-    .trim();
-  const projectFile = project.fullpath();
-  let daw = 'Ableton Live';
-  let bpm = 0;
-  let tracks: any[] = [];
-  try {
-    const parser = new AbletonParser(projectFile);
-    const parseResult = parser.parse();
-    daw = parseResult.daw;
-    bpm = parseResult.bpm;
-
-    tracks = [
-      ...parseResult.midiTracks,
-      ...parseResult.audioTracks,
-      ...parseResult.returnTracks,
-    ];
-  } catch (error: any) {
-    logger.warn(
-      `Error parsing project ${projectFile}, parsing will be skipped`,
-    );
-    logger.warn(error.message);
-    if (mainWindow)
-      mainWindow.webContents.send(
-        'warning',
-        `Error parsing project ${projectFile}, parsing will be skipped`,
-      );
-  }
-
-  // look for audio file
-  let audioFile = glob.sync(
-    `${path.dirname(projectFile)}/**/${name.replace('.als', '')}.{wav,mp3,flac}`,
-  )[0];
-
-  if (!audioFile) {
-    // audio file is the newest file in the project folder
-    const files = glob.sync(`${path.dirname(projectFile)}/*.{wav,mp3,flac}`);
-    const sortedFiles = files.sort((a, b) => {
-      const statA = fs.statSync(a);
-      const statB = fs.statSync(b);
-      return statA.mtimeMs - statB.mtimeMs;
-    });
-    audioFile = sortedFiles[sortedFiles.length - 1];
-  }
-  if (audioFile) logger.info(`Found audio file: ${audioFile}`);
-
-  let p = null;
-
-  if (update) {
-    p = await ProjectRepository.findOneBy({
-      path: projectFile,
-    });
-
-    if (p) {
-      p.bpm = bpm ?? 0;
-      p.daw = daw;
-      p.tracks = tracks;
-      p.modifiedAt = new Date(mtimeMs || 0);
-      p.audioFile = audioFile ?? null;
-      await ProjectRepository.save(p);
-    }
-    logger.info(`Updating DB entry for ${name}`);
-    return p;
-  }
-
-  p = new Project();
-  p.title = title;
-  p.file = name;
-  p.path = projectFile;
-  p.bpm = bpm ?? 0;
-  p.daw = daw;
-  p.tracks = tracks;
-  p.audioFile = audioFile ?? null;
-  p.modifiedAt = new Date(mtimeMs || 0);
-  await ProjectRepository.save(p);
-
-  logger.info(`Created DB entry for ${projectFile}`);
-
-  return p;
-};
-
-const scanPath = async (projectsPath: string) => {
-  logger.info(`Scanning ${projectsPath}`);
-  try {
-    const results = await glob(`${projectsPath}/**/!(Backup)/*.als`, {
-      stat: true,
-      withFileTypes: true,
-    });
-    if (Array.isArray(results) && results.length > 0) {
-      logger.info(`Found ${results.length} projects`);
-      return results;
-    }
-    logger.warn(`No projects found in ${projectsPath}`);
-    return [];
-  } catch (error) {
-    logger.error('Error scanning path');
-    logger.error(error);
-    return [];
-  }
-};
-
-const fastScan = async (projectsPath: string) => {
-  const projects = await ProjectRepository.find();
-  const savedProjects = projects.map((i) => i.path);
-
-  const results = await scanPath(projectsPath);
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const result of results) {
-    const projectPath = result.fullpath();
-    if (!savedProjects.includes(projectPath)) {
-      await processProject(result);
-    } else {
-      logger.info(`Skipped ${projectPath}`);
-    }
-  }
-};
-
-const fullScan = async (projectsPath: string) => {
-  const results = await scanPath(projectsPath);
-  const savedProjects = await ProjectRepository.find();
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const result of results) {
-    const projectPath = result.fullpath();
-    const savedProject = savedProjects.find((i) => i.path === projectPath);
-    if (savedProject) {
-      // Update project
-      await processProject(result, true);
-    } else {
-      // Create project
-      await processProject(result);
-    }
-  }
-
-  // Remove projects that are not in the folder anymore
-  // eslint-disable-next-line no-restricted-syntax
-  for (const savedProject of savedProjects) {
-    const projectPath = savedProject.path;
-    const result = results.find((i) => i.fullpath() === projectPath);
-    if (!result) {
-      const p = await ProjectRepository.findOneBy({
-        id: savedProject.id,
-      });
-      await ProjectRepository.remove(p!);
-    }
-  }
-};
-
 const checkFile = (filePath: string) => {
   if (!fs.existsSync(filePath)) {
     throw new Error('File not found');
   }
 };
 
-let isScanning = false;
 ipcMain.on('scan-projects', async (event, arg) => {
-  if (isScanning) {
+  if (projectScanner.isCurrentlyScanning()) {
     logger.info('Scan already in progress');
     return event.reply('error', 'Scan already in progress');
   }
-  isScanning = true;
+  projectScanner.setScanning(true);
   if (mainWindow) mainWindow.webContents.send('scan-started');
   const projectsPath = await SettingRepository.findOneBy({
     key: 'projectsPath',
   });
   if (!projectsPath!.value) {
     logger.error('Projects path not set');
-    isScanning = false;
+    projectScanner.setScanning(false);
     return event.reply('scan-projects', 'Projects path not set');
   }
   try {
     if (arg === 'fast') {
-      await fastScan(projectsPath!.value);
+      await projectScanner.fastScan(projectsPath!.value);
     } else if (arg === 'full') {
       const { response } = await dialog.showMessageBox({
         type: 'warning',
@@ -235,12 +78,12 @@ ipcMain.on('scan-projects', async (event, arg) => {
         title: 'Full Scan',
         message: 'This may take a while, are you sure?',
       });
-      if (response) await fullScan(projectsPath!.value);
+      if (response) await projectScanner.fullScan(projectsPath!.value);
     }
-    isScanning = false;
+    projectScanner.setScanning(false);
     return event.reply('scan-projects', 'OK');
   } catch (error: any) {
-    isScanning = false;
+    projectScanner.setScanning(false);
     logger.error('Error scanning projects');
     logger.error(error);
     return event.reply('scan-projects', error.message);
@@ -374,9 +217,39 @@ ipcMain.on('load-settings', async (event) => {
   }
 });
 
+const scheduleBackgroundScan = async () => {
+  try {
+    const cronSetting = await SettingRepository.findOneBy({
+      key: 'scanSchedule',
+    });
+
+    const projectsPathSetting = await SettingRepository.findOneBy({
+      key: 'projectsPath',
+    });
+
+    if (cronSetting?.value && projectsPathSetting?.value) {
+      logger.info(
+        `Setting up scheduled scan with cron: ${cronSetting.value.trim()}`,
+      );
+      projectScanner.scheduleBackgroundScan(
+        cronSetting.value.trim(),
+        projectsPathSetting.value,
+      );
+    } else {
+      logger.info('Scheduled scanning not configured');
+    }
+  } catch (error) {
+    logger.error('Error setting up scheduled scan');
+    logger.error(error);
+  }
+};
+
 ipcMain.on('save-settings', async (event, arg) => {
   logger.info(`Saving settings: ${JSON.stringify(arg)}`);
   try {
+    let scanScheduleChanged = false;
+    let projectsPathChanged = false;
+
     Object.entries(arg).forEach(async ([key, value]) => {
       const setting = await SettingRepository.findOneBy({
         key,
@@ -389,9 +262,23 @@ ipcMain.on('save-settings', async (event, arg) => {
         } else {
           setting.value = value as string | undefined;
         }
+
+        if (key === 'scanSchedule') {
+          scanScheduleChanged = true;
+        }
+
+        if (key === 'projectsPath') {
+          projectsPathChanged = true;
+        }
+
         await SettingRepository.save(setting);
+        // Restart scheduler if relevant settings changed
+        if (scanScheduleChanged || projectsPathChanged) {
+          scheduleBackgroundScan();
+        }
       }
     });
+
     event.reply('save-settings', 'done');
   } catch (error: any) {
     logger.error('Error saving settings');
@@ -521,6 +408,7 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    projectScanner.setMainWindow(null);
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -535,6 +423,7 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+  projectScanner.setMainWindow(mainWindow);
 };
 
 protocol.registerSchemesAsPrivileged([
@@ -579,6 +468,10 @@ app
     SettingRepository = Settings;
     TagRepository = Tags;
     createWindow();
+    projectScanner = new ProjectScanner(ProjectRepository, mainWindow);
+
+    scheduleBackgroundScan();
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.

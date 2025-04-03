@@ -22,8 +22,10 @@ import {
   Settings,
 } from '@/store/Slices/settingsSlice';
 import { SettingsIcon, FolderIcon } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Switch } from '@/components/ui/switch';
+import cronstrue from 'cronstrue';
 import DebounceInput from '../components/DebounceInput';
 
 export function SettingsButton({ onClick }: { onClick: () => void }) {
@@ -42,6 +44,9 @@ export function SettingsView() {
   const dispatch = useDispatch();
   const settings = useSelector(selectSettings) as Settings;
   const appState = useSelector(selectAppState);
+  const [cronInput, setCronInput] = useState(settings.scanSchedule || '');
+  const [humanReadable, setHumanReadable] = useState('');
+  const [cronError, setCronError] = useState('');
 
   const handleFastScan = () => {
     window.electron.ipcRenderer.sendMessage('scan-projects', 'fast');
@@ -63,6 +68,46 @@ export function SettingsView() {
     }
     dispatch(updateSettings({ theme: newTheme }));
   };
+
+  const handleScanScheduleChange = (value: string) => {
+    setCronInput(value);
+    try {
+      if (value) {
+        const readable = cronstrue.toString(value);
+        setHumanReadable(readable);
+        setCronError('');
+      } else {
+        setHumanReadable('');
+      }
+      dispatch(updateSettings({ scanSchedule: value }));
+    } catch (error) {
+      setCronError('Invalid cron expression');
+      setHumanReadable('');
+    }
+  };
+
+  // Common cron presets
+  const cronPresets = [
+    { label: 'Every hour', value: '0 * * * *' },
+    { label: 'Every 3 hours', value: '0 */3 * * *' },
+    { label: 'Every 6 hours', value: '0 */6 * * *' },
+    { label: 'Every 12 hours', value: '0 */12 * * *' },
+    { label: 'Once a day (midnight)', value: '0 0 * * *' },
+  ];
+
+  // Initialize human readable text when component mounts
+  useEffect(() => {
+    if (settings.scanSchedule) {
+      try {
+        const readable = cronstrue.toString(settings.scanSchedule);
+        setHumanReadable(readable);
+        setCronInput(settings.scanSchedule);
+      } catch (error) {
+        // Handle invalid cron expression in settings
+        setCronError('Invalid cron expression in settings');
+      }
+    }
+  }, [settings.scanSchedule]);
 
   useEffect(() => {
     const handleKeyDown = (e: { key: string }) => {
@@ -132,6 +177,63 @@ export function SettingsView() {
                 <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Background Scan</Label>
+            <div className="flex items-center space-x-4">
+              <Switch
+                id="auto-scan"
+                checked={!!settings.scanSchedule}
+                onCheckedChange={(checked: boolean) => {
+                  if (checked) {
+                    const defaultCron = '0 * * * *';
+                    handleScanScheduleChange(defaultCron);
+                  } else {
+                    handleScanScheduleChange('');
+                  }
+                }}
+              />
+              <Label htmlFor="auto-scan" className="cursor-pointer">
+                Enable automatic scanning
+              </Label>
+            </div>
+
+            {settings.scanSchedule && (
+              <div className="mt-2 space-y-2">
+                <Label htmlFor="cron-input">Schedule (cron format)</Label>
+                <DebounceInput
+                  id="cron-input"
+                  value={cronInput}
+                  onChange={(e) => handleScanScheduleChange(e)}
+                  placeholder="0 * * * *"
+                  className={cronError ? 'border-destructive' : ''}
+                />
+
+                {cronError ? (
+                  <p className="text-sm text-destructive">{cronError}</p>
+                ) : humanReadable ? (
+                  <p className="text-sm text-muted-foreground">
+                    {humanReadable}
+                  </p>
+                ) : null}
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {cronPresets.map((preset) => (
+                    <Button
+                      key={preset.value}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleScanScheduleChange(preset.value)}
+                      className={`text-xs ${
+                        cronInput.trim() === preset.value ? 'bg-primary/10' : ''
+                      }`}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label>Scan Projects</Label>

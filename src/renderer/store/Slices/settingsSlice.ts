@@ -12,6 +12,7 @@ export interface Settings {
   pageSize: number;
   displayedColumns: string[];
   sorting: Sorting;
+  scanSchedule: string;
   [key: string]: any | null;
 }
 
@@ -29,6 +30,7 @@ const initialState: Settings = {
     'modified',
   ],
   sorting: { id: 'title', desc: true },
+  scanSchedule: '0 0 * * *',
 };
 
 const settingSlice = createSlice({
@@ -42,6 +44,7 @@ const settingSlice = createSlice({
       state.pageSize = payload.pageSize;
       state.displayedColumns = payload.displayedColumns;
       state.sorting = payload.sorting;
+      state.scanSchedule = payload.scanSchedule;
     },
 
     updateSettings(state, action: PayloadAction<Partial<Settings>>) {
@@ -63,6 +66,7 @@ const settingSlice = createSlice({
             pageSize: state.pageSize,
             displayedColumns: state.displayedColumns,
             sorting: state.sorting,
+            scanSchedule: state.scanSchedule,
           }),
         );
         window.electron.ipcRenderer.sendMessage(
