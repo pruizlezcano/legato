@@ -13,6 +13,7 @@ export interface Settings {
   displayedColumns: string[];
   sorting: Sorting;
   scanSchedule: string;
+  minimizeToTray: boolean;
   [key: string]: any | null;
 }
 
@@ -31,6 +32,7 @@ const initialState: Settings = {
   ],
   sorting: { id: 'title', desc: true },
   scanSchedule: '0 0 * * *',
+  minimizeToTray: false,
 };
 
 const settingSlice = createSlice({
@@ -45,6 +47,7 @@ const settingSlice = createSlice({
       state.displayedColumns = payload.displayedColumns;
       state.sorting = payload.sorting;
       state.scanSchedule = payload.scanSchedule;
+      state.minimizeToTray = payload.minimizeToTray;
     },
 
     updateSettings(state, action: PayloadAction<Partial<Settings>>) {
@@ -67,6 +70,7 @@ const settingSlice = createSlice({
             displayedColumns: state.displayedColumns,
             sorting: state.sorting,
             scanSchedule: state.scanSchedule,
+            minimizeToTray: state.minimizeToTray,
           }),
         );
         window.electron.ipcRenderer.sendMessage(

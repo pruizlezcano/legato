@@ -10,6 +10,7 @@ import { CreateDatabase1709996613941 } from './migrations/1709996613941-CreateDa
 import { SeedSettings1709996613942 } from './migrations/1709996613942-SeedSettings';
 import { TableState1729347610722 } from './migrations/1729347610722-TableState';
 import { BackgroundScan1743608773462 } from './migrations/1743608773462-BackgroundScan';
+import { MinimizeToTray1743684245136 } from './migrations/1743684245136-MinimizeToTray';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -29,6 +30,7 @@ export const AppDataSource = new DataSource({
     SeedSettings1709996613942,
     TableState1729347610722,
     BackgroundScan1743608773462,
+    MinimizeToTray1743684245136,
   ],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations

@@ -5,15 +5,17 @@ import path from 'path';
 import fs from 'fs';
 import { Path, glob } from 'glob';
 import { Repository } from 'typeorm';
-import Electron from 'electron';
+import Electron, { dialog, Notification } from 'electron';
 import { CronJob } from 'cron';
-import { Project } from '../../db/entity';
+import { Project, Setting } from '../../db/entity';
 import logger from '../logger';
 import { AbletonParser } from './abletonParser';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ProjectScanner {
   private projectRepository: Repository<Project>;
+
+  private settingRepository: Repository<Setting>;
 
   private mainWindow: Electron.BrowserWindow | null;
 
@@ -23,13 +25,15 @@ export class ProjectScanner {
 
   constructor(
     projectRepository: Repository<Project>,
+    settingRepository: Repository<Setting>,
     mainWindow: Electron.BrowserWindow | null,
   ) {
     this.projectRepository = projectRepository;
+    this.settingRepository = settingRepository;
     this.mainWindow = mainWindow;
   }
 
-  async processProject(project: Path, update = false) {
+  private async processProject(project: Path, update = false) {
     logger.info(`Processing ${project.fullpath()}`);
 
     const { name, mtimeMs } = project;
@@ -117,7 +121,7 @@ export class ProjectScanner {
     return p;
   }
 
-  async scanPath(projectsPath: string) {
+  private async scanPath(projectsPath: string) {
     logger.info(`Scanning ${projectsPath}`);
     try {
       const results = await glob(`${projectsPath}/**/!(Backup)/*.als`, {
@@ -137,7 +141,7 @@ export class ProjectScanner {
     }
   }
 
-  async fastScan(projectsPath: string) {
+  private async fastScan(projectsPath: string) {
     const projects = await this.projectRepository.find();
     const savedProjects = projects.map((i) => i.path);
 
@@ -153,7 +157,7 @@ export class ProjectScanner {
     }
   }
 
-  async fullScan(projectsPath: string) {
+  private async fullScan(projectsPath: string) {
     const results = await this.scanPath(projectsPath);
     const savedProjects = await this.projectRepository.find();
 
@@ -259,6 +263,74 @@ export class ProjectScanner {
       this.scheduledScanJob.stop();
       this.scheduledScanJob = null;
       logger.info('Background scan scheduling stopped');
+    }
+  }
+
+  async handleScanRequest(
+    arg: 'fast' | 'full',
+    event: Electron.IpcMainEvent | null = null,
+  ): Promise<void> {
+    if (this.isCurrentlyScanning()) {
+      logger.info('Scan already in progress');
+      if (event) {
+        event.reply('error', 'Scan already in progress');
+      }
+      return;
+    }
+
+    this.setScanning(true);
+    if (this.mainWindow) this.mainWindow.webContents.send('scan-started');
+
+    try {
+      const projectsPath = await this.settingRepository.findOneBy({
+        key: 'projectsPath',
+      });
+
+      if (!projectsPath?.value) {
+        throw new Error('Projects path not set');
+      }
+      // check if the projects path is a valid directory
+      if (!fs.existsSync(projectsPath.value)) {
+        throw new Error('Projects path is not a valid directory');
+      }
+      if (arg === 'fast') {
+        await this.fastScan(projectsPath.value);
+      } else if (arg === 'full') {
+        const { response } = await dialog.showMessageBox({
+          type: 'warning',
+          buttons: ['Cancel', 'OK'],
+          defaultId: 1,
+          title: 'Full Scan',
+          message: 'This may take a while, are you sure?',
+        });
+        if (response) await this.fullScan(projectsPath.value);
+      }
+
+      this.setScanning(false);
+      if (event) {
+        event.reply('scan-projects', 'OK');
+      }
+      // Show success notification if no event (called from tray)
+      if (!event && arg === 'fast') {
+        new Notification({
+          title: 'Scan Completed',
+          body: 'Fast scan completed',
+        }).show();
+      }
+    } catch (error: any) {
+      this.setScanning(false);
+      logger.error('Error scanning projects');
+      logger.error(error.message);
+      if (event) {
+        event.reply('scan-projects', error.message);
+      }
+      // Show error notification if no event (called from tray)
+      if (!event) {
+        new Notification({
+          title: 'Scan Error',
+          body: error.message,
+        }).show();
+      }
     }
   }
 }

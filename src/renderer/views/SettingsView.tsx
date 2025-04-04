@@ -253,6 +253,30 @@ export function SettingsView() {
               </Button>
             </span>
           </div>
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <Label>Application Behavior</Label>
+            <div className="flex items-center space-x-4">
+              <Switch
+                id="minimize-to-tray"
+                checked={settings.minimizeToTray}
+                onCheckedChange={(checked: boolean) => {
+                  dispatch(
+                    updateSettings({
+                      minimizeToTray: checked,
+                    }),
+                  );
+                }}
+              />
+              <Label htmlFor="minimize-to-tray" className="cursor-pointer">
+                Minimize to tray when closing
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              When enabled, closing the app will minimize it to the system tray
+              instead of quitting. This allows background scans to continue
+              running.
+            </p>
+          </div>
         </div>
         <DialogFooter>
           <p className="text-muted-foreground/60 text-xs">

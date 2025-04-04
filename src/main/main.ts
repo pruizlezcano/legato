@@ -19,6 +19,9 @@ import {
   dialog,
   protocol,
   net,
+  Menu,
+  Tray,
+  nativeImage,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import fs from 'fs';
@@ -45,6 +48,15 @@ class AppUpdater {
 let autoUpdatErevent: any = null;
 
 let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
 
 const checkFile = (filePath: string) => {
   if (!fs.existsSync(filePath)) {
@@ -53,41 +65,7 @@ const checkFile = (filePath: string) => {
 };
 
 ipcMain.on('scan-projects', async (event, arg) => {
-  if (projectScanner.isCurrentlyScanning()) {
-    logger.info('Scan already in progress');
-    return event.reply('error', 'Scan already in progress');
-  }
-  projectScanner.setScanning(true);
-  if (mainWindow) mainWindow.webContents.send('scan-started');
-  const projectsPath = await SettingRepository.findOneBy({
-    key: 'projectsPath',
-  });
-  if (!projectsPath!.value) {
-    logger.error('Projects path not set');
-    projectScanner.setScanning(false);
-    return event.reply('scan-projects', 'Projects path not set');
-  }
-  try {
-    if (arg === 'fast') {
-      await projectScanner.fastScan(projectsPath!.value);
-    } else if (arg === 'full') {
-      const { response } = await dialog.showMessageBox({
-        type: 'warning',
-        buttons: ['Cancel', 'OK'],
-        defaultId: 1,
-        title: 'Full Scan',
-        message: 'This may take a while, are you sure?',
-      });
-      if (response) await projectScanner.fullScan(projectsPath!.value);
-    }
-    projectScanner.setScanning(false);
-    return event.reply('scan-projects', 'OK');
-  } catch (error: any) {
-    projectScanner.setScanning(false);
-    logger.error('Error scanning projects');
-    logger.error(error);
-    return event.reply('scan-projects', error.message);
-  }
+  await projectScanner.handleScanRequest(arg, event);
 });
 
 ipcMain.on('list-projects', async (event) => {
@@ -204,6 +182,8 @@ ipcMain.on('load-settings', async (event) => {
           settingsObj[setting.key] = JSON.parse(setting.value);
         } else if (setting.key === 'displayedColumns') {
           settingsObj[setting.key] = setting.value.split(',');
+        } else if (setting.key === 'minimizeToTray') {
+          settingsObj[setting.key] = setting.value === 'true';
         } else {
           settingsObj[setting.key] = setting.value;
         }
@@ -259,6 +239,8 @@ ipcMain.on('save-settings', async (event, arg) => {
           setting.value = JSON.stringify(value);
         } else if (key === 'displayedColumns') {
           setting.value = (value as string[]).join(',');
+        } else if (key === 'minimizeToTray') {
+          setting.value = value ? 'true' : 'false';
         } else {
           setting.value = value as string | undefined;
         }
@@ -373,14 +355,6 @@ const createWindow = async () => {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
-
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
@@ -403,6 +377,7 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+      app.dock?.show();
     }
   });
 
@@ -426,6 +401,85 @@ const createWindow = async () => {
   projectScanner.setMainWindow(mainWindow);
 };
 
+const createTray = () => {
+  const icon =
+    process.platform === 'darwin'
+      ? getAssetPath('menuTemplate.png')
+      : getAssetPath('icons', '16x16.png');
+  const trayIcon = nativeImage.createFromPath(icon);
+
+  tray = new Tray(trayIcon);
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show Legato',
+      click: () => {
+        if (!mainWindow) {
+          createWindow();
+        }
+        mainWindow?.show();
+      },
+    },
+    {
+      label: 'Scan Projects',
+      submenu: [
+        {
+          label: 'Fast Scan',
+          click: () => {
+            projectScanner.handleScanRequest('fast');
+          },
+        },
+        {
+          label: 'Full Scan',
+          click: () => {
+            projectScanner.handleScanRequest('full');
+          },
+        },
+      ],
+    },
+    {
+      label: 'Settings',
+      accelerator: 'Command+,',
+      click: async () => {
+        if (!mainWindow) {
+          await createWindow();
+
+          // Wait for the window to be ready before sending the event
+          mainWindow!.once('ready-to-show', () => {
+            mainWindow?.show();
+            mainWindow?.webContents.send('open-settings');
+          });
+        } else {
+          // If window exists but is hidden, show it
+          if (!mainWindow.isVisible()) {
+            mainWindow.show();
+            if (process.platform === 'darwin') app.dock?.show();
+          }
+
+          // If window is already loaded, send the event directly
+          if (mainWindow.webContents.isLoading()) {
+            // Wait for window to finish loading if it's still loading
+            mainWindow.webContents.once('did-finish-load', () => {
+              mainWindow?.webContents.send('open-settings');
+            });
+          } else {
+            // Window is ready, send event immediately
+            mainWindow.webContents.send('open-settings');
+          }
+        }
+      },
+    },
+    {
+      label: 'Quit',
+      accelerator: 'Command+Q',
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setContextMenu(contextMenu);
+};
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'local',
@@ -442,12 +496,21 @@ protocol.registerSchemesAsPrivileged([
  * Add event listeners...
  */
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
+  const minimizeToTraySetting = await SettingRepository.findOneBy({
+    key: 'minimizeToTray',
+  });
+  const minimizeToTray = minimizeToTraySetting?.value === 'true';
+
+  if (minimizeToTray && !tray) {
+    createTray();
+  }
+
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (!minimizeToTray) app.quit();
+  } else if (minimizeToTray) app.dock!.hide();
 });
 
 app
@@ -468,7 +531,11 @@ app
     SettingRepository = Settings;
     TagRepository = Tags;
     createWindow();
-    projectScanner = new ProjectScanner(ProjectRepository, mainWindow);
+    projectScanner = new ProjectScanner(
+      ProjectRepository,
+      SettingRepository,
+      mainWindow,
+    );
 
     scheduleBackgroundScan();
 
