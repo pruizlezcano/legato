@@ -20,7 +20,8 @@ export type Channels =
   | 'get-version'
   | 'project-updated'
   | 'succes'
-  | 'warning';
+  | 'warning'
+  | 'open-external';
 
 const electronHandler = {
   ipcRenderer: {

@@ -27,6 +27,7 @@ import {
   setShowSettings,
   setFilter,
   setShowAudioPlayer,
+  setAppVersion,
 } from '@/store/Slices/appStateSlice';
 import {
   loadProjects,
@@ -43,7 +44,6 @@ import TableSkeleton from './components/TableSkeleton';
 import { Skeleton } from './components/ui/skeleton';
 
 function Hello() {
-  const [appVersion, setAppVersion] = useState('');
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isCssLoaded, setIsCssLoaded] = useState(false);
@@ -131,7 +131,7 @@ function Hello() {
     });
 
     window.electron.ipcRenderer.once('get-version', (arg) => {
-      setAppVersion(arg as string);
+      dispatch(setAppVersion(arg as string));
     });
     window.electron.ipcRenderer.on('succes', (arg) => {
       toast.success(arg as string, { duration: 1500 });
@@ -203,7 +203,7 @@ function Hello() {
           </Tooltip>
         </TooltipProvider>
         <div className="ml-2 mt-1 xl:mt-2 flex space-x-2">
-          <Badge variant="outline">v{appVersion}</Badge>
+          <Badge variant="outline">v{appState.appVersion}</Badge>
           {isLoading ? (
             <Skeleton className="h-6 w-20" />
           ) : (

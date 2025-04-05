@@ -12,6 +12,8 @@ interface AppState {
   showSettings: boolean;
   /** The currently playing track */
   nowPlaying: string;
+  /** The app version */
+  appVersion: string;
 }
 
 const initialState: AppState = {
@@ -20,6 +22,7 @@ const initialState: AppState = {
   scanInProgress: false,
   showSettings: false,
   nowPlaying: '',
+  appVersion: '',
 };
 
 const appStateSlice = createSlice({
@@ -41,6 +44,9 @@ const appStateSlice = createSlice({
     setNowPlaying(state, action: PayloadAction<string>) {
       state.nowPlaying = action.payload;
     },
+    setAppVersion(state, action: PayloadAction<string>) {
+      state.appVersion = action.payload;
+    },
   },
 });
 
@@ -50,6 +56,7 @@ export const {
   setScanInProgress,
   setShowSettings,
   setNowPlaying,
+  setAppVersion,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

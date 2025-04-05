@@ -306,6 +306,10 @@ ipcMain.on('get-version', (event) => {
   event.reply('get-version', app.getVersion());
 });
 
+ipcMain.on('open-external', (_, url) => {
+  shell.openExternal(url);
+});
+
 autoUpdater.on('update-available', async (event) => {
   logger.info('There is a new version available');
   autoUpdatErevent = event;
@@ -543,9 +547,15 @@ app
   .whenReady()
   .then(async () => {
     protocol.handle('local', async (request) => {
-      const file = `file://${request.url.slice('local://'.length)}`;
+      const file = request.url.slice('local://'.length);
       try {
-        const response = net.fetch(file);
+        if (file === 'icon') {
+          const iconPath = getAssetPath('icon.png');
+          return net.fetch(`file://${iconPath}`);
+        }
+        const response = net.fetch(
+          `file://${request.url.slice('local://'.length)}`,
+        );
         return response;
       } catch (error) {
         console.error('Error handling local protocol for URL:', file, error);
