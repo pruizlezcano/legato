@@ -14,6 +14,7 @@ export interface Settings {
   sorting: Sorting;
   scanSchedule: string;
   minimizeToTray: boolean;
+  startMinimized: boolean;
   [key: string]: any | null;
 }
 
@@ -33,6 +34,7 @@ const initialState: Settings = {
   sorting: { id: 'title', desc: true },
   scanSchedule: '0 0 * * *',
   minimizeToTray: false,
+  startMinimized: false,
 };
 
 const settingSlice = createSlice({
@@ -48,10 +50,15 @@ const settingSlice = createSlice({
       state.sorting = payload.sorting;
       state.scanSchedule = payload.scanSchedule;
       state.minimizeToTray = payload.minimizeToTray;
+      state.startMinimized = payload.startMinimized;
     },
 
     updateSettings(state, action: PayloadAction<Partial<Settings>>) {
       let update = false;
+      if (action.payload.minimizeToTray === false && state.startMinimized) {
+        state.startMinimized = false;
+        update = true;
+      }
       Object.keys(action.payload).forEach((key) => {
         if (
           Object.prototype.hasOwnProperty.call(action.payload, key) &&
@@ -71,6 +78,7 @@ const settingSlice = createSlice({
             sorting: state.sorting,
             scanSchedule: state.scanSchedule,
             minimizeToTray: state.minimizeToTray,
+            startMinimized: state.startMinimized,
           }),
         );
         window.electron.ipcRenderer.sendMessage(

@@ -276,6 +276,35 @@ export function SettingsView() {
               instead of quitting. This allows background scans to continue
               running.
             </p>
+            <div className="flex items-center space-x-4 mt-4">
+              <Switch
+                id="start-minimized"
+                checked={settings.startMinimized}
+                disabled={!settings.minimizeToTray}
+                onCheckedChange={(checked: boolean) => {
+                  dispatch(
+                    updateSettings({
+                      startMinimized: checked,
+                    }),
+                  );
+                }}
+              />
+              <Label
+                htmlFor="start-minimized"
+                className={`cursor-pointer ${!settings.minimizeToTray ? 'text-muted-foreground' : ''}`}
+              >
+                Start minimized
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              When enabled, the app will start minimized to the system tray.
+              {!settings.minimizeToTray && (
+                <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
+                  Enable &quot;Minimize to tray when closing&quot; to use this
+                  feature.
+                </span>
+              )}
+            </p>
           </div>
         </div>
         <DialogFooter>

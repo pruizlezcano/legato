@@ -184,6 +184,8 @@ ipcMain.on('load-settings', async (event) => {
           settingsObj[setting.key] = setting.value.split(',');
         } else if (setting.key === 'minimizeToTray') {
           settingsObj[setting.key] = setting.value === 'true';
+        } else if (setting.key === 'startMinimized') {
+          settingsObj[setting.key] = setting.value === 'true';
         } else {
           settingsObj[setting.key] = setting.value;
         }
@@ -240,6 +242,8 @@ ipcMain.on('save-settings', async (event, arg) => {
         } else if (key === 'displayedColumns') {
           setting.value = (value as string[]).join(',');
         } else if (key === 'minimizeToTray') {
+          setting.value = value ? 'true' : 'false';
+        } else if (key === 'startMinimized') {
           setting.value = value ? 'true' : 'false';
         } else {
           setting.value = value as string | undefined;
@@ -350,12 +354,8 @@ const installExtensions = async () => {
     .catch(logger.error);
 };
 
-const createWindow = async () => {
-  if (isDebug) {
-    await installExtensions();
-  }
-
-  mainWindow = new BrowserWindow({
+const setupWindow = () => {
+  const window = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,
@@ -367,38 +367,68 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  window.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.on('ready-to-show', () => {
+  window.on('closed', () => {
+    mainWindow = null;
+    projectScanner.setMainWindow(null);
+  });
+
+  const menuBuilder = new MenuBuilder(window);
+  menuBuilder.buildMenu();
+
+  window.webContents.setWindowOpenHandler((edata) => {
+    shell.openExternal(edata.url);
+    return { action: 'deny' };
+  });
+
+  projectScanner.setMainWindow(window);
+  return window;
+};
+
+const createWindow = async () => {
+  if (isDebug) {
+    await installExtensions();
+  }
+
+  mainWindow = setupWindow();
+
+  mainWindow.on('ready-to-show', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    if (process.env.START_MINIMIZED) {
-      mainWindow.minimize();
+
+    const startMinimizedSetting = await SettingRepository.findOneBy({
+      key: 'startMinimized',
+    });
+    const startMinimized = startMinimizedSetting?.value === 'true';
+
+    if (startMinimized) {
+      createTray();
+      mainWindow.hide();
+      app.dock?.hide();
     } else {
       mainWindow.show();
       app.dock?.show();
     }
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    projectScanner.setMainWindow(null);
-  });
-
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
-
-  // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
-    return { action: 'deny' };
-  });
-
-  // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
-  projectScanner.setMainWindow(mainWindow);
+};
+
+const restoreWindow = async () => {
+  if (!mainWindow) {
+    mainWindow = setupWindow();
+
+    mainWindow.once('ready-to-show', () => {
+      mainWindow?.show();
+      app.dock?.show();
+    });
+  } else if (!mainWindow.isVisible()) {
+    mainWindow.show();
+    if (process.platform === 'darwin') app.dock?.show();
+  }
 };
 
 const createTray = () => {
@@ -412,11 +442,8 @@ const createTray = () => {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show Legato',
-      click: () => {
-        if (!mainWindow) {
-          createWindow();
-        }
-        mainWindow?.show();
+      click: async () => {
+        await restoreWindow();
       },
     },
     {
@@ -441,11 +468,10 @@ const createTray = () => {
       accelerator: 'Command+,',
       click: async () => {
         if (!mainWindow) {
-          await createWindow();
+          await restoreWindow();
 
           // Wait for the window to be ready before sending the event
           mainWindow!.once('ready-to-show', () => {
-            mainWindow?.show();
             mainWindow?.webContents.send('open-settings');
           });
         } else {
