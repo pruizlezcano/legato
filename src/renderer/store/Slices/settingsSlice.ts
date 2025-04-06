@@ -42,7 +42,8 @@ const settingSlice = createSlice({
   initialState,
   reducers: {
     loadSettings(state, action: PayloadAction<Settings>) {
-      const payload = JSON.parse(JSON.stringify(action.payload));
+      const { payload } = action;
+
       state.projectsPath = payload.projectsPath;
       state.theme = payload.theme;
       state.pageSize = payload.pageSize;
@@ -55,36 +56,27 @@ const settingSlice = createSlice({
 
     updateSettings(state, action: PayloadAction<Partial<Settings>>) {
       let update = false;
-      if (action.payload.minimizeToTray === false && state.startMinimized) {
+      const { payload } = action;
+
+      // Handle special case for startMinimized dependency on minimizeToTray
+      if (payload.minimizeToTray === false && state.startMinimized) {
         state.startMinimized = false;
         update = true;
       }
-      Object.keys(action.payload).forEach((key) => {
-        if (
-          Object.prototype.hasOwnProperty.call(action.payload, key) &&
-          action.payload[key] !== state[key as keyof typeof state]
-        ) {
-          state[key as keyof typeof state] = action.payload[key] as never;
+
+      (Object.keys(payload) as Array<keyof typeof payload>).forEach((key) => {
+        if (payload[key] === undefined) return;
+
+        // Only update if value has changed
+        if (JSON.stringify(payload[key]) !== JSON.stringify(state[key])) {
+          state[key] = payload[key] as any;
           update = true;
         }
       });
+
+      // Send updated settings to main process if anything changed
       if (update) {
-        const serializableState = JSON.parse(
-          JSON.stringify({
-            projectsPath: state.projectsPath,
-            theme: state.theme,
-            pageSize: state.pageSize,
-            displayedColumns: state.displayedColumns,
-            sorting: state.sorting,
-            scanSchedule: state.scanSchedule,
-            minimizeToTray: state.minimizeToTray,
-            startMinimized: state.startMinimized,
-          }),
-        );
-        window.electron.ipcRenderer.sendMessage(
-          'save-settings',
-          serializableState,
-        );
+        window.electron.ipcRenderer.sendMessage('save-settings', payload);
       }
     },
   },

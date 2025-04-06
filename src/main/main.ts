@@ -231,8 +231,9 @@ ipcMain.on('save-settings', async (event, arg) => {
   try {
     let scanScheduleChanged = false;
     let projectsPathChanged = false;
+    const settingsToUpdate: Setting[] = [];
 
-    Object.entries(arg).forEach(async ([key, value]) => {
+    for (const [key, value] of Object.entries(arg)) {
       const setting = await SettingRepository.findOneBy({
         key,
       });
@@ -257,13 +258,16 @@ ipcMain.on('save-settings', async (event, arg) => {
           projectsPathChanged = true;
         }
 
-        await SettingRepository.save(setting);
-        // Restart scheduler if relevant settings changed
-        if (scanScheduleChanged || projectsPathChanged) {
-          scheduleBackgroundScan();
-        }
+        settingsToUpdate.push(setting);
       }
-    });
+    }
+
+    await SettingRepository.save(settingsToUpdate);
+
+    // Restart scheduler if relevant settings changed
+    if (scanScheduleChanged || projectsPathChanged) {
+      scheduleBackgroundScan();
+    }
 
     event.reply('save-settings', 'done');
   } catch (error: any) {
