@@ -244,6 +244,9 @@ ipcMain.on('save-settings', async (event, arg) => {
           setting.value = (value as string[]).join(',');
         } else if (key === 'minimizeToTray') {
           setting.value = value ? 'true' : 'false';
+          if (!value && tray) {
+            tray.destroy();
+          }
         } else if (key === 'startMinimized') {
           setting.value = value ? 'true' : 'false';
         } else {
@@ -377,12 +380,24 @@ const setupWindow = () => {
 
   window.loadURL(resolveHtmlPath('index.html'));
 
+  window.on('close', async (e) => {
+    if (projectScanner.isCurrentlyScanning()) {
+      e.preventDefault();
+      const canClose = await projectScanner.shouldQuit();
+      if (canClose) {
+        createTray();
+        mainWindow?.hide();
+        if (process.platform === 'darwin') app.dock?.hide();
+      }
+    }
+  });
+
   window.on('closed', () => {
     mainWindow = null;
     projectScanner.setMainWindow(null);
   });
 
-  const menuBuilder = new MenuBuilder(window);
+  const menuBuilder = new MenuBuilder(window, projectScanner);
   menuBuilder.buildMenu();
 
   window.webContents.setWindowOpenHandler((edata) => {
@@ -505,8 +520,9 @@ const createTray = () => {
     {
       label: 'Quit',
       accelerator: 'Command+Q',
-      click: () => {
-        app.quit();
+      click: async () => {
+        const canQuit = await projectScanner.shouldQuit();
+        if (canQuit) app.quit();
       },
     },
   ]);
@@ -526,10 +542,6 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-/**
- * Add event listeners...
- */
-
 app.on('window-all-closed', async () => {
   const minimizeToTraySetting = await SettingRepository.findOneBy({
     key: 'minimizeToTray',
@@ -543,7 +555,10 @@ app.on('window-all-closed', async () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
-    if (!minimizeToTray) app.quit();
+    if (!minimizeToTray) {
+      const canQuit = await projectScanner.shouldQuit();
+      if (canQuit) app.quit();
+    }
   } else if (minimizeToTray) app.dock!.hide();
 });
 

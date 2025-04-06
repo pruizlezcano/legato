@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import { ProjectScanner } from './lib/projectScanner';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -14,8 +15,11 @@ interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
 
-  constructor(mainWindow: BrowserWindow) {
+  projectScanner: ProjectScanner;
+
+  constructor(mainWindow: BrowserWindow, projectScanner: ProjectScanner) {
     this.mainWindow = mainWindow;
+    this.projectScanner = projectScanner;
   }
 
   buildMenu(): Menu {
@@ -65,7 +69,6 @@ export default class MenuBuilder {
           label: 'Settings',
           accelerator: 'Command+,',
           click: () => {
-            // app.emit('open-settings');
             this.mainWindow.webContents.send('open-settings');
           },
         },
@@ -87,12 +90,37 @@ export default class MenuBuilder {
         {
           label: 'Quit',
           accelerator: 'Command+Q',
-          click: () => {
-            app.quit();
+          click: async () => {
+            const canQuit = await this.projectScanner.shouldQuit();
+            if (canQuit) app.quit();
           },
         },
       ],
     };
+
+    const subMenuFile: MenuItemConstructorOptions = {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Scan Projects',
+          submenu: [
+            {
+              label: 'Fast Scan',
+              click: () => {
+                this.projectScanner.handleScanRequest('fast');
+              },
+            },
+            {
+              label: 'Full Scan',
+              click: () => {
+                this.projectScanner.handleScanRequest('full');
+              },
+            },
+          ],
+        },
+      ],
+    };
+
     const subMenuEdit: DarwinMenuItemConstructorOptions = {
       label: 'Edit',
       submenu: [
@@ -186,11 +214,18 @@ export default class MenuBuilder {
         ? subMenuViewDev
         : subMenuViewProd;
 
-    return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+    return [
+      subMenuAbout,
+      subMenuFile,
+      subMenuEdit,
+      subMenuView,
+      subMenuWindow,
+      subMenuHelp,
+    ];
   }
 
-  buildDefaultTemplate() {
-    const templateDefault = [
+  buildDefaultTemplate(): MenuItemConstructorOptions[] {
+    const templateDefault: MenuItemConstructorOptions[] = [
       {
         label: '&File',
         submenu: [
@@ -204,6 +239,24 @@ export default class MenuBuilder {
             click: () => {
               this.mainWindow.close();
             },
+          },
+          { type: 'separator' },
+          {
+            label: 'Scan Projects',
+            submenu: [
+              {
+                label: 'Fast Scan',
+                click: () => {
+                  this.projectScanner.handleScanRequest('fast');
+                },
+              },
+              {
+                label: 'Full Scan',
+                click: () => {
+                  this.projectScanner.handleScanRequest('full');
+                },
+              },
+            ],
           },
         ],
       },

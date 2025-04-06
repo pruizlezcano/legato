@@ -303,7 +303,16 @@ export class ProjectScanner {
           title: 'Full Scan',
           message: 'This may take a while, are you sure?',
         });
-        if (response) await this.fullScan(projectsPath.value);
+        if (response) {
+          await this.fullScan(projectsPath.value);
+        } else {
+          logger.info('Full scan cancelled by user');
+          this.setScanning(false);
+          if (event) {
+            event.reply('scan-projects', 'Scan cancelled by user');
+          }
+          return;
+        }
       }
 
       this.setScanning(false);
@@ -332,5 +341,20 @@ export class ProjectScanner {
         }).show();
       }
     }
+  }
+
+  async shouldQuit(): Promise<boolean> {
+    if (this.isCurrentlyScanning()) {
+      const { response } = await dialog.showMessageBox({
+        type: 'warning',
+        buttons: ['Cancel', 'Quit Anyway'],
+        defaultId: 0,
+        title: 'Scan in Progress',
+        message:
+          'A project scan is currently in progress. Quitting now may interrupt the scan.',
+      });
+      return response === 1;
+    }
+    return true;
   }
 }
