@@ -393,6 +393,26 @@ export function SettingsView() {
                   </span>
                 )}
               </p>
+              <div className="flex items-center space-x-4 mt-4">
+                <Switch
+                  id="auto-start"
+                  checked={settings.autoStart}
+                  onCheckedChange={(checked: boolean) => {
+                    dispatch(
+                      updateSettings({
+                        autoStart: checked,
+                      }),
+                    );
+                  }}
+                />
+                <Label htmlFor="auto-start" className="cursor-pointer">
+                  Start at login
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                When enabled, Legato will automatically start when you log in to
+                your computer.
+              </p>
             </div>
           </div>
         );

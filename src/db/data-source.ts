@@ -12,6 +12,7 @@ import { TableState1729347610722 } from './migrations/1729347610722-TableState';
 import { BackgroundScan1743608773462 } from './migrations/1743608773462-BackgroundScan';
 import { MinimizeToTray1743684245136 } from './migrations/1743684245136-MinimizeToTray';
 import { StartMinimized1743785672638 } from './migrations/1743785672638-StartMinimized';
+import { AutoStart1744048077069 } from './migrations/1744048077069-AutoStart';
 
 const dbPath =
   process.env.NODE_ENV === 'development'
@@ -33,6 +34,7 @@ export const AppDataSource = new DataSource({
     BackgroundScan1743608773462,
     MinimizeToTray1743684245136,
     StartMinimized1743785672638,
+    AutoStart1744048077069,
   ],
   migrationsTableName: '_migrations',
   migrationsRun: false, // Auto-run migrations

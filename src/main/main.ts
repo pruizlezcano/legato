@@ -249,6 +249,12 @@ ipcMain.on('save-settings', async (event, arg) => {
           }
         } else if (key === 'startMinimized') {
           setting.value = value ? 'true' : 'false';
+        } else if (key === 'autoStart') {
+          setting.value = value ? 'true' : 'false';
+          app.setLoginItemSettings({
+            openAtLogin: value as boolean,
+            path: app.getPath('exe'),
+          });
         } else {
           setting.value = value as string | undefined;
         }
@@ -585,6 +591,18 @@ app
     ProjectRepository = Projects;
     SettingRepository = Settings;
     TagRepository = Tags;
+
+    // Set up auto-start based on saved setting
+    const autoStartSetting = await SettingRepository.findOneBy({
+      key: 'autoStart',
+    });
+    if (autoStartSetting?.value === 'true') {
+      app.setLoginItemSettings({
+        openAtLogin: true,
+        path: app.getPath('exe'),
+      });
+    }
+
     createWindow();
     projectScanner = new ProjectScanner(
       ProjectRepository,

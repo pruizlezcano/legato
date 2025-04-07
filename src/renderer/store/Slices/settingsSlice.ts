@@ -15,6 +15,7 @@ export interface Settings {
   scanSchedule: string;
   minimizeToTray: boolean;
   startMinimized: boolean;
+  autoStart: boolean;
   [key: string]: any | null;
 }
 
@@ -35,6 +36,7 @@ const initialState: Settings = {
   scanSchedule: '0 0 * * *',
   minimizeToTray: false,
   startMinimized: false,
+  autoStart: false,
 };
 
 const settingSlice = createSlice({
@@ -52,6 +54,7 @@ const settingSlice = createSlice({
       state.scanSchedule = payload.scanSchedule;
       state.minimizeToTray = payload.minimizeToTray;
       state.startMinimized = payload.startMinimized;
+      state.autoStart = payload.autoStart;
     },
 
     updateSettings(state, action: PayloadAction<Partial<Settings>>) {
