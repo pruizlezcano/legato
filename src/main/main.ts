@@ -472,6 +472,15 @@ const createTray = () => {
     {
       label: 'Show Legato',
       click: async () => {
+        if (projectScanner.isCurrentlyScanning() && !mainWindow) {
+          dialog.showMessageBox({
+            type: 'info',
+            title: 'Scan in Progress',
+            message: 'The application is currently scanning your projects.',
+            detail: 'The window will show when the scan is complete.',
+            buttons: ['OK'],
+          });
+        }
         await restoreWindow();
       },
     },
