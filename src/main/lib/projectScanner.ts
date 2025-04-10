@@ -70,16 +70,21 @@ export class ProjectScanner {
     }
 
     // look for audio file
-    let audioFile = glob.sync(
+    const audioFiles = await glob(
       `${path.dirname(projectFile)}/**/${name.replace('.als', '')}.{wav,mp3,flac}`,
-    )[0];
+    );
+
+    let audioFile = audioFiles[0];
 
     if (!audioFile) {
       // audio file is the newest file in the project folder
-      const files = glob.sync(`${path.dirname(projectFile)}/*.{wav,mp3,flac}`);
+      const files = await glob(`${path.dirname(projectFile)}/*.{wav,mp3,flac}`);
+      const fileStats = await Promise.all(
+        files.map((f) => fs.promises.stat(f)),
+      );
       const sortedFiles = files.sort((a, b) => {
-        const statA = fs.statSync(a);
-        const statB = fs.statSync(b);
+        const statA = fileStats[files.indexOf(a)];
+        const statB = fileStats[files.indexOf(b)];
         return statA.mtimeMs - statB.mtimeMs;
       });
       audioFile = sortedFiles[sortedFiles.length - 1];
