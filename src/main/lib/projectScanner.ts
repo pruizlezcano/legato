@@ -330,6 +330,8 @@ export class ProjectScanner {
           title: 'Scan Completed',
           body: 'Fast scan completed',
         }).show();
+        if (this.mainWindow)
+          this.mainWindow.webContents.send('scan-projects', 'OK');
       }
     } catch (error: any) {
       this.setScanning(false);
@@ -344,6 +346,8 @@ export class ProjectScanner {
           title: 'Scan Error',
           body: error.message,
         }).show();
+        if (this.mainWindow)
+          this.mainWindow.webContents.send('scan-projects', error.message);
       }
     }
   }
