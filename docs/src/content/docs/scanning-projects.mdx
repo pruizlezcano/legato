@@ -32,6 +32,14 @@ This function also scans the project directory, but it processes all projects, w
 
 This scan is slower because it processes all projects, whether they are new, existing, or deleted. However, it accurately reflects the current state of all projects.
 
+## Automatic Background Scanning
+
+Legato can automatically scan for new projects in the background on a schedule, allowing you to keep your project library up-to-date without manual intervention.
+
+Background scanning runs a [Fast Scan](#fast-scan) in the background, which means it will only process new projects without updating existing ones or removing deleted projects.
+
+The background scan schedule is configurable using a cron string in the settings. You can use a cron string generator like [crontab.guru](https://crontab.guru/) to create a cron string that suits your needs.
+
 ## Example file structure
 
 Legato only loads projects from subdirectories of the root directory. It does not load projects from subdirectories of subdirectories. For example, it will not load automatic backup projects because those are in a subdirectory of the project directory.
