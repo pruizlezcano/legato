@@ -1,13 +1,14 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import tailwind from '@astrojs/tailwind';
-
 import react from '@astrojs/react';
+
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://pruizlezcano.github.io',
   base: '/legato',
+
   integrations: [
     starlight({
       title: 'Legato',
@@ -15,9 +16,13 @@ export default defineConfig({
       editLink: {
         baseUrl: 'https://github.com/pruizlezcano/legato/edit/main/docs',
       },
-      social: {
-        github: 'https://github.com/pruizlezcano/legato',
-      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/pruizlezcano/legato',
+        },
+      ],
       sidebar: [
         {
           label: 'Getting started',
@@ -38,6 +43,10 @@ export default defineConfig({
               label: 'Search Filters',
               link: 'search-filters',
             },
+            {
+              label: 'Application Behavior',
+              link: 'application-behavior',
+            },
           ],
         },
         {
@@ -53,7 +62,10 @@ export default defineConfig({
         styleOverrides: { borderRadius: '0.4rem' },
       },
     }),
-    tailwind({ applyBaseStyles: false }),
     react(),
   ],
+
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

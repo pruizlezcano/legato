@@ -7,11 +7,91 @@ import { Features, Feature } from '../components/Features';
 <Layout title="Legato | The manager for your Ableton projects">
   <main>
     <Hero client:load />
-    <Features>
-      <Feature>Open Ableton sets directly through Legato</Feature>
-      <Feature>Search, categorize, tag, and take notes</Feature>
-      <Feature>Play your exported audio directly through Legato</Feature>
-      <Feature>Completely free</Feature>
-    </Features>
+
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center">Why Choose Legato?</h2>
+        <Features>
+          <Feature icon="🎵" title="Direct Set Access">
+            Open and manage your Ableton sets directly through Legato's
+            intuitive interface
+          </Feature>
+          <Feature icon="🔍" title="Smart Organization">
+            Search, categorize, tag, and take notes on your projects with
+            powerful filtering
+          </Feature>
+          <Feature icon="🎧" title="Audio Preview">
+            Play your exported audio directly through Legato's built-in player
+          </Feature>
+          <Feature icon="💯" title="Free Forever">
+            Completely free with no hidden costs or limitations
+          </Feature>
+        </Features>
+      </div>
+    </section>
+
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="text-4xl mb-4">1</div>
+            <h3 class="text-xl font-semibold mb-2">Import Your Projects</h3>
+            <p>
+              Connect Legato to your Ableton projects folder and let it index
+              your work
+            </p>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-4">2</div>
+            <h3 class="text-xl font-semibold mb-2">Organize & Tag</h3>
+            <p>
+              Add tags, notes, and categories to keep your projects organized
+            </p>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-4">3</div>
+            <h3 class="text-xl font-semibold mb-2">Find & Open</h3>
+            <p>
+              Quickly find and open your projects with powerful search and
+              filtering
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">
+          Frequently Asked Questions
+        </h2>
+        <div class="max-w-2xl mx-auto">
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">Is Legato really free?</h3>
+            <p>
+              Yes! Legato is completely free to use with no hidden costs or
+              limitations.
+            </p>
+          </div>
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">
+              Does it work with all versions of Ableton?
+            </h3>
+            <p>
+              Yes! Legato works with all Ableton versions, supporting
+              Lite/Intro, Standard and Suite versions.
+            </p>
+          </div>
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">How do I get started?</h3>
+            <p>
+              Simply download Legato, point it to your Ableton projects folder,
+              and start organizing!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </Layout>
