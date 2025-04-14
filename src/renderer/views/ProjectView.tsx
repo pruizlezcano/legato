@@ -38,6 +38,7 @@ import {
   setShowAudioPlayer,
 } from '@/store/Slices/appStateSlice';
 import { capitalize } from '@/utils';
+import { Howler } from 'howler';
 import { Progress, progressColors } from '../../types/Progress';
 import { Project } from '../../db/entity';
 import DebounceInput from '../components/DebounceInput';
@@ -319,9 +320,8 @@ function ProjectView({
                 dropMessage="Drop your adio file here"
                 handleOnDrop={(files) => {
                   if (files) {
-                    const acceptedTypes = ['audio/mpeg', 'audio/wav'];
                     const validFiles = Array.from(files).filter((file) =>
-                      acceptedTypes.includes(file.type),
+                      Howler.codecs(file.name.split('.').pop() ?? ''),
                     );
                     if (validFiles.length) {
                       dispatch(
