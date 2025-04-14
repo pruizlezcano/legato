@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -24,6 +23,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
+    --scrollbar: 240 5.9% 90%;
     --radius: 0.5rem;
   }
 
@@ -47,6 +47,7 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+    --scrollbar: 240 3.7% 15.9%;
   }
 }
 
@@ -56,5 +57,20 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+html {
+  overflow-x: hidden;
+  margin-right: calc(-1 * (100vw - 100%));
+  ::-webkit-scrollbar {
+    width: 0.4rem;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--scrollbar));
+    border-radius: 0.5rem;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: hsl(var(--background));
   }
 }
