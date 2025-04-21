@@ -12,7 +12,7 @@ export enum Progress {
 }
 
 export const progressColors: Record<Progress, string> = {
-  [Progress.TO_DO]: 'test-gray-600 dark:text-gray-300',
+  [Progress.TO_DO]: 'text-gray-600 dark:text-gray-300',
   [Progress.IN_PROGRESS]: 'text-blue-600 dark:text-blue-400',
   [Progress.RECORDING]: 'text-blue-700 dark:text-blue-500',
   [Progress.MIXING]: 'text-orange-500 dark:text-orange-300',
