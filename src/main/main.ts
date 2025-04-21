@@ -614,12 +614,12 @@ app
       });
     }
 
-    createWindow();
     projectScanner = new ProjectScanner(
       ProjectRepository,
       SettingRepository,
       mainWindow,
     );
+    createWindow();
 
     scheduleBackgroundScan();
 
