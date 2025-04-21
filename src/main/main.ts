@@ -186,6 +186,8 @@ ipcMain.on('load-settings', async (event) => {
           settingsObj[setting.key] = setting.value === 'true';
         } else if (setting.key === 'startMinimized') {
           settingsObj[setting.key] = setting.value === 'true';
+        } else if (setting.key === 'autoStart') {
+          settingsObj[setting.key] = setting.value === 'true';
         } else {
           settingsObj[setting.key] = setting.value;
         }
