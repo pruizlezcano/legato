@@ -1,4 +1,28 @@
 
+## [0.4.0](https://github.com/pruizlezcano/legato/compare/v0.3.0...v0.4.0) (2025-04-23)
+
+Legato now seamlessly integrates with your workflow through background operation capabilities. You can minimize the app to your system tray while scheduled scans run automatically based on customizable cron expressions, and optionally have Legato start automatically at login.
+
+The interface has been refreshed with a reorganized settings panel, updated icons, and smoother visuals throughout the application.
+
+### Features
+
+* Added auto-start functionality for application launch at login ([1b6c5f9](https://github.com/pruizlezcano/legato/commit/1b6c5f9756295c4ed2a56a514a7a92e472c54097))
+* Added background scan scheduling and UI integration ([0c1564e](https://github.com/pruizlezcano/legato/commit/0c1564e683479022ac84681473073a4607d8b18f))
+* Added minimize to tray functionality ([9109aac](https://github.com/pruizlezcano/legato/commit/9109aac0c30c2caa363aaac61b6a6fce13ade1b4))
+* Added scan cancellation and quit confirmation logic ([f04249d](https://github.com/pruizlezcano/legato/commit/f04249da6c6748dda69e47e6e5c0175f56279858))
+* Added start minimized to tray functionality ([d375b45](https://github.com/pruizlezcano/legato/commit/d375b45f85dfe8ab4563d25a41bb473db3e3f55f))
+* **projectScanner:** Notify main window on scan completion or error ([85b925a](https://github.com/pruizlezcano/legato/commit/85b925aea5cf83df8acc9c04ed255e6eb586ad01))
+* **settings:** Improved settings UI layout and organization for better user experience ([adfbcc9](https://github.com/pruizlezcano/legato/commit/adfbcc911b782b891aa07b9676ce168ad53b59f3))
+* **tray:** Added notification for ongoing project scans when restoring window ([2627351](https://github.com/pruizlezcano/legato/commit/2627351ec7458389e9f83e14c49abc71c654f6b3))
+
+
+### Bug Fixes
+
+* Correct typo in TO_DO progress color class ([6457940](https://github.com/pruizlezcano/legato/commit/64579407aff679ce17dba832986464c079d181a1))
+* Prevent UI flashing during initial load ([29a10fb](https://github.com/pruizlezcano/legato/commit/29a10fb85bfb36f5f10e25f19623fab155fed142))
+* **settings:** `autoStart` not being initialized ([3e339af](https://github.com/pruizlezcano/legato/commit/3e339aff1ab23da679b648c3a6eefe57abf56702))
+
 ## [0.3.0](https://github.com/pruizlezcano/legato/compare/v0.2.0...v0.3.0) (2024-12-17)
 
 
