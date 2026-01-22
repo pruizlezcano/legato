@@ -14,6 +14,7 @@ import {
   ColumnDef,
   FilterFn,
 } from '@tanstack/react-table';
+import SearchString from 'search-string';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Table,
@@ -86,8 +87,14 @@ declare module '@tanstack/table-core' {
     arrayFilter: FilterFn<unknown>;
     booleanFilter: FilterFn<unknown>;
     notNullFilter: FilterFn<unknown>;
+    globalSearch: FilterFn<unknown>;
   }
 }
+
+type SearchCondition = {
+  value: string;
+  negated: boolean;
+};
 
 // eslint-disable-next-line react/function-component-definition
 const ProjectsTable = () => {
@@ -482,6 +489,7 @@ const ProjectsTable = () => {
       globalFilter,
       sorting,
     },
+    globalFilterFn: 'globalSearch',
     onGlobalFilterChange: (state) => {
       setGlobalFilter(state);
       table.resetPageIndex();
@@ -504,63 +512,126 @@ const ProjectsTable = () => {
       },
     },
     filterFns: {
-      textFilter: (row, columnId, filterValue: string[]) => {
+      textFilter: (row, columnId, filterValue: SearchCondition[]) => {
         const value: string = row.getValue(columnId);
         if (value === undefined || value === null) return false;
-        return filterValue.some((filter) =>
-          value.toLowerCase().includes(filter.toLowerCase()),
+
+        const lowerValue = value.toLowerCase();
+
+        // Check negations first
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && lowerValue.includes(f.value.toLowerCase()),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) =>
+          lowerValue.includes(f.value.toLowerCase()),
         );
       },
-      numberFilter: (row, columnId, filterValue: string[]) => {
+      numberFilter: (row, columnId, filterValue: SearchCondition[]) => {
         const value: number = row.getValue(columnId);
-        if (value === undefined) return false;
-        for (const filter of filterValue) {
+        if (value === undefined || value === null) return false;
+
+        const checkMatch = (val: number, filter: string) => {
           if (/\d+-\d+/.test(filter)) {
-            // Number interval: number:120-150
             const [min, max] = filter.split('-');
-            if (value >= Number(min) && value <= Number(max)) {
-              return true;
-            }
+            return val >= Number(min) && val <= Number(max);
           }
-          if (/>\d+/.test(filter)) {
-            // Greater than: number:>120
-            const threshold = Number(filter.slice(1)); // Remove '>'
-            if (value > threshold) {
-              return true;
-            }
+          if (filter.startsWith('>')) {
+            return val > Number(filter.slice(1));
           }
-          if (/<\d+/.test(filter)) {
-            // Less than: number:<120
-            const threshold = Number(filter.slice(1)); // Remove '<'
-            if (value < threshold) {
-              return true;
-            }
+          if (filter.startsWith('<')) {
+            return val < Number(filter.slice(1));
           }
-          // Exact number: number:123
-          if (value === Number(filter)) {
-            return true;
-          }
-        }
-        return false;
+          return val === Number(filter);
+        };
+
+        // Check negations
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && checkMatch(value, f.value),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) => checkMatch(value, f.value));
       },
-      arrayFilter: (row, columnId, filterValue: string[]) => {
+      arrayFilter: (row, columnId, filterValue: SearchCondition[]) => {
         const value: string[] = row.getValue(columnId);
-        if (value === undefined) return false;
+        if (value === undefined || value === null) return false;
+
         const arrayValues = value.map((tag) => tag.toLowerCase()).join(' ');
-        return filterValue.some((filter) =>
-          arrayValues.includes(filter.toLowerCase()),
+
+        // Check negations
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && arrayValues.includes(f.value.toLowerCase()),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) =>
+          arrayValues.includes(f.value.toLowerCase()),
         );
       },
-      booleanFilter: (row, columnId, filterValue: string[]) => {
+      booleanFilter: (row, columnId, filterValue: SearchCondition[]) => {
         const value: boolean = row.getValue(columnId);
         if (value === undefined) return false;
-        return value === (filterValue[0] === 'true');
+
+        // Boolean filters usually only have one value in this UI, but let's be robust
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && value === (f.value === 'true'),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) => value === (f.value === 'true'));
       },
-      notNullFilter: (row, columnId, filterValue: string[]) => {
+      notNullFilter: (row, columnId, filterValue: SearchCondition[]) => {
         const value = row.getValue(columnId);
-        if (filterValue[0] === 'true')
-          return value !== undefined && value !== null;
-        return value === undefined || value === null;
+        const isSet = value !== undefined && value !== null;
+
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && isSet === (f.value === 'true'),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) => isSet === (f.value === 'true'));
+      },
+      globalSearch: (row, columnId, filterValue: SearchCondition[]) => {
+        // We check across all searchable columns (title, scale, genre, daw)
+        const searchableFields = ['title', 'scale', 'genre', 'daw', 'path'];
+        const content = searchableFields
+          .map((field) => (row.getValue(field) as string)?.toLowerCase() ?? '')
+          .join(' ');
+
+        // Tags
+        const tags =
+          (row.getValue('tags') as string[])?.join(' ').toLowerCase() ?? '';
+        const fullContent = `${content} ${tags}`;
+
+        // Check negations
+        const hasFailedNegation = filterValue.some(
+          (f) => f.negated && fullContent.includes(f.value.toLowerCase()),
+        );
+        if (hasFailedNegation) return false;
+
+        const positiveFilters = filterValue.filter((f) => !f.negated);
+        if (positiveFilters.length === 0) return true;
+
+        return positiveFilters.some((f) =>
+          fullContent.includes(f.value.toLowerCase()),
+        );
       },
     },
     // debugTable: true,
@@ -589,35 +660,35 @@ const ProjectsTable = () => {
       if (query === filterQuery) return;
 
       setFilterQuery(query);
-      // Parse the general search term
-      const regex = /(\w+):(\w+|"[^"]*")/g;
-      const generalSearch = query.replace(regex, '').trim();
 
-      // Parse additional filters
-      let match;
-      const filters: { [key: string]: string[] } = {};
+      const searchString = SearchString.parse(query);
 
       // Reset all filters
       for (const column of table.getAllColumns()) {
         column.setFilterValue('');
       }
-      table.getColumn('hidden')!.setFilterValue('false');
+      table
+        .getColumn('hidden')!
+        .setFilterValue([{ value: 'false', negated: false }]);
 
-      // Set new filters
-      // eslint-disable-next-line no-cond-assign
-      while ((match = regex.exec(query)) !== null) {
-        // eslint-disable-next-line prefer-const
-        let [, field, value] = match;
-        if (!filters[field]) filters[field] = [];
-        filters[field] = [
-          ...filters[field],
-          value.replace(/^"|"$/g, '').trim(),
-        ];
-        const column = table.getColumn(field);
-        if (column) column.setFilterValue(filters[field]);
+      const conditions = searchString.getConditionArray();
+      const filters: { [key: string]: SearchCondition[] } = {};
+
+      conditions.forEach((condition: any) => {
+        const { keyword, value, negated } = condition;
+        if (!filters[keyword]) filters[keyword] = [];
+        filters[keyword].push({ value, negated });
+      });
+
+      for (const [key, values] of Object.entries(filters)) {
+        const column = table.getColumn(key);
+        if (column) column.setFilterValue(values);
       }
 
-      table.setGlobalFilter(generalSearch);
+      const textSegments = searchString.getTextSegments();
+      table.setGlobalFilter(
+        textSegments.map((s: any) => ({ value: s.text, negated: s.negated })),
+      );
     },
     [filterQuery, table],
   );
