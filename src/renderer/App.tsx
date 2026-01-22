@@ -108,6 +108,11 @@ function Hello() {
     window.electron.ipcRenderer.on('project-updated', (arg) => {
       dispatch(loadProject(arg as Project));
     });
+
+    window.electron.ipcRenderer.on('scan-project-found', (arg) => {
+      logger.info('project found');
+      dispatch(loadProject(arg as Project));
+    });
   }, [dispatch]);
 
   useEffect(() => {

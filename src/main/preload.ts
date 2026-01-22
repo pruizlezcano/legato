@@ -21,7 +21,8 @@ export type Channels =
   | 'project-updated'
   | 'succes'
   | 'warning'
-  | 'open-external';
+  | 'open-external'
+  | 'scan-project-found';
 
 const electronHandler = {
   ipcRenderer: {

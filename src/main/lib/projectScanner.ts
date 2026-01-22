@@ -107,6 +107,9 @@ export class ProjectScanner {
         await this.projectRepository.save(p);
       }
       logger.info(`Updating DB entry for ${name}`);
+      if (this.mainWindow) {
+        this.mainWindow.webContents.send('scan-project-found', p);
+      }
       return p;
     }
 
@@ -122,6 +125,10 @@ export class ProjectScanner {
     await this.projectRepository.save(p);
 
     logger.info(`Created DB entry for ${projectFile}`);
+
+    if (this.mainWindow) {
+      this.mainWindow.webContents.send('scan-project-found', p);
+    }
 
     return p;
   }
