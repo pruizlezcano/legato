@@ -166,6 +166,73 @@ ipcMain.on('update-project', async (event, arg: Project) => {
   }
 });
 
+ipcMain.on('delete-project', async (event, arg: number) => {
+  logger.info(`Delete request for project ${arg}`);
+  try {
+    const project = await ProjectRepository.findOneBy({
+      id: arg,
+    });
+
+    if (!project) {
+      logger.warn(`Project ${arg} not found`);
+      return event.reply('error', 'Project not found');
+    }
+
+    // Show confirmation dialog
+    const result = await dialog.showMessageBox(mainWindow!, {
+      type: 'warning',
+      buttons: ['Cancel', 'Delete'],
+      defaultId: 0,
+      cancelId: 0,
+      title: 'Delete Project',
+      message: `Are you sure you want to delete "${project.title}"?`,
+      detail:
+        'The project folder will be moved to trash. This action cannot be undone from within the app.',
+    });
+
+    // If user cancelled (clicked Cancel or closed dialog)
+    if (result.response !== 1) {
+      logger.info(`Project deletion cancelled by user`);
+      return event.reply('delete-project', { cancelled: true });
+    }
+
+    // Get project folder path (parent directory of .als file)
+    const projectFolder = path.dirname(project.path);
+
+    // Move project folder to trash
+    try {
+      await shell.trashItem(projectFolder);
+      logger.info(`Moved project folder to trash: ${projectFolder}`);
+    } catch (trashError: any) {
+      // If file doesn't exist, we'll still remove from DB
+      if (!fs.existsSync(projectFolder)) {
+        logger.warn(
+          `Project folder not found, removing from DB anyway: ${projectFolder}`,
+        );
+      } else {
+        // If it's another error (permissions, etc), don't remove from DB
+        logger.error('Error moving project to trash');
+        logger.error(trashError);
+        return event.reply(
+          'error',
+          `Failed to delete project folder: ${trashError.message}`,
+        );
+      }
+    }
+
+    // Remove from database
+    await ProjectRepository.remove(project);
+    logger.info(`Project ${arg} removed from database`);
+
+    event.sender.send('succes', `Project "${project.title}" deleted`);
+    return event.reply('delete-project', { success: true, id: arg });
+  } catch (error: any) {
+    logger.error('Error deleting project');
+    logger.error(error);
+    return event.reply('error', error.message);
+  }
+});
+
 ipcMain.on('open-settings', async (event) => {
   event.reply('open-settings', 'foo');
 });

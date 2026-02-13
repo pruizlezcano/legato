@@ -70,6 +70,16 @@ const projectSlice = createSlice({
         JSON.parse(JSON.stringify(action.payload)),
       );
     },
+    deleteProject(state, action: PayloadAction<number>) {
+      const projectId = action.payload;
+      state.projects = state.projects.filter(
+        (project: Project) => project.id !== projectId,
+      );
+      if (state.selectedProject?.id === projectId) {
+        state.selectedProject = null;
+      }
+      window.electron.ipcRenderer.sendMessage('delete-project', projectId);
+    },
     selectProjectById(state, action: PayloadAction<number>) {
       const id = action.payload;
       state.selectedProject =
@@ -84,6 +94,7 @@ export const {
   updateProject,
   selectProjectById,
   saveProject,
+  deleteProject,
 } = projectSlice.actions;
 
 export default projectSlice.reducer;

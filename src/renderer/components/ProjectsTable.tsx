@@ -34,6 +34,7 @@ import {
   InfoIcon,
   FolderIcon,
   PlayIcon,
+  Trash2Icon,
 } from 'lucide-react';
 
 import {
@@ -53,6 +54,7 @@ import {
   saveProject,
   selectProjects,
   selectProjectById,
+  deleteProject,
 } from '@/store/Slices/projectsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectItem } from '@/components/ui/select';
@@ -118,6 +120,10 @@ const ProjectsTable = () => {
 
   const handleHide = (project: Project) => {
     dispatch(saveProject({ ...project, hidden: !project.hidden }));
+  };
+
+  const handleDelete = (project: Project) => {
+    dispatch(deleteProject(project.id));
   };
 
   const columns: ColumnDef<Project>[] = [
@@ -458,6 +464,16 @@ const ProjectsTable = () => {
                     <EyeOffIcon className="text-muted-foreground/70 mr-2 h-4 w-4" />
                   )}
                   <p>{project.hidden ? 'Unhide' : 'Hide'}</p>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleDelete(project);
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2Icon className="mr-2 h-4 w-4" />
+                  <p>Delete project</p>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

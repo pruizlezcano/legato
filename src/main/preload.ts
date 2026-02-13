@@ -10,6 +10,7 @@ export type Channels =
   | 'open-project'
   | 'open-project-folder'
   | 'update-project'
+  | 'delete-project'
   | 'open-path-dialog'
   | 'save-settings'
   | 'load-settings'
